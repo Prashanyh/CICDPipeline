@@ -20,7 +20,19 @@ urlpatterns = [
     path('view-scikey/', views.SciListViewView.as_view(), name='view-scikey'),##viewing all tickets
     path('detail-scikey/<int:pk>/', views.SciTicketDetail.as_view(), name='detail-scikey'),##viewing single ticket
 
-    path('assign-newtickets/', views.SciKeyAssignTicketsAPIView.as_view(), name='assign-newtickets'),
-    path('count-newtickets/', views.SciKeyAllTicketsCountAPIView.as_view(), name='count-newtickets'),
+    path('assign-newtickets/', views.SciKeyAssignTicketsAPIView.as_view(), name='assign-newtickets'), # Assign tickets to agents
+    path('count-alltickets/', views.SciKeyAllTicketsCountAPIView.as_view(), name='count-alltickets'), # Count All tickets
+
+    # path('agent_own_tickets/',views.AgentOwnTicketsListApiView.as_view(),name="agent_own_tickets"),
+    path('agent_own_tickets/',views.AgentOwnTicketsListApiView.as_view(),name="agent_own_tickets"),
+    path('agent_detail_tickets/<int:id>/', views.AgentDetailTicketsListApiView.as_view(),name="agent_detail_tickets"),
+
+
+    path('agent_assign_tickets/', views.SciKeyAssignTicketsListAPIView.as_view(),name="agent_assign_tickets"),
+    path('agent_closed_tickets/', views.SciKeyClosedTicketsListAPIView.as_view(),name="agent_closed_tickets"),
+    path('agent_new_tickets/', views.SciKeyNewTicketsListAPIView.as_view(),name="agent_new_tickets"),
+    path('agent_notfound_tickets/', views.SciKeyNotFoundTicketsListAPIView.as_view(),name="agent_notfound_tickets"),
+    path('agent_exception_tickets/', views.SciKeyExceptionTicketsListAPIView.as_view(),name="agent_exception_tickets"),
+
 
 ]

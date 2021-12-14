@@ -135,6 +135,29 @@ class ScikeyAssignSerializer(serializers.ModelSerializer):
         model = Sci1stKey
         fields = ('status')
 
+##prasanth
+class AgentOwnTicketsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sci1stKey
+        fields = '__all__'
+
+
+##prasanth
+class AgentRetriveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sci1stKey
+        fields = ['id','process_status']
+
+##prasanth
+class ScikeyTicketsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sci1stKey
+        fields = '__all__'
+
+
+
+
+
 ##theja
 class ChangePasswordSerializers(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])

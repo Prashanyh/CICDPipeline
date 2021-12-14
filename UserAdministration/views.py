@@ -6,11 +6,14 @@ from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, views, response
-from rest_framework import generics
+from rest_framework import generics,mixins
 from rest_framework.views import APIView
 from tablib import Dataset
 from django.contrib.auth.hashers import make_password
 from .serializers import *
+import json
+from rest_framework import permissions
+from UserAdministration.manager_permissions import IsManagerPermission
 
 ##prasanth
 #user Registration
@@ -29,6 +32,7 @@ class RegisterApi(generics.GenericAPIView):
 ##prasanth
 #user Login
 class LoginAPIView(generics.GenericAPIView):
+    permission_classes = []
     serializer_class = LoginSerializer
     def post(self,request):
         serializer=self.serializer_class(data=request.data)
@@ -154,33 +158,39 @@ class UploadFileView(APIView):
         serializer.is_valid(raise_exception=True)
         dataset = Dataset()
         file = serializer.validated_data['file']
-        imported_data = dataset.load(file.read(), format='xlsx')
-        '''uploading xl file with particular data what user mentioned in xl we are looping the xl data
-                and appending into the database with same fields'''
-        for data in imported_data:
-            sci_data=Sci1stKey(projectId=data[0],
-                      name=data[1],
-                      reference=data[2],
-                      jurisdiction_doctype=data[3],
-                      propertystate=data[4],
-                      dateaddded_to_kwf=data[5],
-                      datereceived=data[6],
-                      dateimaged=data[7],
-                      default=data[8],
-                      neverkeyed=data[9],
-                      erecordable=data[10],
-                      keying_duedate=data[11],
-                      shipping_datedue=data[12],
-                      isthis_a_rush=data[13],
-                      workflow=data[14],
-                      allocated_date=data[15],
-                      organization=data[16],
-                      agent=data[17],
-                      tl_name=data[18],
-                      team_name=data[19],
-                      )
-            sci_data.save()
-        return Response(status=status.HTTP_200_OK)
+        try:
+            imported_data = dataset.load(file.read(), format='xlsx')
+            '''uploading xl file with particular data what user mentioned in xl we are looping the xl data
+                    and appending into the database with same fields'''
+            for data in imported_data:
+                sci_data=Sci1stKey(projectId=data[0],
+                          name=data[1],
+                          reference=data[2],
+                          jurisdiction_doctype=data[3],
+                          propertystate=data[4],
+                          dateaddded_to_kwf=data[5],
+                          datereceived=data[6],
+                          dateimaged=data[7],
+                          default=data[8],
+                          neverkeyed=data[9],
+                          erecordable=data[10],
+                          keying_duedate=data[11],
+                          shipping_datedue=data[12],
+                          isthis_a_rush=data[13],
+                          workflow=data[14],
+                          allocated_date=data[15],
+                          organization=data[16],
+                          agent=data[17],
+                          tl_name=data[18],
+                          team_name=data[19],
+                          )
+                sci_data.save()
+            return Response({'sucessfully uploaded your file'},status=status.HTTP_200_OK)
+        except:
+            return Response(
+                {'please select proper file'}, status=status.HTTP_404_NOT_FOUND)
+
+
 ##prasanth
 class SciListViewView(APIView):
     def get(self, request, format=None):
@@ -251,10 +261,9 @@ class SciKeyAssignTicketsAPIView(generics.GenericAPIView):
     #     serializer.is_valid(raise_exception=True)
     #     serializer.save()
     #     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 # prashanth
-import json
-from rest_framework import permissions
-from UserAdministration.manager_permissions import IsManagerPermission
 class SciKeyAllTicketsCountAPIView(APIView):
     serializer_class = ScikeyAssignSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerPermission)
@@ -262,6 +271,66 @@ class SciKeyAllTicketsCountAPIView(APIView):
     def get(self, request, *args, **kwargs):
         new_tickets_count = Sci1stKey.objects.filter(status="newtickets").count()
         assign_tickets_count = Sci1stKey.objects.filter(status="assign").count()
-        context = {"new": new_tickets_count,'assign':assign_tickets_count}
+        completed_tickets_count = Sci1stKey.objects.filter(status="completed").count()
+        context = {"new": new_tickets_count,'assign':assign_tickets_count,'completed':completed_tickets_count}
         return Response(json.dumps(context), status=status.HTTP_200_OK)
 
+
+
+
+
+    # def get_object(self):
+    #     return self.request.user
+
+
+    # def get_object(self):
+    #     pk = self.kwargs.get('pk')
+    #
+    #     if pk == "current":
+    #         return self.request.user
+    # queryset = Sci1stKey.objects.all()
+    # serializer_class = AgentOwnTicketsSerializer
+
+    # def get(self, request):
+    #     serializer = AgentOwnTicketsSerializer(request.user)
+    #     return Response(serializer.data)
+
+    # permission_classes = (permissions.IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,IsAgent)
+
+
+    #
+    # queryset = Sci1stKey.objects.all()
+    # serializer_class = AgentOwnTicketsSerializer
+
+class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMixin,
+                                 mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    queryset = Sci1stKey.objects.all()
+    serializer_class = AgentRetriveSerializer
+    lookup_field = 'id'
+
+    def get_object(self, id):
+        try:
+            return Sci1stKey.objects.get(id=id)
+        except Sci1stKey.DoesNotExist:
+            raise Http404
+
+    def get(self, request, id=None, *args, **kwargs):
+        if id:
+            calobj = self.get_object(id)
+            serializer = AgentRetriveSerializer(calobj)
+            return Response(serializer.data)
+        else:
+            alldata = Sci1stKey.objects.all()
+            serializer = AgentRetriveSerializer(alldata, many=True)
+            return Response(serializer.data)
+
+
+    def put(self, request, id=None, *args, **kwargs):
+        calobj = self.get_object(id)
+        serializer = AgentRetriveSerializer(calobj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            body_data = serializer.data
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
