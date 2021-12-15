@@ -20,6 +20,9 @@ from rest_framework.exceptions import AuthenticationFailed
 
 ##prasanth
 class UserSerializer(serializers.ModelSerializer):
+    """
+    user register serializer and required fields
+    """
     # mobile = serializers.RegexField("[0-9]{10}",min_length=10,max_length=10)
     mobile = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -27,7 +30,9 @@ class UserSerializer(serializers.ModelSerializer):
     fullname=serializers.CharField(max_length=55,min_length=3,required=True)
 
     class Meta:
+        # get the model name
         model = UserProfile
+        #required fields
         fields = ("id","username","fullname", "email", "password", "mobile","dob","gender","role","team_name","orginization","is_admin","is_manager","is_tl","is_agent")
         # fields="__all__"
 
@@ -48,13 +53,18 @@ class EmailVerificationSerializer(serializers.ModelSerializer):
 
 ##prasanth
 class LoginSerializer(serializers.ModelSerializer):
+    '''
+    Login user serializer with required fields
+    '''
     username=serializers.CharField()
     password=serializers.CharField(max_length=10,min_length=6,write_only=True)
     fullname=serializers.CharField(max_length=255,min_length=3,read_only=True)
     tokens=serializers.CharField(max_length=135,min_length=6,read_only=True)
 
     class Meta:
+        # model name
         model= UserProfile
+        # required fields
         fields=['username','password','fullname','tokens']
 
 
@@ -69,16 +79,6 @@ class LoginSerializer(serializers.ModelSerializer):
             raise AuthenticationFailed('Account disabled , contact admin')
         if not user.is_verified:
             raise AuthenticationFailed('user is not verified')
-        # if user is not None:
-        #     if user.is_active:
-        #         if user.role == "Manager":
-        #             return {"username":user.username,
-        #                     "fullname":user.fullname,
-        #                     "role":user.role,
-        #                     'tokens': user.tokens
-        #                     }
-
-
         return {
             'username':user.username,
             'fullname':user.fullname,
@@ -90,46 +90,69 @@ class LoginSerializer(serializers.ModelSerializer):
 from django.contrib.auth.hashers import make_password
 
 class UserProfileSerializer(serializers.ModelSerializer):
-        class Meta:
-            model = UserProfile
+    '''
+    User Profile data serializer
+    '''
+    class Meta:
+        # model name
+        model = UserProfile
         # fields = ("name", "email", "mobile")
-
-            fields = ("fullname", "email", "mobile", "dob", "gender", "role", "team_name")
+        # required fields
+        fields = ("fullname", "email", "mobile", "dob", "gender", "role", "team_name")
 
 ###theja
 class Teamserialsers(serializers.ModelSerializer):
+    '''
+    get all team serializer
+    '''
     team_by_persons = UserSerializer(read_only=True,many=True)
     class Meta:
+        # model name
         model = Teams
+        # all fields
         fields = '__all__'
 
 ##prasanth
 class FileSerializer(serializers.ModelSerializer):
-  class Meta():
+  class Meta:
     model = Sci1stKey
     fields = ['file']
 
 
 ##prasanth
 class ScikeylistSerializer(serializers.ModelSerializer):
+    '''
+    get the all ticket list serializer
+    '''
     class Meta:
+        # model name
         model = Sci1stKey
+        # required fields
         fields = '__all__'
 #     #     fields = ('projectId', 'name' ,'reference', 'jurisdiction_doctype', 'propertystate', 'dateaddded_to_kwf',
 #     # 'datereceived', 'dateimaged', 'default', 'neverkeyed', 'erecordable',  'keying_duedate',  'shipping_datedue',
 #     # 'isthis_a_rush', 'workflow', 'allocated_date', 'organization', 'agent', 'tl_name', 'team_name', 'upload_date',
 #     # 'status')
 class FileUploadSerializer(serializers.Serializer):
+    '''
+    sci key file upload serializer
+    '''
     file = serializers.FileField()
 
 ##prasanth
 class SaveFileSerializer(serializers.Serializer):
+    '''sci key upload serializer'''
     class Meta:
+        # model name
         model = Sci1stKey
+        # required fields
         fields = "__all__"
 
 ##prasanth
 class ScikeyAssignSerializer(serializers.ModelSerializer):
+    '''
+    sci key agent change the ticket status serializer
+    '''
     status = serializers.CharField()
     class Meta:
         model = Sci1stKey
@@ -137,15 +160,25 @@ class ScikeyAssignSerializer(serializers.ModelSerializer):
 
 ##prasanth
 class AgentOwnTicketsSerializer(serializers.ModelSerializer):
+    '''
+    sci all tickets serializer use this serializer all users
+    '''
     class Meta:
+        # model name
         model = Sci1stKey
+        # required fields
         fields = '__all__'
 
 
 ##prasanth
 class AgentRetriveSerializer(serializers.ModelSerializer):
+    '''
+    agent update status of scikey serializer
+    '''
     class Meta:
+        # model name
         model = Sci1stKey
+        # required fields
         fields = ['id','process_status','status']
         # fields = '__all__'
     # def update(self, instance, validated_data):
@@ -158,13 +191,21 @@ class AgentRetriveSerializer(serializers.ModelSerializer):
 
 ##prasanth
 class ScikeyTicketsListSerializer(serializers.ModelSerializer):
+    '''
+    sci all ticekt list serializer
+    '''
     class Meta:
+        # model name
         model = Sci1stKey
+        # required fields
         fields = '__all__'
 
 
 ##prasanth
 class ScikeyPendingTicketsListSerializer(serializers.ModelSerializer):
+    '''
+    This serializer using for all tickets in pending api view
+    '''
     class Meta:
         model = Sci1stKey
         fields = '__all__'
@@ -208,10 +249,15 @@ class ChangePasswordSerializers(serializers.ModelSerializer):
 ##updating his own profile
 ##theja
 class Update_his_profile_Serializer(serializers.ModelSerializer):
+    '''
+    Update user profile serializer with required fields
+    '''
     email = serializers.EmailField(required=True)
 
     class Meta:
+        # get model name
         model = UserProfile
+        # required fields
         fields = ('username', 'fullname', 'email', 'mobile', 'role', 'team_name', 'gender', 'dob')
 
     def validate_email(self, value):

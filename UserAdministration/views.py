@@ -18,23 +18,41 @@ from UserAdministration.manager_permissions import IsManagerPermission
 ##prasanth
 #user Registration
 class RegisterApi(generics.GenericAPIView):
+    # fetching serializer data
     serializer_class = UserSerializer
+    # adding authentications & auth user with role
     authentication_classes = []
 
+    # post method for user registration
     def post(self, request, *args,  **kwargs):
+        '''
+        This function is used for post data into database of particuar model and
+            method is POST this method is used for only post the data and this function
+            contating serializer data fetching serializer data and register  user with details
+        '''
         parameters = request.data.copy()
         serializer = self.get_serializer(data=parameters)
+        # validating serializer
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response({"message": "User Created Successfully.  Now perform Login to get your token"},status=status.HTTP_201_CREATED)
         else:
             return Response({'user name already exist'},status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
 ##prasanth
 #user Login
 class LoginAPIView(generics.GenericAPIView):
+    # adding authentications & auth user with role
     permission_classes = []
+    # fetching serializer data
     serializer_class = LoginSerializer
+
     def post(self,request):
+        '''
+        getting serializer data and checking validating data sending data
+        into the responce body with status code
+        '''
         serializer=self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
@@ -42,23 +60,40 @@ class LoginAPIView(generics.GenericAPIView):
 ##theja
 ##changing password
 class ChangePasswordView(generics.UpdateAPIView):
-    queryset = UserProfile.objects.all()
+    '''
+    This class is used for get the user and change user password
+    '''
+
+    ## authentication token and permissions of user we can change permissions
     permission_classes = (IsAuthenticated,)
+    # get the model data
+    queryset = UserProfile.objects.all()
     serializer_class = ChangePasswordSerializers
 
 
 class Update_his_ProfileView(generics.UpdateAPIView):
-    queryset = UserProfile.objects.all()
+    '''
+    This class is used for get the user and update his profile details
+    '''
+    ## authentication token and permissions of user we can change permissions
     permission_classes = (IsAuthenticated,)
+    # get the model data
+    queryset = UserProfile.objects.all()
+    # fetch serializer
     serializer_class = Update_his_profile_Serializer
 
 ##theja
 # Adding Teams by Admin
 class Addingteams(generics.GenericAPIView):
+    ## authentication token and permissions of user we can change permissions
     permission_classes = []
+    # fetch serializer data
     serializer_class = Teamserialsers
 
     def post(self, request, *args,  **kwargs):
+        '''
+        This function is used for post the data of adding teams
+        '''
         parameters = request.data.copy()
         serializer = self.get_serializer(data=parameters)
         if serializer.is_valid(raise_exception=True):
@@ -70,9 +105,11 @@ class Addingteams(generics.GenericAPIView):
 ##theja
 # View all_Team  by Admin
 class Team_ListView(APIView):
+    ## authentication token and permissions of user we can change permissions
     permission_classes = []
     def get(self, request):
         try:
+            # get the model data
             tutorial = Teams.objects.all()
         except Teams.DoesNotExist:
             return JsonResponse({'message': 'Teams does not exist'}, status=status.HTTP_404_NOT_FOUND)
@@ -85,17 +122,24 @@ class Team_ListView(APIView):
 # view/update/delete Team  by Admin
 @api_view(['GET', 'PUT', 'DELETE'])
 def Team_detail(request, pk):
+    '''
+    This function is used for update team details of particular team and this
+    function contain get, put, delete
+    '''
 
     try:
+        # get the model name with filtering team id
         tutorial = Teams.objects.get(pk=pk)
     except Teams.DoesNotExist:
         return JsonResponse({'message': 'The Team does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
+        # fetch serializer data and add model into serializer
         tutorial_serializer = Teamserialsers(tutorial)
         return JsonResponse(tutorial_serializer.data)
 
     elif request.method == 'PUT':
+        '''this function is used for update team detail '''
         tutorial_data = JSONParser().parse(request)
         tutorial_serializer = Teamserialsers(tutorial, data=tutorial_data)
         if tutorial_serializer.is_valid():
@@ -111,14 +155,20 @@ def Team_detail(request, pk):
 ##theja
 # All Persons(user Profile) by Admin
 class User_listApiview(APIView):
+    ## authentication token and permissions of user we can add permissions
     permission_classes = []
 
     def get(self, request):
+        """
+        this function is used for get the all user data
+        :param request:
+        :return:
+        """
         try:
             tutorial = UserProfile.objects.all()
         except UserProfile.DoesNotExist:
             return JsonResponse({'message': 'The user does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
+        # fetching serializer data
         tutorial_serializer = UserProfileSerializer(tutorial, many=True)
         return JsonResponse(tutorial_serializer.data, safe=False)
 
@@ -127,7 +177,14 @@ class User_listApiview(APIView):
 # view/update/delete person(one)  by Admin
 @api_view(['GET', 'PUT', 'DELETE'])
 def Person_detail(request, pk):
+    '''
+    this function is used for update his profie data single update or multiple update also
+    :param request:
+    :param pk:
+    :return:
+    '''
     try:
+        # get the single user id and print the data
         tutorial = UserProfile.objects.get(pk=pk)
     except UserProfile.DoesNotExist:
         return JsonResponse({'message': 'The user does not exist'}, status=status.HTTP_404_NOT_FOUND)
@@ -137,6 +194,10 @@ def Person_detail(request, pk):
         return JsonResponse(tutorial_serializer.data)
 
     elif request.method == 'PUT':
+        '''
+        this method is used for update single user data 
+        \with particular field and update more fields
+        '''
         tutorial_data = JSONParser().parse(request)
         tutorial_serializer = UserProfileSerializer(tutorial, data=tutorial_data)
         if tutorial_serializer.is_valid():
@@ -145,23 +206,36 @@ def Person_detail(request, pk):
         return JsonResponse(tutorial_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
+        '''
+        this method is delete particular user record from db
+        '''
         tutorial.delete()
         return JsonResponse({'message': 'person was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
 
 
 ##prasanth
 class UploadFileView(APIView):
+    # fetching Serializer data (file upload serializer)
     serializer_class = FileUploadSerializer
 
     def post(self, request, *args, **kwargs):
+        '''
+        This function is used for post data into database of particuar model and
+            method is POST this method is used for only post the data and this function
+            contating serializer data fetching serializer data and
+            validating data and loading into the data with the file format
+        '''
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         dataset = Dataset()
+        # fetching file
         file = serializer.validated_data['file']
         try:
             imported_data = dataset.load(file.read(), format='xlsx')
-            '''uploading xl file with particular data what user mentioned in xl we are looping the xl data
-                    and appending into the database with same fields'''
+            '''
+            uploading xl file with particular data what user mentioned in xl we are looping the xl data
+                    and appending into the database with same fields
+                    '''
             for data in imported_data:
                 sci_data=Sci1stKey(projectId=data[0],
                           name=data[1],
@@ -185,17 +259,27 @@ class UploadFileView(APIView):
                           team_name=data[19],
                           )
                 sci_data.save()
+                # return response
             return Response({'sucessfully uploaded your file'},status=status.HTTP_200_OK)
         except:
+            # return response
             return Response(
                 {'please select proper file'}, status=status.HTTP_404_NOT_FOUND)
 
 
 ##prasanth
 class SciListViewView(APIView):
+    """
+    This function is used for get the list availble records in this function used get method
+        get method is used for get the data in db or any local also this get method contains
+        model data with query and assigned model data into serializer and get n number of records
+        sending into responce body
+    """
     def get(self, request, format=None):
+        # fetching model object
         scikeylist = Sci1stKey.objects.all()
         serializer = ScikeylistSerializer(scikeylist, many=True)
+        # return response
         return Response(serializer.data)
 
 ##prasanth
@@ -209,6 +293,10 @@ class SciTicketDetail(APIView):
         except Sci1stKey.DoesNotExist:
             raise Http404
 
+    """  
+    This method is used for get the particular data with id contains 
+        and sending responce into the body
+    """
     def get(self, request, pk, format=None):
         sci_key = self.get_object(pk)
         serializer = ScikeylistSerializer(sci_key)
@@ -222,16 +310,24 @@ class SciTicketDetail(APIView):
 
 
 
-# prashanth
+## prashanth
 class SciKeyAssignTicketsAPIView(generics.GenericAPIView):
+    # fetching serilizer
     serializer_class = ScikeyAssignSerializer
 
     def put(self, request, *args, **kwargs):
+        """
+        this method is used for update single record or multiple record
+            and update the status of sci ticket
+        """
+        # get the ticket status from
         status_sci = request.data.get('status')
+        # get the model with newtickets
         user = Sci1stKey.objects.filter(status="newtickets")
         for user_status in user:
             user_status.status='assign'
             user_status.save()
+            # update status
             user.update(status=status_sci)
             return Response({'sucessfully updated your status'}, status=status.HTTP_200_OK)
         else:
@@ -262,10 +358,19 @@ class SciKeyAssignTicketsAPIView(generics.GenericAPIView):
 
 # prashanth
 class SciKeyAllTicketsCountAPIView(APIView):
+    # fetching serializer data
     serializer_class = ScikeyAssignSerializer
+    # get the token of user and checking user perimissions
     # permission_classes = (permissions.IsAuthenticated, IsManagerPermission)
 
     def get(self, request, *args, **kwargs):
+        """
+        get the all tickets count data with specific status of all ticket
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         new_tickets_count = Sci1stKey.objects.filter(status="newtickets").count()
         assign_tickets_count = Sci1stKey.objects.filter(status="assign").count()
         completed_tickets_count = Sci1stKey.objects.filter(status="completed").count()
@@ -275,66 +380,129 @@ class SciKeyAllTicketsCountAPIView(APIView):
 
 # prashanth
 class SciKeyAssignTicketsListAPIView(generics.ListAPIView):
+    """fetching the serializer and Scikey data"""
     serializer_class = ScikeyTicketsListSerializer
     queryset = Sci1stKey.objects.all()
 
     def list(self, request, *args, **kwargs):
+        '''
+        get the particular status of scikey and get the all data of assign ticket
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
         queryset = Sci1stKey.objects.filter(status='assign')
         user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
         return Response(user_serializer.data)
 
 # prashanth
 class SciKeyClosedTicketsListAPIView(generics.ListAPIView):
+    """
+    fetching the serializer and Scikey data
+    """
     serializer_class = ScikeyTicketsListSerializer
     queryset = Sci1stKey.objects.all()
 
     def list(self, request, *args, **kwargs):
+        '''
+        get the particular status of scikey and get the all data of completed ticket
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
         queryset = Sci1stKey.objects.filter(process_status='completed')
         user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        # return responce data
         return Response(user_serializer.data)
 
 # prashanth
 class SciKeyNewTicketsListAPIView(generics.ListAPIView):
+    """
+    fetching the serializer and Scikey data
+    """
     serializer_class = ScikeyTicketsListSerializer
     queryset = Sci1stKey.objects.all()
 
     def list(self, request, *args, **kwargs):
+        '''
+        get the particular status of scikey and get the all data of completed ticket
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
         queryset = Sci1stKey.objects.filter(status='newtickets')
         user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        # return responce data
         return Response(user_serializer.data)
 
 # prashanth
 class SciKeyNotFoundTicketsListAPIView(generics.ListAPIView):
+    """
+    fetching the serializer and Scikey data
+    """
     serializer_class = ScikeyTicketsListSerializer
     queryset = Sci1stKey.objects.all()
 
     def list(self, request, *args, **kwargs):
+        '''
+            get the particular status of scikey and get the all data of notfound ticket
+            :param request:
+            :param args:
+            :param kwargs:
+            :return:
+        '''
         queryset = Sci1stKey.objects.filter(status='notfound')
         user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        # return responce data
         return Response(user_serializer.data)
 
 # prashanth
 class SciKeyExceptionTicketsListAPIView(generics.ListAPIView):
+    """
+    fetching the serializer and Scikey data
+    """
     serializer_class = ScikeyTicketsListSerializer
     queryset = Sci1stKey.objects.all()
 
     def list(self, request, *args, **kwargs):
+        '''
+        get the particular status of scikey and get the all data of exception ticket
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
         queryset = Sci1stKey.objects.filter(status='exception')
         user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        # return responce data
         return Response(user_serializer.data)
 
 
 
-
+# prashanth
 from .agent_permissions import *
 class AgentOwnTicketsListApiView(generics.ListAPIView):
+    """
+    fetching the serializer and Scikey data
+    """
     queryset = Sci1stKey.objects.all()
     serializer_class = AgentOwnTicketsSerializer
 
     def list(self, request, *args, **kwargs):
+        '''
+        get the login user (agent)  particular all tickets
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
         user_id = request.user.username
         queryset = Sci1stKey.objects.filter(agent=user_id)
         user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        # return responce data
         return Response(user_serializer.data)
 
 
@@ -364,20 +532,30 @@ class AgentOwnTicketsListApiView(generics.ListAPIView):
     # queryset = Sci1stKey.objects.all()
     # serializer_class = AgentOwnTicketsSerializer
 
+# prashanth
 class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMixin,
                                  mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    """
+    fetching the serializer and Scikey data
+    """
     queryset = Sci1stKey.objects.all()
     serializer_class = AgentRetriveSerializer
+    # filter the sciticket id and get the data
     lookup_field = 'id'
 
     def get_object(self, id):
         try:
             # return Sci1stKey.objects.get(id=id)
             individual_ticket = Sci1stKey.objects.filter(id=id)
+            '''
+            get the sci key id and get the ticket and 
+                change the status of ticket
+            '''
             for x in individual_ticket:
                 x.status = 'inprogress'
                 x.save()
                 individual_ticket.update(status='inprogress')
+                # return the agent ticket
                 return Sci1stKey.objects.get(id=id)
         except Sci1stKey.DoesNotExist:
             raise Http404
@@ -394,6 +572,14 @@ class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMi
 
 
     def put(self, request, id=None, *args, **kwargs):
+        '''
+        update the agent scikey ticket status with paricular field here we are given two fields s(status)
+        :param request:
+        :param id:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
         calobj = self.get_object(id)
         print(calobj, 'kkkkkkkkkkkkkkkk')
         # individual_ticket = Sci1stKey.objects.filter(id=id)
@@ -411,25 +597,48 @@ class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMi
 
 # prashanth
 class SciKeyPendingTicketsListAPIView(generics.ListAPIView):
+    """
+    fetching the serializer and Scikey data
+    """
     serializer_class = ScikeyPendingTicketsListSerializer
     queryset = Sci1stKey.objects.all()
-    permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
+    # authentication token and permissions of user we can change permissions
+    # permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
 
     def list(self, request, *args, **kwargs):
+        '''
+        get the all agents & login agent data of scikey and get the all data of pending ticket
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
         queryset = Sci1stKey.objects.filter(status='pending')
         user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        # return the reponce of data body
         return Response(user_serializer.data)
 
 
-
+# prashanth
 class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModelMixin,
                                  mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    """
+    fetching the serializer and Scikey data
+    """
     queryset = Sci1stKey.objects.all()
     serializer_class = ScikeyPendingTicketsListSerializer
+    # authentication token and permissions of user we can change permissions
+    # permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
+
+    # get the particular agent id
     lookup_field = 'id'
 
     def get_object(self, id):
         try:
+            '''
+            get the sci key id and get the ticket and 
+                            change the status of ticket
+            '''
             return Sci1stKey.objects.get(id=id)
         except Sci1stKey.DoesNotExist:
             raise Http404
@@ -437,6 +646,9 @@ class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModel
     def get(self, request, id=None, *args, **kwargs):
         if id:
             calobj = self.get_object(id)
+            '''
+            get the sci key id and get the ticket status 
+            '''
             serializer = ScikeyPendingTicketsListSerializer(calobj)
             return Response(serializer.data)
         else:
@@ -446,6 +658,15 @@ class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModel
 
 
     def put(self, request, id=None, *args, **kwargs):
+        """
+        get the sci key id and get the ticket and
+                            update the status of ticket
+        :param request:
+        :param id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         calobj = self.get_object(id)
         serializer = ScikeyPendingTicketsListSerializer(calobj, data=request.data, partial=True)
         if serializer.is_valid():
