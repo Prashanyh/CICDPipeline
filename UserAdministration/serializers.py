@@ -146,7 +146,15 @@ class AgentOwnTicketsSerializer(serializers.ModelSerializer):
 class AgentRetriveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sci1stKey
-        fields = ['id','process_status']
+        fields = ['id','process_status','status']
+        # fields = '__all__'
+    # def update(self, instance, validated_data):
+    #     qs = Sci1stKey.objects.filter(id=id)
+    #     for x in qs:
+    #         x.save()
+    #         qs.update(process_status=tickets, status='closed')
+
+
 
 ##prasanth
 class ScikeyTicketsListSerializer(serializers.ModelSerializer):
@@ -155,7 +163,11 @@ class ScikeyTicketsListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
+##prasanth
+class ScikeyPendingTicketsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sci1stKey
+        fields = '__all__'
 
 
 ##theja

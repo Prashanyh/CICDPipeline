@@ -240,9 +240,6 @@ class SciKeyAssignTicketsAPIView(generics.GenericAPIView):
 
 
 
-
-
-
     # def put(self, request, *args, **kwargs):
     #     # serializer = ScikeyAssignSerializer(data=request.data)
     #     # if serializer.is_valid():
@@ -266,7 +263,7 @@ class SciKeyAssignTicketsAPIView(generics.GenericAPIView):
 # prashanth
 class SciKeyAllTicketsCountAPIView(APIView):
     serializer_class = ScikeyAssignSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerPermission)
+    # permission_classes = (permissions.IsAuthenticated, IsManagerPermission)
 
     def get(self, request, *args, **kwargs):
         new_tickets_count = Sci1stKey.objects.filter(status="newtickets").count()
@@ -275,6 +272,70 @@ class SciKeyAllTicketsCountAPIView(APIView):
         context = {"new": new_tickets_count,'assign':assign_tickets_count,'completed':completed_tickets_count}
         return Response(json.dumps(context), status=status.HTTP_200_OK)
 
+
+# prashanth
+class SciKeyAssignTicketsListAPIView(generics.ListAPIView):
+    serializer_class = ScikeyTicketsListSerializer
+    queryset = Sci1stKey.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = Sci1stKey.objects.filter(status='assign')
+        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        return Response(user_serializer.data)
+
+# prashanth
+class SciKeyClosedTicketsListAPIView(generics.ListAPIView):
+    serializer_class = ScikeyTicketsListSerializer
+    queryset = Sci1stKey.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = Sci1stKey.objects.filter(process_status='completed')
+        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        return Response(user_serializer.data)
+
+# prashanth
+class SciKeyNewTicketsListAPIView(generics.ListAPIView):
+    serializer_class = ScikeyTicketsListSerializer
+    queryset = Sci1stKey.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = Sci1stKey.objects.filter(status='newtickets')
+        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        return Response(user_serializer.data)
+
+# prashanth
+class SciKeyNotFoundTicketsListAPIView(generics.ListAPIView):
+    serializer_class = ScikeyTicketsListSerializer
+    queryset = Sci1stKey.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = Sci1stKey.objects.filter(status='notfound')
+        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        return Response(user_serializer.data)
+
+# prashanth
+class SciKeyExceptionTicketsListAPIView(generics.ListAPIView):
+    serializer_class = ScikeyTicketsListSerializer
+    queryset = Sci1stKey.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = Sci1stKey.objects.filter(status='exception')
+        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        return Response(user_serializer.data)
+
+
+
+
+from .agent_permissions import *
+class AgentOwnTicketsListApiView(generics.ListAPIView):
+    queryset = Sci1stKey.objects.all()
+    serializer_class = AgentOwnTicketsSerializer
+
+    def list(self, request, *args, **kwargs):
+        user_id = request.user.username
+        queryset = Sci1stKey.objects.filter(agent=user_id)
+        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        return Response(user_serializer.data)
 
 
 
@@ -311,7 +372,13 @@ class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMi
 
     def get_object(self, id):
         try:
-            return Sci1stKey.objects.get(id=id)
+            # return Sci1stKey.objects.get(id=id)
+            individual_ticket = Sci1stKey.objects.filter(id=id)
+            for x in individual_ticket:
+                x.status = 'inprogress'
+                x.save()
+                individual_ticket.update(status='inprogress')
+                return Sci1stKey.objects.get(id=id)
         except Sci1stKey.DoesNotExist:
             raise Http404
 
@@ -328,7 +395,59 @@ class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMi
 
     def put(self, request, id=None, *args, **kwargs):
         calobj = self.get_object(id)
+        print(calobj, 'kkkkkkkkkkkkkkkk')
+        # individual_ticket = Sci1stKey.objects.filter(id=id)
+        # for x in individual_ticket:
+        #     x.status = 'closed'
+        #     x.save()
+        #     individual_ticket.update(status='closed')
         serializer = AgentRetriveSerializer(calobj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            body_data = serializer.data
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# prashanth
+class SciKeyPendingTicketsListAPIView(generics.ListAPIView):
+    serializer_class = ScikeyPendingTicketsListSerializer
+    queryset = Sci1stKey.objects.all()
+    permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
+
+    def list(self, request, *args, **kwargs):
+        queryset = Sci1stKey.objects.filter(status='pending')
+        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        return Response(user_serializer.data)
+
+
+
+class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModelMixin,
+                                 mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    queryset = Sci1stKey.objects.all()
+    serializer_class = ScikeyPendingTicketsListSerializer
+    lookup_field = 'id'
+
+    def get_object(self, id):
+        try:
+            return Sci1stKey.objects.get(id=id)
+        except Sci1stKey.DoesNotExist:
+            raise Http404
+
+    def get(self, request, id=None, *args, **kwargs):
+        if id:
+            calobj = self.get_object(id)
+            serializer = ScikeyPendingTicketsListSerializer(calobj)
+            return Response(serializer.data)
+        else:
+            alldata = Sci1stKey.objects.all()
+            serializer = ScikeyPendingTicketsListSerializer(alldata, many=True)
+            return Response(serializer.data)
+
+
+    def put(self, request, id=None, *args, **kwargs):
+        calobj = self.get_object(id)
+        serializer = ScikeyPendingTicketsListSerializer(calobj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             body_data = serializer.data

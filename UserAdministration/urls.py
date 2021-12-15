@@ -24,15 +24,18 @@ urlpatterns = [
     path('count-alltickets/', views.SciKeyAllTicketsCountAPIView.as_view(), name='count-alltickets'), # Count All tickets
 
     # path('agent_own_tickets/',views.AgentOwnTicketsListApiView.as_view(),name="agent_own_tickets"),
-    path('agent_own_tickets/',views.AgentOwnTicketsListApiView.as_view(),name="agent_own_tickets"),
-    path('agent_detail_tickets/<int:id>/', views.AgentDetailTicketsListApiView.as_view(),name="agent_detail_tickets"),
+    path('agent_own_tickets/',views.AgentOwnTicketsListApiView.as_view(),name="agent_own_tickets"), # agent own tickets api
+    path('agent_detail_tickets/<int:id>/', views.AgentDetailTicketsListApiView.as_view(),name="agent_detail_tickets"), # agent own tickets update api
 
 
-    path('agent_assign_tickets/', views.SciKeyAssignTicketsListAPIView.as_view(),name="agent_assign_tickets"),
-    path('agent_closed_tickets/', views.SciKeyClosedTicketsListAPIView.as_view(),name="agent_closed_tickets"),
-    path('agent_new_tickets/', views.SciKeyNewTicketsListAPIView.as_view(),name="agent_new_tickets"),
-    path('agent_notfound_tickets/', views.SciKeyNotFoundTicketsListAPIView.as_view(),name="agent_notfound_tickets"),
-    path('agent_exception_tickets/', views.SciKeyExceptionTicketsListAPIView.as_view(),name="agent_exception_tickets"),
+    path('agent_assign_tickets/', views.SciKeyAssignTicketsListAPIView.as_view(),name="agent_assign_tickets"), # agent assign tickets api
+    path('agent_closed_tickets/', views.SciKeyClosedTicketsListAPIView.as_view(),name="agent_closed_tickets"), # agent closed tickets api
+    path('agent_new_tickets/', views.SciKeyNewTicketsListAPIView.as_view(),name="agent_new_tickets"), # agent new tickets api
+    path('agent_notfound_tickets/', views.SciKeyNotFoundTicketsListAPIView.as_view(),name="agent_notfound_tickets"), # agent notfound tickets api
+    path('agent_exception_tickets/', views.SciKeyExceptionTicketsListAPIView.as_view(),name="agent_exception_tickets"), # agent exception tickets api
+
+    path('agent_pending_tickets/', views.SciKeyPendingTicketsListAPIView.as_view(),name="agent_pending_tickets"),# agent own pending tickets
+    path('agent_pending_detail_tickets/<int:id>/', views.AgentPendingDetailTicketApiView.as_view(),name="agent_pending_detail_tickets"), # agent update own ticktes
 
 
 ]
