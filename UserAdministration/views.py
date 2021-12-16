@@ -190,6 +190,42 @@ class UploadFileView(APIView):
             return Response(
                 {'please select proper file'}, status=status.HTTP_404_NOT_FOUND)
 
+class UploadPersonView(APIView):
+    serializer_class = PersonUploadSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        dataset = Dataset()
+        file = serializer.validated_data['file']
+        imported_data = dataset.load(file.read(), format='xlsx')
+        '''uploading xl file with particular data what user mentioned in xl we are looping the xl data
+                and appending into the database with same fields'''
+        for data in imported_data:
+            person_data=UserProfile(username=data[0],
+                      fullname=data[1],
+                      mobile=data[2],
+                      email=data[3],
+                      password=data[4],
+                      date_joined=data[5],
+                      is_verified=data[6],
+                      is_active=data[7],
+                      is_admin=data[8],
+                      is_manager=data[9],
+                      is_tl=data[10],
+                      is_agent=data[11],
+                      orginization=data[12],
+                      dob=data[13],
+                      gender=data[14],
+                      team_name=data[15],
+                      role=data[16]
+                      
+
+                    
+                      )
+            person_data.save()
+        return Response(status=status.HTTP_200_OK)
+
 
 ##prasanth
 class SciListViewView(APIView):

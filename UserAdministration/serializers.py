@@ -128,12 +128,23 @@ class SaveFileSerializer(serializers.Serializer):
         model = Sci1stKey
         fields = "__all__"
 
+
+class PersonUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+
+
+##prasanth
+class SavePersonFileSerializer(serializers.Serializer):
+    class Meta:
+        model = UserProfile
+        fields = "__all__"
+
 ##prasanth
 class ScikeyAssignSerializer(serializers.ModelSerializer):
     status = serializers.CharField()
     class Meta:
         model = Sci1stKey
-        fields = ('status')
+        fields = ['status']
 
 ##prasanth
 class AgentOwnTicketsSerializer(serializers.ModelSerializer):
