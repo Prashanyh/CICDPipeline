@@ -179,7 +179,7 @@ class AgentRetriveSerializer(serializers.ModelSerializer):
         # model name
         model = Sci1stKey
         # required fields
-        fields = ['id','process_status','status']
+        fields = ['id','process_status','status','stop_time_ticket']
         # fields = '__all__'
     # def update(self, instance, validated_data):
     #     qs = Sci1stKey.objects.filter(id=id)
@@ -292,3 +292,10 @@ class Update_his_profile_Serializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+class Assigntickets_listSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sci1stKey
+        # get model name
+        fields = '__all__'
+        #getting fields

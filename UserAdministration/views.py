@@ -273,7 +273,7 @@ class SciListViewView(APIView):
     This function is used for get the list availble records in this function used get method
         get method is used for get the data in db or any local also this get method contains
         model data with query and assigned model data into serializer and get n number of records
-        sending into responce body
+        sending into responce body admin & manager
     """
     def get(self, request, format=None):
         # fetching model object
@@ -295,7 +295,7 @@ class SciTicketDetail(APIView):
 
     """  
     This method is used for get the particular data with id contains 
-        and sending responce into the body
+        and sending responce into the body admin
     """
     def get(self, request, pk, format=None):
         sci_key = self.get_object(pk)
@@ -315,7 +315,7 @@ class SciKeyAssignTicketsAPIView(generics.GenericAPIView):
     # fetching serilizer
     serializer_class = ScikeyAssignSerializer
 
-    def put(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         """
         this method is used for update single record or multiple record
             and update the status of sci ticket
@@ -328,7 +328,7 @@ class SciKeyAssignTicketsAPIView(generics.GenericAPIView):
             user_status.status='assign'
             user_status.save()
             # update status
-            user.update(status=status_sci)
+            user.update(status="assign")
             return Response({'sucessfully updated your status'}, status=status.HTTP_200_OK)
         else:
             return Response(
@@ -384,7 +384,7 @@ class SciKeyAssignTicketsListAPIView(generics.ListAPIView):
     serializer_class = ScikeyTicketsListSerializer
     queryset = Sci1stKey.objects.all()
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         '''
         get the particular status of scikey and get the all data of assign ticket
         :param request:
@@ -393,8 +393,13 @@ class SciKeyAssignTicketsListAPIView(generics.ListAPIView):
         :return:
         '''
         queryset = Sci1stKey.objects.filter(status='assign')
-        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
-        return Response(user_serializer.data)
+        try:
+            user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+            return Response(user_serializer.data)
+        except:
+            return Response(
+                {'sorry dont have any assign ticktes'}, status=status.HTTP_404_NOT_FOUND)
+
 
 # prashanth
 class SciKeyClosedTicketsListAPIView(generics.ListAPIView):
@@ -404,7 +409,7 @@ class SciKeyClosedTicketsListAPIView(generics.ListAPIView):
     serializer_class = ScikeyTicketsListSerializer
     queryset = Sci1stKey.objects.all()
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         '''
         get the particular status of scikey and get the all data of completed ticket
         :param request:
@@ -413,9 +418,13 @@ class SciKeyClosedTicketsListAPIView(generics.ListAPIView):
         :return:
         '''
         queryset = Sci1stKey.objects.filter(process_status='completed')
-        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
-        # return responce data
-        return Response(user_serializer.data)
+        try:
+            user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+            # return responce data
+            return Response(user_serializer.data)
+        except:
+            return Response(
+                {'sorry dont have any completed ticktes'}, status=status.HTTP_404_NOT_FOUND)
 
 # prashanth
 class SciKeyNewTicketsListAPIView(generics.ListAPIView):
@@ -425,7 +434,7 @@ class SciKeyNewTicketsListAPIView(generics.ListAPIView):
     serializer_class = ScikeyTicketsListSerializer
     queryset = Sci1stKey.objects.all()
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         '''
         get the particular status of scikey and get the all data of completed ticket
         :param request:
@@ -434,64 +443,71 @@ class SciKeyNewTicketsListAPIView(generics.ListAPIView):
         :return:
         '''
         queryset = Sci1stKey.objects.filter(status='newtickets')
-        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
-        # return responce data
-        return Response(user_serializer.data)
+        try:
+            user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+            # return responce data
+            return Response(user_serializer.data)
+        except:
+            return Response(
+                {'sorry dont have any newtickets ticktes'}, status=status.HTTP_404_NOT_FOUND)
 
-# prashanth
-class SciKeyNotFoundTicketsListAPIView(generics.ListAPIView):
-    """
-    fetching the serializer and Scikey data
-    """
-    serializer_class = ScikeyTicketsListSerializer
-    queryset = Sci1stKey.objects.all()
-
-    def list(self, request, *args, **kwargs):
-        '''
-            get the particular status of scikey and get the all data of notfound ticket
-            :param request:
-            :param args:
-            :param kwargs:
-            :return:
-        '''
-        queryset = Sci1stKey.objects.filter(status='notfound')
-        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
-        # return responce data
-        return Response(user_serializer.data)
-
-# prashanth
-class SciKeyExceptionTicketsListAPIView(generics.ListAPIView):
-    """
-    fetching the serializer and Scikey data
-    """
-    serializer_class = ScikeyTicketsListSerializer
-    queryset = Sci1stKey.objects.all()
-
-    def list(self, request, *args, **kwargs):
-        '''
-        get the particular status of scikey and get the all data of exception ticket
-        :param request:
-        :param args:
-        :param kwargs:
-        :return:
-        '''
-        queryset = Sci1stKey.objects.filter(status='exception')
-        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
-        # return responce data
-        return Response(user_serializer.data)
-
+# # prashanth
+# class SciKeyNotFoundTicketsListAPIView(generics.ListAPIView):
+#     """
+#     fetching the serializer and Scikey data
+#     """
+#     serializer_class = ScikeyTicketsListSerializer
+#     queryset = Sci1stKey.objects.all()
+#
+#     def list(self, request, *args, **kwargs):
+#         '''
+#             get the particular status of scikey and get the all data of notfound ticket
+#             :param request:
+#             :param args:
+#             :param kwargs:
+#             :return:
+#         '''
+#         queryset = Sci1stKey.objects.filter(process_status='notfound')
+#         user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+#         # return responce data
+#         return Response(user_serializer.data)
+#
+# # prashanth
+# class SciKeyExceptionTicketsListAPIView(generics.ListAPIView):
+#     """
+#     fetching the serializer and Scikey data
+#     """
+#     serializer_class = ScikeyTicketsListSerializer
+#     queryset = Sci1stKey.objects.all()
+#
+#     def list(self, request, *args, **kwargs):
+#         '''
+#         get the particular status of scikey and get the all data of exception ticket
+#         :param request:
+#         :param args:
+#         :param kwargs:
+#         :return:
+#         '''
+#         queryset = Sci1stKey.objects.filter(process_status='exception')
+#         user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+#         # return responce data
+#         return Response(user_serializer.data)
+#
 
 
 # prashanth
 from .agent_permissions import *
 class AgentOwnTicketsListApiView(generics.ListAPIView):
+
     """
     fetching the serializer and Scikey data
     """
     queryset = Sci1stKey.objects.all()
     serializer_class = AgentOwnTicketsSerializer
+    # authentication token and permissions of user we can change permissions
+    permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         '''
         get the login user (agent)  particular all tickets
         :param request:
@@ -500,13 +516,13 @@ class AgentOwnTicketsListApiView(generics.ListAPIView):
         :return:
         '''
         user_id = request.user.username
-        queryset = Sci1stKey.objects.filter(agent=user_id)
-        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
-        # return responce data
-        return Response(user_serializer.data)
-
-
-
+        try:
+            queryset = Sci1stKey.objects.filter(status="assign",agent=user_id)
+            user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+            return Response(user_serializer.data)
+        except:
+            return Response(
+                {'your dont have any assign tickets'}, status=status.HTTP_404_NOT_FOUND)
 
     # def get_object(self):
     #     return self.request.user
@@ -532,6 +548,8 @@ class AgentOwnTicketsListApiView(generics.ListAPIView):
     # queryset = Sci1stKey.objects.all()
     # serializer_class = AgentOwnTicketsSerializer
 
+
+import datetime
 # prashanth
 class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMixin,
                                  mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
@@ -540,23 +558,24 @@ class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMi
     """
     queryset = Sci1stKey.objects.all()
     serializer_class = AgentRetriveSerializer
+    # authentication token and permissions of user we can change permissions
+    permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
     # filter the sciticket id and get the data
     lookup_field = 'id'
 
     def get_object(self, id):
         try:
             # return Sci1stKey.objects.get(id=id)
-            individual_ticket = Sci1stKey.objects.filter(id=id)
+            qs = Sci1stKey.objects.filter(id=id)
             '''
             get the sci key id and get the ticket and 
                 change the status of ticket
             '''
-            for x in individual_ticket:
-                x.status = 'inprogress'
+            for x in qs:
+                x.start_time_ticket = datetime.datetime.now()
                 x.save()
-                individual_ticket.update(status='inprogress')
-                # return the agent ticket
-                return Sci1stKey.objects.get(id=id)
+                qs.update(start_time_ticket=datetime.datetime.now())
+                return Sci1stKey.objects.get(id=id,status="assign", process_status="emty")
         except Sci1stKey.DoesNotExist:
             raise Http404
 
@@ -581,18 +600,23 @@ class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMi
         :return:
         '''
         calobj = self.get_object(id)
-        print(calobj, 'kkkkkkkkkkkkkkkk')
-        # individual_ticket = Sci1stKey.objects.filter(id=id)
-        # for x in individual_ticket:
-        #     x.status = 'closed'
-        #     x.save()
-        #     individual_ticket.update(status='closed')
+        # qs = Sci1stKey.objects.filter(id=id).values_list('agent')
+        # for i in qs:
+        #     a=list(i)
+        #     agent_name=a[0]
+        #     qs = Sci1stKey.objects.filter(agent=agent_name)
+        #     for x in qs:
+        #         print(x,'sssssssssssssssssssssssssssssss')
+        #         x.stop_time_ticket = datetime.datetime.now()
+        #         x.save()
+        #         qs.update(start_time_ticket=datetime.datetime.now())
         serializer = AgentRetriveSerializer(calobj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             body_data = serializer.data
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 # prashanth
@@ -603,9 +627,9 @@ class SciKeyPendingTicketsListAPIView(generics.ListAPIView):
     serializer_class = ScikeyPendingTicketsListSerializer
     queryset = Sci1stKey.objects.all()
     # authentication token and permissions of user we can change permissions
-    # permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
+    permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         '''
         get the all agents & login agent data of scikey and get the all data of pending ticket
         :param request:
@@ -613,10 +637,16 @@ class SciKeyPendingTicketsListAPIView(generics.ListAPIView):
         :param kwargs:
         :return:
         '''
-        queryset = Sci1stKey.objects.filter(status='pending')
-        user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
-        # return the reponce of data body
-        return Response(user_serializer.data)
+        user_id = request.user.username
+        try:
+            queryset = Sci1stKey.objects.filter(status='pending',agent=user_id,)
+            user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+            # return the reponce of data body
+            return Response(user_serializer.data)
+        except:
+            return Response(
+                {'your dont have any pending tickets'}, status=status.HTTP_404_NOT_FOUND)
+
 
 
 # prashanth
@@ -674,3 +704,66 @@ class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModel
             body_data = serializer.data
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class AllAssign_Tickets_ListApi_View(APIView):
+    serializer_class = Assigntickets_listSerializer
+
+    def get(self, request, agent):
+        try:
+            tutorial = Sci1stKey.objects.filter(agent=agent,status='assign')
+            """
+                get the sci 1st key all assigned tickets 
+                :param request:
+                :param id:
+                :param args:
+                :param kwargs:
+                :return:
+            """
+        except (Sci1stKey.DoesNotExist):
+            return JsonResponse({'message': 'No details'}, status=status.HTTP_404_NOT_FOUND)
+
+        tutorial_serializer = Assigntickets_listSerializer(tutorial,many=True)
+        data = {'list_of_data': tutorial_serializer.data}
+        return Response(data)
+
+
+
+class Ticketreassign_to_agentview(APIView):
+    serializer_class = Assigntickets_listSerializer
+
+    def get_object(self, obj_id):
+        try:
+            obj = Sci1stKey.objects.get(id=obj_id)
+            return obj
+        except (Sci1stKey.DoesNotExist, ValidationError):
+            raise status.HTTP_400_BAD_REQUEST
+
+    def validate_ids(self, ticket_ids):
+        for id in ticket_ids:
+            try:
+                Sci1stKey.objects.get(id=id)
+                print(Sci1stKey.objects.get(id=id))
+            except (Sci1stKey.DoesNotExist, ValidationError):
+                raise status.HTTP_400_BAD_REQUEST
+        return True
+
+    def put(self, request, *args, **kwargs):
+        data = request.data
+        str_data = json.dumps(data)#converting dict to str
+        lis_data = json.loads(str_data)["data"]#convering str to list
+        print(type(lis_data))
+        ticket_ids = [i['id'] for i in lis_data]
+        self.validate_ids(ticket_ids)
+        instances = []
+        for temp_dict in lis_data:
+            id = temp_dict['id']
+            agent = temp_dict['agent']
+            obj = self.get_object(id)
+            obj.agent = agent
+            obj.save()
+            instances.append(obj)
+        serializer = Sci1stKey(instances)
+        return Response(serializer.data)

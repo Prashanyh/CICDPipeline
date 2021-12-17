@@ -15,4 +15,4 @@ class IsAgentPermission(BasePermission):
 
 class IsAgent(BasePermission):
     def has_permission(self, request, view):
-        return request.user.role == "is_agent"
+        return request.user == "is_agent"
