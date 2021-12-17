@@ -20,25 +20,29 @@ urlpatterns = [
     path('admin_all_tickets/', views.SciListViewView.as_view(), name='admin_all_tickets'),##viewing all tickets
     path('admin_ticket_get_delete/<int:pk>/', views.SciTicketDetail.as_view(), name='admin_ticket_get_delete'),##viewing single ticket
 
-    path('admin_bulk_assign/', views.SciKeyAssignTicketsAPIView.as_view(), name='admin_bulk_assign'), # Assign tickets to agents
-    path('admin_ticketstatus_count/', views.SciKeyAllTicketsCountAPIView.as_view(), name='admin_ticketstatus_count'), # Count All tickets
+    path('admin_bulk_assign/', views.SciKeyAdminBulkAssignTicketsAPIView.as_view(), name='admin_bulk_assign'), # Assign tickets to agents
+    path('admin_ticketstatus_count/', views.SciKeyAdminAllTicketsCountAPIView.as_view(), name='admin_ticketstatus_count'), # Count All tickets
 
     # path('agent_own_tickets/',views.AgentOwnTicketsListApiView.as_view(),name="agent_own_tickets"),
-    path('agent_assigntickets_list/',views.AgentOwnTicketsListApiView.as_view(),name="agent_assigntickets_list"), # agent own tickets api
-    path('agent_assignticket_viewupdate/<int:id>/', views.AgentDetailTicketsListApiView.as_view(),name="agent_assignticket_viewupdate"), # agent own tickets update api
-
-    path('show_assigntickets_viewlist/',views.AllAssign_Tickets_ListApi_View.as_view(),name='show_assigntickets_viewlist'),#showing all assign tickets to admin/manager
-    path('tickets_reassign_agent/',views.Ticketreassign_to_agentview.as_view(),name='tickets_reassign_agent/'),#reassign tickets to agent
+    path('agent_assigntickets_list/',views.AgentAssignTicketsListApiView.as_view(),name="agent_assigntickets_list"), # agent own tickets api
+    path('agent_assignticket_viewupdate/<int:id>/', views.AgentAssignDetailTicketListApiView.as_view(),name="agent_assignticket_viewupdate"), # agent own tickets update api
 
 
-    path('admin_assigntickets_list/', views.SciKeyAssignTicketsListAPIView.as_view(),name="admin_assigntickets_list"), # agent assign tickets api
-    path('admin_closetickets_list/', views.SciKeyClosedTicketsListAPIView.as_view(),name="admin_closetickets_list"), # agent closed tickets api
-    path('admin_newtickets_list/', views.SciKeyNewTicketsListAPIView.as_view(),name="admin_newtickets_list"), # agent new tickets api
+    path('admin_assigntickets_list/', views.SciKeyAdminAssignTicketsListAPIView.as_view(),name="admin_assigntickets_list"), # agent assign tickets api
+    path('admin_closetickets_list/', views.SciKeyAddminClosedTicketsListAPIView.as_view(),name="admin_closetickets_list"), # agent closed tickets api
+    path('admin_newtickets_list/', views.SciKeyAdminNewTicketsListAPIView.as_view(),name="admin_newtickets_list"), # agent new tickets api
 
     # path('admin_notfoundtickets_list/', views.SciKeyNotFoundTicketsListAPIView.as_view(),name="agent_notfound_tickets"), # agent notfound tickets api
     # path('admin_exceptiondtickets_list/', views.SciKeyExceptionTicketsListAPIView.as_view(),name="agent_exception_tickets"), # agent exception tickets api
 
-    path('agent_pending_tickets_list/', views.SciKeyPendingTicketsListAPIView.as_view(),name="agent_pending_tickets_list"),# agent own pending tickets
+    path('agent_pending_tickets_list/', views.SciKeyAgentPendingTicketsListAPIView.as_view(),name="agent_pending_tickets_list"),# agent own pending tickets
     path('agent_pending_ticket_viewupdate/<int:id>/', views.AgentPendingDetailTicketApiView.as_view(),name="agent_pending_ticket_viewupdate"), # agent update own ticktes
+
+
+    path('show_assigntickets_viewlist/', views.AllReAssign_Tickets_ListApi_View.as_view(),name='show_assigntickets_viewlist'),  # showing all assign tickets to admin/manager
+    path('tickets_reassign_agent/', views.Ticketreassign_to_agentview.as_view(), name='tickets_reassign_agent/'),# reassign tickets to agent
+
+
+    path('demoapi/', views.ListUsers.as_view())
 
 ]

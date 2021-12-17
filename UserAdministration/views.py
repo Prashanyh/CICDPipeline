@@ -311,7 +311,7 @@ class SciTicketDetail(APIView):
 
 
 ## prashanth
-class SciKeyAssignTicketsAPIView(generics.GenericAPIView):
+class SciKeyAdminBulkAssignTicketsAPIView(generics.GenericAPIView):
     # fetching serilizer
     serializer_class = ScikeyAssignSerializer
 
@@ -357,7 +357,7 @@ class SciKeyAssignTicketsAPIView(generics.GenericAPIView):
 
 
 # prashanth
-class SciKeyAllTicketsCountAPIView(APIView):
+class SciKeyAdminAllTicketsCountAPIView(APIView):
     # fetching serializer data
     serializer_class = ScikeyAssignSerializer
     # get the token of user and checking user perimissions
@@ -379,7 +379,7 @@ class SciKeyAllTicketsCountAPIView(APIView):
 
 
 # prashanth
-class SciKeyAssignTicketsListAPIView(generics.ListAPIView):
+class SciKeyAdminAssignTicketsListAPIView(generics.ListAPIView):
     """fetching the serializer and Scikey data"""
     serializer_class = ScikeyTicketsListSerializer
     queryset = Sci1stKey.objects.all()
@@ -402,7 +402,7 @@ class SciKeyAssignTicketsListAPIView(generics.ListAPIView):
 
 
 # prashanth
-class SciKeyClosedTicketsListAPIView(generics.ListAPIView):
+class SciKeyAddminClosedTicketsListAPIView(generics.ListAPIView):
     """
     fetching the serializer and Scikey data
     """
@@ -427,7 +427,7 @@ class SciKeyClosedTicketsListAPIView(generics.ListAPIView):
                 {'sorry dont have any completed ticktes'}, status=status.HTTP_404_NOT_FOUND)
 
 # prashanth
-class SciKeyNewTicketsListAPIView(generics.ListAPIView):
+class SciKeyAdminNewTicketsListAPIView(generics.ListAPIView):
     """
     fetching the serializer and Scikey data
     """
@@ -497,7 +497,7 @@ class SciKeyNewTicketsListAPIView(generics.ListAPIView):
 
 # prashanth
 from .agent_permissions import *
-class AgentOwnTicketsListApiView(generics.ListAPIView):
+class AgentAssignTicketsListApiView(generics.ListAPIView):
 
     """
     fetching the serializer and Scikey data
@@ -551,7 +551,7 @@ class AgentOwnTicketsListApiView(generics.ListAPIView):
 
 import datetime
 # prashanth
-class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMixin,
+class AgentAssignDetailTicketListApiView(generics.GenericAPIView,mixins.UpdateModelMixin,
                                  mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
     """
     fetching the serializer and Scikey data
@@ -620,7 +620,7 @@ class AgentDetailTicketsListApiView(generics.GenericAPIView,mixins.UpdateModelMi
 
 
 # prashanth
-class SciKeyPendingTicketsListAPIView(generics.ListAPIView):
+class SciKeyAgentPendingTicketsListAPIView(generics.ListAPIView):
     """
     fetching the serializer and Scikey data
     """
@@ -708,28 +708,73 @@ class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModel
 
 
 
-class AllAssign_Tickets_ListApi_View(APIView):
+class AllReAssign_Tickets_ListApi_View(APIView):
     serializer_class = Assigntickets_listSerializer
 
-    def get(self, request, agent):
+    def get(self, request,*args, **kwargs):
         try:
-            tutorial = Sci1stKey.objects.filter(agent=agent,status='assign')
-            """
-                get the sci 1st key all assigned tickets 
-                :param request:
-                :param id:
-                :param args:
-                :param kwargs:
-                :return:
-            """
-        except (Sci1stKey.DoesNotExist):
-            return JsonResponse({'message': 'No details'}, status=status.HTTP_404_NOT_FOUND)
-
-        tutorial_serializer = Assigntickets_listSerializer(tutorial,many=True)
-        data = {'list_of_data': tutorial_serializer.data}
-        return Response(data)
+            List_of_AgentNames = UserProfile.objects.filter(role='Agent').values('id')
+            reassign = []
+            for agentname in List_of_AgentNames:
+                reassign.append(agentname)
+            users_list = []
+            for x in reassign:
+                k = (x["id"])
+                users_list.append(k)
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+        # try:
+        #     queryset = Sci1stKey.objects.filter(status='assign' )
+        #     user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+        #     # return the reponce of data body
+        #     return Response(user_serializer.data)
+        # except:
+        #     return Response(
+        #         {'your dont have any pending tickets'}, status=status.HTTP_404_NOT_FOUND)
+        #
+        # try:
+        #     tutorial = Sci1stKey.objects.filter(status='assign')
+        #     """
+        #         get the sci 1st key all assigned tickets
+        #         :param request:
+        #         :param id:
+        #         :param args:
+        #         :param kwargs:
+        #         :return:
+        #     """
+        # except (Sci1stKey.DoesNotExist):
+        #     return JsonResponse({'message': 'No details'}, status=status.HTTP_404_NOT_FOUND)
+        #
+        # tutorial_serializer = Assigntickets_listSerializer(tutorial,many=True)
+        # data = {'list_of_data': tutorial_serializer.data}
+        # return Response(data)
+
+
+
+from rest_framework import authentication, permissions
+from UserAdministration.agent_permissions import *
+class ListUsers(generics.ListAPIView):
+    serializer_class = UserSerializer
+    queryset = UserProfile.objects.all()
+    # permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
+    # """
+    # View to list all users in the system.
+    #
+    # * Requires token authentication.
+    # * Only admin users are able to access this view.
+    # """
+    # # authentication_classes = [authentication.TokenAuthentication]
+    # # permission_classes = [permissions.BasePermission]
+    #
+    # def get(self, request, format=None):
+    #     """
+    #     Return a list of all users.
+    #     """
+    #     usernames = [user for user in UserProfile.objects.all().values('role')]
+    #     return Response(usernames)
 
 class Ticketreassign_to_agentview(APIView):
     serializer_class = Assigntickets_listSerializer

@@ -294,8 +294,22 @@ class Update_his_profile_Serializer(serializers.ModelSerializer):
         return instance
 
 class Assigntickets_listSerializer(serializers.ModelSerializer):
+    # name = serializers.SlugRelatedField(many=False, slug_field='name', queryset=UserProfile.objects.all())
+
     class Meta:
-        model = Sci1stKey
+        model = UserProfile
         # get model name
         fields = '__all__'
-        #getting fields
+
+
+
+
+
+from rest_framework import serializers
+
+class UserSerializer(serializers.ModelSerializer):
+    # role = serializers.ChoicesField(choices=UserProfile.role)
+
+    class Meta:
+        model = UserProfile
+        fields = ['role']
