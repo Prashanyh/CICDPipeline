@@ -37,15 +37,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'UserAdministration',
-    'rest_framework',
-    'rest_framework.authtoken',
+    'UserAdministration', # app name
+    'rest_framework', # 3rd party
+    'rest_framework.authtoken', # 3rd party
+    'corsheaders', # front-end
 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # added a corsheader
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -164,3 +166,11 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CORS_ORIGIN_ALLOW_ALL=True
+
+ CORS_ORIGIN_WHITELIST = (
+'http://127.0.0.1:8000',
+'http://localhost:8000',
+)
