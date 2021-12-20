@@ -2,6 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="37d7d0ec-6270-45a7-8daf-f462a5b4c697" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserAdministration/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/UserAdministration/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserAdministration/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/UserAdministration/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserAdministration/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/UserAdministration/views.py" afterDir="false" />
@@ -86,14 +90,45 @@
         </counts>
       </usages-collector>
     </session>
+    <session id="726268135">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.open.time.0" value="1" />
+          <entry key="project.opened" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="cell" value="12" />
+          <entry key="py" value="237" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="Python" value="237" />
+          <entry key="Scratch" value="12" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="useradministration_sci1stkey" value="1" />
+          <entry key="useradministration_userprofile" value="4" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="Database Element" value="5" />
+        </counts>
+      </usages-collector>
+    </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UserAdministration/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="283">
-              <caret line="41" column="55" lean-forward="true" selection-start-line="41" selection-start-column="55" selection-end-line="41" selection-end-column="55" />
+            <state relative-caret-position="101">
+              <caret line="39" lean-forward="true" selection-start-line="39" selection-end-line="39" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -101,28 +136,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UserAdministration/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="711" column="28" lean-forward="true" selection-start-line="711" selection-start-column="28" selection-end-line="711" selection-end-column="28" />
+            <state relative-caret-position="588">
+              <caret line="1108" column="27" lean-forward="true" selection-start-line="1108" selection-start-column="27" selection-end-line="1108" selection-end-column="27" />
               <folding>
                 <element signature="e#0#59#0" expanded="true" />
-                <element signature="e#26387#26393#0" />
-                <marker date="1639751459474" expanded="true" signature="19554:19560" ph="..." />
-                <marker date="1639751459474" expanded="true" signature="19554:19793" ph="..." />
-                <marker date="1639751459474" expanded="true" signature="26055:26463" ph="..." />
-                <marker date="1639751459474" expanded="true" signature="27791:27875" ph="..." />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="das://d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1/schema/main/table/useradministration_sci1stkey">
-          <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-            <state>
-              <filtering enabled="true" />
             </state>
           </provider>
         </entry>
@@ -130,8 +151,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UserAdministration/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="52">
-              <caret line="54" column="39" selection-start-line="54" selection-start-column="39" selection-end-line="54" selection-end-column="39" />
+            <state relative-caret-position="228">
+              <caret line="173" column="4" lean-forward="true" selection-start-line="173" selection-start-column="4" selection-end-line="173" selection-end-column="18" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -139,11 +160,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UserAdministration/serializers.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="395">
-              <caret line="303" lean-forward="true" selection-start-line="303" selection-end-line="303" />
+            <state relative-caret-position="262">
+              <caret line="297" column="71" selection-start-line="297" selection-start-column="71" selection-end-line="297" selection-end-column="71" />
+              <folding>
+                <marker date="1639990232723" expanded="true" signature="6362:7187" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -192,8 +216,8 @@
         <option value="$PROJECT_DIR$/XT01/settings.py" />
         <option value="$PROJECT_DIR$/UserAdministration/agent_permissions.py" />
         <option value="$PROJECT_DIR$/UserAdministration/urls.py" />
-        <option value="$PROJECT_DIR$/UserAdministration/views.py" />
         <option value="$PROJECT_DIR$/UserAdministration/serializers.py" />
+        <option value="$PROJECT_DIR$/UserAdministration/views.py" />
       </list>
     </option>
   </component>
@@ -214,35 +238,30 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
-              <item name="XT01" type="b2602c69:ProjectViewProjectNode" />
-              <item name="XT01" type="462c0819:PsiDirectoryNode" />
+              <item name="XT-O1-UserManagement" type="b2602c69:ProjectViewProjectNode" />
+              <item name="XT-O1-UserManagement" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
-              <item name="XT01" type="b2602c69:ProjectViewProjectNode" />
-              <item name="XT01" type="462c0819:PsiDirectoryNode" />
+              <item name="XT-O1-UserManagement" type="b2602c69:ProjectViewProjectNode" />
+              <item name="XT-O1-UserManagement" type="462c0819:PsiDirectoryNode" />
               <item name="UserAdministration" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="XT01" type="b2602c69:ProjectViewProjectNode" />
-              <item name="XT01" type="462c0819:PsiDirectoryNode" />
-              <item name="XT01" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="DatabaseDriversLRU" value="sqlite" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="database.console.LAST_STATE" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../project/XT01_REP0_APP/useradministration1.10/useradministration" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
   </component>
@@ -265,6 +284,7 @@
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="XT01.settings" />
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="" />
@@ -307,14 +327,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26096824" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26605505" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.4604811" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -330,7 +349,7 @@
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="SciView" order="3" />
-      <window_info anchor="right" id="Database" order="4" weight="0.32980332" />
+      <window_info anchor="right" id="Database" order="4" weight="0.32874617" />
     </layout>
     <layout-to-restore>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25718608" />
@@ -364,9 +383,7 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1/console.sql">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1/console.sql" />
     <entry file="das://d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1/schema/main/table/useradministration_teams">
       <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
         <state>
@@ -425,30 +442,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UserAdministration/serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="262">
+          <caret line="297" column="71" selection-start-line="297" selection-start-column="71" selection-end-line="297" selection-end-column="71" />
+          <folding>
+            <marker date="1639990232723" expanded="true" signature="6362:7187" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/UserAdministration/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="52">
-          <caret line="54" column="39" selection-start-line="54" selection-start-column="39" selection-end-line="54" selection-end-column="39" />
+        <state relative-caret-position="228">
+          <caret line="173" column="4" lean-forward="true" selection-start-line="173" selection-start-column="4" selection-end-line="173" selection-end-column="18" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UserAdministration/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="41" column="55" lean-forward="true" selection-start-line="41" selection-start-column="55" selection-end-line="41" selection-end-column="55" />
-          <folding>
-            <element signature="e#0#32#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="das://d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1/schema/main/table/useradministration_userprofile">
-      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-        <state>
-          <filtering enabled="true" />
         </state>
       </provider>
     </entry>
@@ -459,25 +469,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UserAdministration/views.py">
+    <entry file="das://d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1/schema/main/table/useradministration_userprofile">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UserAdministration/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="711" column="28" lean-forward="true" selection-start-line="711" selection-start-column="28" selection-end-line="711" selection-end-column="28" />
+        <state relative-caret-position="101">
+          <caret line="39" lean-forward="true" selection-start-line="39" selection-end-line="39" />
           <folding>
-            <element signature="e#0#59#0" expanded="true" />
-            <element signature="e#26387#26393#0" />
-            <marker date="1639751459474" expanded="true" signature="19554:19560" ph="..." />
-            <marker date="1639751459474" expanded="true" signature="19554:19793" ph="..." />
-            <marker date="1639751459474" expanded="true" signature="26055:26463" ph="..." />
-            <marker date="1639751459474" expanded="true" signature="27791:27875" ph="..." />
+            <element signature="e#0#32#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UserAdministration/serializers.py">
+    <entry file="file://$PROJECT_DIR$/UserAdministration/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="395">
-          <caret line="303" lean-forward="true" selection-start-line="303" selection-end-line="303" />
+        <state relative-caret-position="588">
+          <caret line="1108" column="27" lean-forward="true" selection-start-line="1108" selection-start-column="27" selection-end-line="1108" selection-end-column="27" />
+          <folding>
+            <element signature="e#0#59#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
