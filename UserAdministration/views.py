@@ -434,6 +434,7 @@ class SciKeyAdminBulkAssignTicketsAPIView(generics.GenericAPIView):
                 user_status.save()
                 # update status
                 user.update(status="assign")
+
                 # serializer.save()
                 return Response({'sucessfully updated your status'}, status=status.HTTP_200_OK)
             else:
@@ -819,21 +820,37 @@ class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModel
 
 
 class AllReAssign_Tickets_ListApi_View(APIView):
+    # fetching serializer class
     serializer_class = Assigntickets_listSerializer
+    # model name and get all users
     queryset = UserProfile.objects.all()
 
     def get(self, request,*args, **kwargs):
+        """
+        this function is using for get the all agents and used get method
+        and validating the data avilable or not checking
+        """
         List_of_AgentNames = UserProfile.objects.filter(role='Agent').values('id')
-        reassign = []
-        for agentname in List_of_AgentNames:
-            reassign.append(agentname)
+        if not List_of_AgentNames:
+            #  responce code
+            return Response({"no agents in your database roles please add agent role"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            # stored agent names & ids
+            reassign = []
+            for agentname in List_of_AgentNames:
+                reassign.append(agentname)
+            # storing agent ids here    
+            userslist = []
+            for x in reassign:
+                # selecting id
+                k = (x["id"])
+                userslist.append(k)
+            #  responce code
+            return Response({"received agent names"}, status=status.HTTP_200_OK)
 
-        users_list = []
-        for x in reassign:
-            k = (x["id"])
-            users_list.append(k)
-        print(user_list)
-        return Response('ok')
+
+
+            
             
         
 
