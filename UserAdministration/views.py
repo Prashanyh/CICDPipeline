@@ -267,6 +267,40 @@ class UploadFileView(APIView):
                 {'please select proper file'}, status=status.HTTP_404_NOT_FOUND)
 
 
+class UploadPersonView(APIView):
+    serializer_class = PersonUploadSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        dataset = Dataset()
+        file = serializer.validated_data['file']
+        imported_data = dataset.load(file.read(), format='xlsx')
+        '''uploading xl file with particular data what user mentioned in xl we are looping the xl data
+                and appending into the database with same fields'''
+        for data in imported_data:
+            person_data=UserProfile(username=data[0],
+                      fullname=data[1],
+                      mobile=data[2],
+                      email=data[3],
+                      password=data[4],
+                      date_joined=data[5],
+                      is_verified=data[6],
+                      is_active=data[7],
+                      is_admin=data[8],
+                      is_manager=data[9],
+                      is_tl=data[10],
+                      is_agent=data[11],
+                      orginization=data[12],
+                      dob=data[13],
+                      gender=data[14],
+                      team_name=data[15],
+                      role=data[16]
+                      )
+            person_data.save()
+        return Response(status=status.HTTP_200_OK)
+
+
 ##prasanth
 class SciListViewView(APIView):
     """
@@ -321,18 +355,31 @@ class SciKeyAdminBulkAssignTicketsAPIView(generics.GenericAPIView):
             and update the status of sci ticket
         """
         # get the ticket status from
+        #  serializer = ScikeyAssignSerializer(data=request.data)
+        # serializer.is_valid(raise_exception=True)
+        # serializer.save()
+        # return Response(serializer.data, status=status.HTTP_201_CREATED)
         status_sci = request.data.get('status')
         # get the model with newtickets
         user = Sci1stKey.objects.filter(status="newtickets")
-        for user_status in user:
-            user_status.status='assign'
-            user_status.save()
-            # update status
-            user.update(status="assign")
-            return Response({'sucessfully updated your status'}, status=status.HTTP_200_OK)
+        serializer = ScikeyAssignSerializer(user,data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if serializer is not None:
+            for user_status in user:
+                user_status.status='assign'
+                user_status.save()
+                # update status
+                user.update(status="assign")
+                
+                # serializer.save()
+                return Response({'sucessfully updated your status'}, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                {'not available any newtickets in your database '}, status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(
-                {'your status is not valid please enter valid status'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+             return Response({'Something went wrong, please contact a Admin member '})
+
+            
 
 
 
@@ -710,20 +757,22 @@ class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModel
 
 class AllReAssign_Tickets_ListApi_View(APIView):
     serializer_class = Assigntickets_listSerializer
+    queryset = UserProfile.objects.all()
 
     def get(self, request,*args, **kwargs):
-        try:
-            List_of_AgentNames = UserProfile.objects.filter(role='Agent').values('id')
-            reassign = []
-            for agentname in List_of_AgentNames:
-                reassign.append(agentname)
-            users_list = []
-            for x in reassign:
-                k = (x["id"])
-                users_list.append(k)
-            return Response(status=status.HTTP_200_OK)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        List_of_AgentNames = UserProfile.objects.filter(role='Agent').values('id')
+        reassign = []
+        for agentname in List_of_AgentNames:
+            reassign.append(agentname)
+
+        users_list = []
+        for x in reassign:
+            k = (x["id"])
+            users_list.append(k)
+        print(user_list)
+        return Response('ok')
+            
+        
 
 
         # try:
@@ -759,7 +808,7 @@ from UserAdministration.agent_permissions import *
 class ListUsers(generics.ListAPIView):
     serializer_class = UserSerializer
     queryset = UserProfile.objects.all()
-    # permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
+    permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
     # """
     # View to list all users in the system.
     #

@@ -15,6 +15,7 @@ urlpatterns = [
 
     path('user_list/',views.User_listApiview.as_view(),name='user_list'),# Showing all persons
     path('person_update_delete/<int:pk>',views.Person_detail,name='persons_update_delete'),#view/update/delete persons(we have to change the nameing)
+    path('upload-person/', views.UploadPersonView.as_view(), name='upload-person'),#uploading sci1st key file
 
     path('upload-scikey/', views.UploadFileView.as_view(), name='upload-scikey'),#uploading sci1st key file
     path('admin_all_tickets/', views.SciListViewView.as_view(), name='admin_all_tickets'),##viewing all tickets

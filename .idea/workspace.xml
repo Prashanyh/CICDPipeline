@@ -2,6 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="37d7d0ec-6270-45a7-8daf-f462a5b4c697" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/UserAdministration/migrations/0002_auto_20211215_1848.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/UserAdministration/migrations/0003_alter_sci1stkey_status.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserAdministration/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/UserAdministration/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserAdministration/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/UserAdministration/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserAdministration/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/UserAdministration/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserAdministration/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/UserAdministration/views.py" afterDir="false" />
@@ -47,7 +51,7 @@
     <session id="531723066">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="3" />
+          <entry key="project.closed" value="4" />
           <entry key="project.open.time.1" value="1" />
           <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.38" value="1" />
@@ -75,13 +79,13 @@
         <counts>
           <entry key="cell" value="297" />
           <entry key="dummy" value="12" />
-          <entry key="py" value="8379" />
+          <entry key="py" value="8470" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="12" />
-          <entry key="Python" value="8379" />
+          <entry key="Python" value="8470" />
           <entry key="Scratch" value="297" />
         </counts>
       </usages-collector>
@@ -92,8 +96,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UserAdministration/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="283">
-              <caret line="41" column="55" lean-forward="true" selection-start-line="41" selection-start-column="55" selection-end-line="41" selection-end-column="55" />
+            <state relative-caret-position="269">
+              <caret line="42" column="56" lean-forward="true" selection-start-line="42" selection-start-column="56" selection-end-line="42" selection-end-column="56" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -101,25 +105,21 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UserAdministration/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="711" column="28" lean-forward="true" selection-start-line="711" selection-start-column="28" selection-end-line="711" selection-end-column="28" />
+            <state relative-caret-position="220">
+              <caret line="760" column="104" selection-start-line="760" selection-start-column="104" selection-end-line="760" selection-end-column="104" />
               <folding>
                 <element signature="e#0#59#0" expanded="true" />
-                <element signature="e#26387#26393#0" />
-                <marker date="1639751459474" expanded="true" signature="19554:19560" ph="..." />
-                <marker date="1639751459474" expanded="true" signature="19554:19793" ph="..." />
-                <marker date="1639751459474" expanded="true" signature="26055:26463" ph="..." />
-                <marker date="1639751459474" expanded="true" signature="27791:27875" ph="..." />
+                <element signature="e#27963#27969#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="das://d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1/schema/main/table/useradministration_sci1stkey">
+        <entry file="das://d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1/schema/main/table/useradministration_userprofile">
           <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
             <state>
               <filtering enabled="true" />
@@ -130,8 +130,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UserAdministration/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="52">
-              <caret line="54" column="39" selection-start-line="54" selection-start-column="39" selection-end-line="54" selection-end-column="39" />
+            <state relative-caret-position="283">
+              <caret line="74" column="17" lean-forward="true" selection-start-line="74" selection-start-column="17" selection-end-line="74" selection-end-column="17" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -139,11 +139,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/UserAdministration/serializers.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="395">
-              <caret line="303" lean-forward="true" selection-start-line="303" selection-end-line="303" />
+            <state relative-caret-position="178">
+              <caret line="215" column="6" selection-start-line="215" selection-start-column="6" selection-end-line="215" selection-end-column="6" />
+              <folding>
+                <element signature="e#9704#9715#0" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -192,8 +195,8 @@
         <option value="$PROJECT_DIR$/XT01/settings.py" />
         <option value="$PROJECT_DIR$/UserAdministration/agent_permissions.py" />
         <option value="$PROJECT_DIR$/UserAdministration/urls.py" />
-        <option value="$PROJECT_DIR$/UserAdministration/views.py" />
         <option value="$PROJECT_DIR$/UserAdministration/serializers.py" />
+        <option value="$PROJECT_DIR$/UserAdministration/views.py" />
       </list>
     </option>
   </component>
@@ -425,26 +428,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UserAdministration/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="52">
-          <caret line="54" column="39" selection-start-line="54" selection-start-column="39" selection-end-line="54" selection-end-column="39" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/UserAdministration/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="41" column="55" lean-forward="true" selection-start-line="41" selection-start-column="55" selection-end-line="41" selection-end-column="55" />
-          <folding>
-            <element signature="e#0#32#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="das://d5b15c0c-4e1c-4349-ba25-4b5b0ccde7a1/schema/main/table/useradministration_userprofile">
       <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
         <state>
@@ -459,25 +442,44 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/UserAdministration/views.py">
+    <entry file="file://$PROJECT_DIR$/UserAdministration/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="711" column="28" lean-forward="true" selection-start-line="711" selection-start-column="28" selection-end-line="711" selection-end-column="28" />
+        <state relative-caret-position="283">
+          <caret line="74" column="17" lean-forward="true" selection-start-line="74" selection-start-column="17" selection-end-line="74" selection-end-column="17" />
           <folding>
-            <element signature="e#0#59#0" expanded="true" />
-            <element signature="e#26387#26393#0" />
-            <marker date="1639751459474" expanded="true" signature="19554:19560" ph="..." />
-            <marker date="1639751459474" expanded="true" signature="19554:19793" ph="..." />
-            <marker date="1639751459474" expanded="true" signature="26055:26463" ph="..." />
-            <marker date="1639751459474" expanded="true" signature="27791:27875" ph="..." />
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UserAdministration/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="269">
+          <caret line="42" column="56" lean-forward="true" selection-start-line="42" selection-start-column="56" selection-end-line="42" selection-end-column="56" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/UserAdministration/serializers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="395">
-          <caret line="303" lean-forward="true" selection-start-line="303" selection-end-line="303" />
+        <state relative-caret-position="178">
+          <caret line="215" column="6" selection-start-line="215" selection-start-column="6" selection-end-line="215" selection-end-column="6" />
+          <folding>
+            <element signature="e#9704#9715#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UserAdministration/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="760" column="104" selection-start-line="760" selection-start-column="104" selection-end-line="760" selection-end-column="104" />
+          <folding>
+            <element signature="e#0#59#0" expanded="true" />
+            <element signature="e#27963#27969#0" />
+          </folding>
         </state>
       </provider>
     </entry>

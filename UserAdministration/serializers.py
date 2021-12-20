@@ -148,6 +148,17 @@ class SaveFileSerializer(serializers.Serializer):
         # required fields
         fields = "__all__"
 
+
+class PersonUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+
+
+##prasanth
+class SavePersonFileSerializer(serializers.Serializer):
+    class Meta:
+        model = UserProfile
+        fields = "__all__"
+
 ##prasanth
 class ScikeyAssignSerializer(serializers.ModelSerializer):
     '''
@@ -156,7 +167,7 @@ class ScikeyAssignSerializer(serializers.ModelSerializer):
     status = serializers.CharField()
     class Meta:
         model = Sci1stKey
-        fields = ('status')
+        fields = ['status']
 
 ##prasanth
 class AgentOwnTicketsSerializer(serializers.ModelSerializer):
@@ -293,9 +304,15 @@ class Update_his_profile_Serializer(serializers.ModelSerializer):
 
         return instance
 
+from UserAdministration.models import UserProfile
 class Assigntickets_listSerializer(serializers.ModelSerializer):
-    # name = serializers.SlugRelatedField(many=False, slug_field='name', queryset=UserProfile.objects.all())
-
+    # Roles = (
+    #     ('Manager', 'Manager'),
+    #     ('TL', 'TL'),
+    #     ('Admin', 'Admin'),
+    #     ('Agent', 'Agent'),)
+    # # name = serializers.SlugRelatedField(many=False, slug_field='name', queryset=UserProfile.objects.all())
+    # role = serializers.ChoiceField(choices=Roles)
     class Meta:
         model = UserProfile
         # get model name
