@@ -15,6 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from rest_framework import routers
+# router = routers.DefaultRouter()
+from UserAdministration import views
+# router.register('tickets_reassign_agent/<slug>/',views.Ticketreassign_to_agentview.({
+#     'get': 'list'}),basename='ln-tickets_reassign_agent'),
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -22,5 +27,7 @@ urlpatterns = [
 
     # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh')
+    # path('', include(router.urls)),
 ]
 
+# urlpatterns += router.urls

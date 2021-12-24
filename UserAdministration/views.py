@@ -14,8 +14,24 @@ from django.db.models import Count
 from django.contrib.auth.hashers import make_password
 from .serializers import *
 import json
+from datetime import timedelta,date
+from django.utils import timezone
 from rest_framework import permissions
 from UserAdministration.manager_permissions import IsManagerPermission
+from django.utils.six import python_2_unicode_compatible
+from .utils import Util
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from six import python_2_unicode_compatible
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+import jwt
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import smart_str,force_str,smart_bytes,DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+from rest_framework.response import Response
 
 ##prasanth
 #user Registration
@@ -59,227 +75,62 @@ class LoginAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-##theja
-##changing password after user login his account
-class ChangePasswordView(generics.UpdateAPIView):
-    '''
-    This class is used for get the user and change user password
-    '''
 
-    ## authentication token and permissions of user we can change permissions
+## prashanth
+# email send and verify mail
+class RequestPasswordResetEmail(generics.GenericAPIView):
+    # fetching serializer data
+    serializer_class = ResetPasswordResetSerializer
 
-    # get the model data
-    model = UserProfile
-    serializer_class = ChangePasswordSerializers
+    def post(self,request):
+        serializer = self.serializer_class(data=request.data)
+        # get the request data from end user
+        email = request.data['email']
+        if UserProfile.objects.filter(email=email):
+            user = UserProfile.objects.get(email=email)
+            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+            current_site = get_current_site(request=request).domain
+            relativeLink = reverse('password_reset_confirm',kwargs={'uidb64':uidb64,'token':token})
+            absurl = 'http://' + current_site + relativeLink
+            email_body = 'Hey Use link below to verify your password' + absurl
+            data = {'email_body': email_body,'to_email':user.email ,'email_subject': 'verify your email'}
+            Util.send_email(data)
+        return Response({'we have sent you a link to reset your password'},status=status.HTTP_200_OK)
+       
+## prashanth
+## check the token of api(gmail)
+class PasswordTokenCheckApiView(generics.GenericAPIView):
 
-    def get_object(self, queryset=None):
-        """ getting the user"""
-        obj = self.request.user
-        return obj
+    def get(self, request, uidb64, token):
+        try:
+            id = smart_str(urlsafe_base64_decode(uidb64))
+            user=UserProfile.objects.get(id=id)
+            if not PasswordResetTokenGenerator().check_token(user,token):
+                return Response({'error':'Token is invalid please request a new token'},status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'sucess':True,'message':'valid credentials','uidb64':uidb64,'token':token},status=status.HTTP_200_OK)
 
-    def update(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        """calling the above function """
-        serializer = self.get_serializer(data=request.data)
-        """getting the data from request"""
+        except DjangoUnicodeDecodeError as identifier:
+            if not PasswordResetTokenGenerator().check_token(user):
+                return Response({'error':'Token is not valid please request a new  one'})
+
+## prashanth
+## creating new password 
+class SetNewPasswordApiView(generics.GenericAPIView):
+    serializer_class = SetNewPasswordSerializer
+
+    def patch(self,request):
+        serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            # Check old password
-            if not self.object.check_password(serializer.data.get("old_password")):
-                return Response({"old_password": ["Old password is not correct"]}, status=status.HTTP_400_BAD_REQUEST)
-            self.object.set_password(serializer.data.get("password"))
-            '''getting the new password'''
-            self.object.save()
-            '''save the new password'''
-            response = {
-                'status': 'success',
-                'code': status.HTTP_200_OK,
-                'message': 'Password updated successfully',
-                'data': serializer.data
-            }
-            '''sending the data in response'''
-            return Response(response)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-##theja
-###updating his profile after user login into the account
-class Update_his_ProfileView(APIView):
-    '''
-    This class is used for get the user and update his profile details
-    '''
-    ## authentication token and permissions of user we can change permissions
-    serializer_class = Update_his_profile_Serializer
-
-    # get the model data
-    queryset = UserProfile.objects.all()
-
-    def get_object(self, queryset=None):
-        obj = self.request.user
-        return obj
-
-    def get(self, request, *args, **kwargs):
-        calobj = self.get_object()
-
-        '''
-        getting his username
-        '''
-        serializer = Update_his_profile_Serializer(calobj)
-        response = {
-            'status': 'success',
-            'code': status.HTTP_200_OK,
-            'data': serializer.data
-        }
-        return Response(response)
-
-    def put(self, request, *args, **kwargs):
-        object = self.get_object()
-        serializer = Update_his_profile_Serializer(object, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            body_data = serializer.data
-            response = {
-                'status': 'success',
-                'code': status.HTTP_200_OK,
-                'message': 'Profile updated successfully',
-                'data' : serializer.data
-            }
-
-            return Response(response)
-            # return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-##theja
-# Adding Teams by Admin
-class Addingteams(generics.GenericAPIView):
-    ## authentication token and permissions of user we can change permissions
-    permission_classes = []
-    # fetch serializer data
-    serializer_class = Teamserialsers
-
-    def post(self, request, *args,  **kwargs):
-        '''
-        This function is used for post the data of adding teams
-        '''
-        parameters = request.data.copy()
-        serializer = self.get_serializer(data=parameters)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response({"message": "Teams Created Successfully."},status=status.HTTP_201_CREATED)
+            # url = serializer.validated_data.get('url')
+            # message = f'The url is {url}'
+            return Response({'message': 'message'})
         else:
-            return Response({"message": 'Team name already exist'},status=status.HTTP_406_NOT_ACCEPTABLE)
-
-##theja
-# View all_Team  by Admin
-class Team_ListView(APIView):
-    ## authentication token and permissions of user we can change permissions
-    permission_classes = []
-    def get(self, request):
-        try:
-            # get the model data
-            tutorial = Teams.objects.all()
-        except Teams.DoesNotExist:
-            return JsonResponse({'message': 'Teams does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-        tutorial_serializer = Teamserialsers(tutorial, many=True)
-        return JsonResponse(tutorial_serializer.data, safe=False)
-
-
-##theja
-# view/update/delete Team  by Admin
-@api_view(['GET', 'PUT', 'DELETE'])
-def Team_detail(request, pk):
-    '''
-    This function is used for update team details of particular team and this
-    function contain get, put, delete
-    '''
-
-    try:
-        # get the model name with filtering team id
-        tutorial = Teams.objects.get(pk=pk)
-    except Teams.DoesNotExist:
-        return JsonResponse({'message': 'The Team does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        # fetch serializer data and add model into serializer
-        tutorial_serializer = Teamserialsers(tutorial)
-        return JsonResponse(tutorial_serializer.data)
-
-    elif request.method == 'PUT':
-        '''this function is used for update team detail '''
-        tutorial_data = JSONParser().parse(request)
-        tutorial_serializer = Teamserialsers(tutorial, data=tutorial_data)
-        if tutorial_serializer.is_valid():
-            tutorial_serializer.save()
-            return JsonResponse(tutorial_serializer.data,)
-        return JsonResponse(tutorial_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        tutorial.delete()
-        return JsonResponse({'message': 'Team was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
-
-
-##theja
-# All Persons(user Profile) by Admin
-class User_listApiview(APIView):
-    ## authentication token and permissions of user we can add permissions
-    permission_classes = []
-
-    def get(self, request):
-        """
-        this function is used for get the all user data
-        :param request:
-        :return:
-        """
-        try:
-            tutorial = UserProfile.objects.all()
-        except UserProfile.DoesNotExist:
-            return JsonResponse({'message': 'The user does not exist'}, status=status.HTTP_404_NOT_FOUND)
-        # fetching serializer data
-        tutorial_serializer = UserProfileSerializer(tutorial, many=True)
-        return JsonResponse(tutorial_serializer.data, safe=False)
-
-
-##theja
-# view/update/delete person(one)  by Admin
-@api_view(['GET', 'PUT', 'DELETE'])
-def Person_detail(request, pk):
-    '''
-    this function is used for update his profie data single update or multiple update also
-    :param request:
-    :param pk:
-    :return:
-    '''
-    try:
-        # get the single user id and print the data
-        tutorial = UserProfile.objects.get(pk=pk)
-    except UserProfile.DoesNotExist:
-        return JsonResponse({'message': 'The user does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        tutorial_serializer = UserProfileSerializer(tutorial)
-        return JsonResponse(tutorial_serializer.data)
-
-    elif request.method == 'PUT':
-        '''
-        this method is used for update single user data 
-        \with particular field and update more fields
-        '''
-        tutorial_data = JSONParser().parse(request)
-        tutorial_serializer = UserProfileSerializer(tutorial, data=tutorial_data)
-        if tutorial_serializer.is_valid():
-            tutorial_serializer.save()
-            return JsonResponse(tutorial_serializer.data)
-        return JsonResponse(tutorial_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        '''
-        this method is delete particular user record from db
-        '''
-        tutorial.delete()
-        return JsonResponse({'message': 'person was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # serilizer = self.serializer_class(data=request.data)
+        # serializer.is_valid()
+        # return Response({'status':True,'message':'password reset sucess'},status=status.HTTP_200_OK)
 
 
 ##prasanth
@@ -484,7 +335,7 @@ class SciKeyAdminAllTicketsCountAPIView(APIView):
         """
         new_tickets_count = Sci1stKey.objects.filter(status="newtickets").count()
         assign_tickets_count = Sci1stKey.objects.filter(status="assign").count()
-        completed_tickets_count = Sci1stKey.objects.filter(status="completed").count()
+        completed_tickets_count = Sci1stKey.objects.filter(process_status="completed").count()
         context = {"new": new_tickets_count,'assign':assign_tickets_count,'completed':completed_tickets_count}
         return Response(json.dumps(context), status=status.HTTP_200_OK)
 
@@ -562,6 +413,414 @@ class SciKeyAdminNewTicketsListAPIView(generics.ListAPIView):
             return Response(
                 {'sorry dont have any newtickets ticktes'}, status=status.HTTP_404_NOT_FOUND)
 
+
+
+## prashanth
+# teamwise newtickets count
+class AdminTeamwiseNewTicketListAPIView(APIView):
+    serializer_class = AdminTeamwiseTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        try:
+            """ getting userid """
+            queryset = Teams.objects.values('teamname')
+            userslist=[]
+            for x in queryset:
+                k = (x["teamname"])
+                userslist.append(k)
+            res=[]
+            for y in userslist:
+                agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="newtickets")
+                res.append(agentdata)
+            # tlteam_closed_tickets = (sum(res))
+            agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="newtickets").values('upload_date', 'team_name','status').annotate(count=Count('status'))
+            print(agentdata,'ppppppppppppppppppppppp')
+            countArray = []
+
+            for profile in agentdata:
+                data = {'upload_date':str(profile['upload_date']), 'team_name':str(profile['team_name']),'count': profile['count']}
+                countArray.append(data)
+
+            return Response(json.dumps(countArray))
+            return Response({'message':'assign tickets table data'}, status=status.HTTP_200_OK)
+        except Exception:
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+          
+
+
+
+## prashanth
+# teamwise Assign count
+class AdminTeamwiseAssignTicketListAPIView(APIView):
+    serializer_class = AdminTeamwiseTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        try:
+            """ getting userid """
+            queryset = Teams.objects.values('teamname')
+            userslist=[]
+            for x in queryset:
+                k = (x["teamname"])
+                userslist.append(k)
+            res=[]
+            for y in userslist:
+                agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="assign")
+                res.append(agentdata)
+            # tlteam_closed_tickets = (sum(res))
+            agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="assign").values('upload_date', 'team_name','status').annotate(count=Count('status'))
+            print(agentdata,'ppppppppppppppppppppppp')
+            countArray = []
+
+            for profile in agentdata:
+                data = {'upload_date':str(profile['upload_date']), 'team_name':str(profile['team_name']),'count': profile['count']}
+                countArray.append(data)
+
+            return Response(json.dumps(countArray))
+            return Response({'message':'assign tickets table data'}, status=status.HTTP_200_OK)
+        except Exception:
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+          
+
+## prashanth
+# teamwise Pending count
+class AdminTeamwisePendingTicketListAPIView(APIView):
+    serializer_class = AdminTeamwiseTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        try:
+            """ getting userid """
+            queryset = Teams.objects.values('teamname')
+            userslist=[]
+            for x in queryset:
+                k = (x["teamname"])
+                userslist.append(k)
+            res=[]
+            for y in userslist:
+                agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="pending")
+                res.append(agentdata)
+            # tlteam_closed_tickets = (sum(res))
+            agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="pending").values('upload_date', 'team_name','status').annotate(count=Count('status'))
+            print(agentdata,'ppppppppppppppppppppppp')
+            countArray = []
+
+            for profile in agentdata:
+                data = {'upload_date':str(profile['upload_date']), 'team_name':str(profile['team_name']),'count': profile['count']}
+                countArray.append(data)
+            
+
+            return Response(json.dumps(countArray))
+            return Response({'message':'assign tickets table data'}, status=status.HTTP_200_OK)
+        except Exception:
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+## prashanth
+# teamwise closed count
+class AdminTeamwiseClosedTicketListAPIView(APIView):
+    serializer_class = AdminTeamwiseClosedTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        try:
+            """ getting userid """
+            queryset = Teams.objects.values('teamname')
+            userslist=[]
+            for x in queryset:
+                k = (x["teamname"])
+                userslist.append(k)
+            res=[]
+            for y in userslist:
+                agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="closed")
+                res.append(agentdata)
+            # tlteam_closed_tickets = (sum(res))
+            agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="closed").values('completed_date', 'team_name','status').annotate(count=Count('status'))
+            print(agentdata,'ppppppppppppppppppppppp')
+            countArray = []
+
+            for profile in agentdata:
+                data = {'completed_date':str(profile['completed_date']), 'team_name':str(profile['team_name']),'count': profile['count']}
+                countArray.append(data)
+            
+
+            return Response(json.dumps(countArray))
+            return Response({'message':'assign tickets table data'}, status=status.HTTP_200_OK)
+        except Exception:
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+# agent assign tickets
+class AdminAgentwiseNewTicketListAPIView(APIView):
+    serializer_class = AdminAgentwiseTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+    def get(self, request):
+        try:
+            # queryset=Sci1stKey.objects.values('upload_date', 'Agent','team_name').order_by().annotate(Count('status')).filter(status="newtickets")
+            queryset=Sci1stKey.objects.filter(status="newtickets").values('upload_date', 'agent','status').annotate(count=Count('status'))
+            print(queryset)
+            
+            countArray =[]
+            for profile in queryset:
+                data = {'upload_date':str(profile['upload_date']), 'agent':str(profile['agent']),'status':profile['status'],'count': int(profile['count'])}
+                countArray.append(data)
+            closed_ticketsdata_serializer = AdminAgentwiseTicketListAPIViewSerializer(countArray, many=True)
+            # return JsonResponse(serializer.data, safe=False)
+            return Response(json.dumps(countArray))
+
+            # response = {
+            #     'status': 'success',
+            #     'code': status.HTTP_200_OK,
+            #     'data': {
+            #              'closed': countArray.data}
+            # }
+            return Response(response)
+        except Exception:
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+# agent assign tickets
+class AdminAgentwiseAssignTicketListAPIView(APIView):
+    serializer_class = AdminAgentwiseTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+    def get(self, request):
+        try:
+            # queryset=Sci1stKey.objects.values('upload_date', 'Agent','team_name').order_by().annotate(Count('status')).filter(status="newtickets")
+            queryset=Sci1stKey.objects.filter(status="assign").values('upload_date', 'agent','status').annotate(count=Count('status'))
+            print(queryset)
+            
+            countArray =[]
+            for profile in queryset:
+                data = {'upload_date':str(profile['upload_date']), 'agent':str(profile['agent']),'status':profile['status'],'count': int(profile['count'])}
+                countArray.append(data)
+            closed_ticketsdata_serializer = AdminAgentwiseTicketListAPIViewSerializer(countArray, many=True)
+            # return JsonResponse(serializer.data, safe=False)
+            return Response(json.dumps(countArray))
+
+            # response = {
+            #     'status': 'success',
+            #     'code': status.HTTP_200_OK,
+            #     'data': {
+            #              'closed': countArray.data}
+            # }
+            return Response(response)
+        except Exception:
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+# agent pending tickets
+class AdminAgentwisePendingTicketListAPIView(APIView):
+    serializer_class = AdminAgentwiseTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+    def get(self, request):
+        try:
+            # queryset=Sci1stKey.objects.values('upload_date', 'Agent','team_name').order_by().annotate(Count('status')).filter(status="newtickets")
+            queryset=Sci1stKey.objects.filter(status="pending").values('upload_date', 'agent','status').annotate(count=Count('status'))
+            print(queryset)
+            
+            countArray =[]
+            for profile in queryset:
+                data = {'upload_date':str(profile['upload_date']), 'agent':str(profile['agent']),'status':profile['status'],'count': int(profile['count'])}
+                countArray.append(data)
+            closed_ticketsdata_serializer = AdminAgentwiseTicketListAPIViewSerializer(countArray, many=True)
+            # return JsonResponse(serializer.data, safe=False)
+            return Response(json.dumps(countArray))
+
+            # response = {
+            #     'status': 'success',
+            #     'code': status.HTTP_200_OK,
+            #     'data': {
+            #              'closed': countArray.data}
+            # }
+            return Response(response)
+        except Exception:
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)    
+
+
+# agent pending tickets
+class AdminAgentwiseClosedTicketListAPIView(APIView):
+    serializer_class = AdminAgentwiseClosedTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+    def get(self, request):
+        try:
+            # queryset=Sci1stKey.objects.values('upload_date', 'Agent','team_name').order_by().annotate(Count('status')).filter(status="newtickets")
+            queryset=Sci1stKey.objects.filter(status="closed").values('completed_date', 'agent','status').annotate(count=Count('status'))
+            print(queryset)
+            
+            countArray =[]
+            for profile in queryset:
+                data = {'completed_date':str(profile['completed_date']), 'agent':str(profile['agent']),'status':profile['status'],'count': int(profile['count'])}
+                countArray.append(data)
+            closed_ticketsdata_serializer = AdminAgentwiseClosedTicketListAPIViewSerializer(countArray, many=True)
+            # return JsonResponse(serializer.data, safe=False)
+            return Response(json.dumps(countArray))
+
+            # response = {
+            #     'status': 'success',
+            #     'code': status.HTTP_200_OK,
+            #     'data': {
+            #              'closed': countArray.data}
+            # }
+            return Response(response)
+        except Exception:
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)    
+
+
+class AdminDatewiseNewTicketListAPIView(APIView):
+    """
+        fetching the serializer and Scikey data
+    """
+    serializer_class = AdminAgentwiseNewAssignTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+    def get(self, request, *args, **kwargs):
+        '''
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
+        try:
+            res = []
+            agentdata = Sci1stKey.objects.filter(status="newtickets").values('upload_date','status').annotate(count=Count('status'))
+            res.append(agentdata)
+            print(agentdata,'ssssssssssssssss')
+            
+            data_list = [num for elem in res for num in elem]
+            
+            """looping lists [[][][]] inside list"""
+            user_serializer = AdminAgentwiseNewAssignTicketListAPIViewSerializer(data_list, many=True)
+            '''convserting the all tickets into json by serializer'''
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': user_serializer.data
+            }
+            return Response(response)
+        except (Sci1stKey.DoesNotExist,ValidationError):
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+# prashanth
+# admin agent datewise pending
+class AdminDatewisePendingTicketListAPIView(APIView):
+    """
+        fetching the serializer and Scikey data
+    """
+    serializer_class = AdminAgentwiseClosedTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+    def get(self, request, *args, **kwargs):
+        '''
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
+        try:
+            res = []
+            agentdata = Sci1stKey.objects.filter(status="pending").values('completed_date','status').annotate(count=Count('status'))
+            res.append(agentdata)            
+            data_list = [num for elem in res for num in elem]
+            print(agentdata,'aaaaaaaaaaaaaaa')
+            
+            """looping lists [[][][]] inside list"""
+            user_serializer = AdminAgentwiseClosedTicketListAPIViewSerializer(data_list, many=True)
+            '''convserting the all tickets into json by serializer'''
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': user_serializer.data
+            }
+            return Response(response)
+        except (Sci1stKey.DoesNotExist,ValidationError):
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+# prashanth
+## agent datewise assign tickets
+class AdminDatewiseAssignTicketListAPIView(APIView):
+    """
+        fetching the serializer and Scikey data
+    """
+    serializer_class = AdminAgentwiseNewAssignTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+    def get(self, request, *args, **kwargs):
+        '''
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
+        try:
+            res = []
+            agentdata = Sci1stKey.objects.filter(status="assign").values('upload_date','status').annotate(count=Count('status'))
+            res.append(agentdata)            
+            data_list = [num for elem in res for num in elem]
+            print(agentdata,'aaaaaaaaaaaaaaa')
+            
+            """looping lists [[][][]] inside list"""
+            user_serializer = AdminAgentwiseNewAssignTicketListAPIViewSerializer(data_list, many=True)
+            '''convserting the all tickets into json by serializer'''
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': user_serializer.data
+            }
+            return Response(response)
+        except (Sci1stKey.DoesNotExist,ValidationError):
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+# prashanth
+# admin agent datewise pending
+class AdminDatewiseClosedTicketListAPIView(APIView):
+    """
+        fetching the serializer and Scikey data
+    """
+    serializer_class = AdminAgentwiseClosedTicketListAPIViewSerializer
+    queryset = Sci1stKey.objects.all()
+    def get(self, request, *args, **kwargs):
+        '''
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
+        try:
+            res = []
+            agentdata = Sci1stKey.objects.filter(status="closed").values('completed_date','status').annotate(count=Count('status'))
+            res.append(agentdata)            
+            data_list = [num for elem in res for num in elem]
+            print(agentdata,'aaaaaaaaaaaaaaa')
+            
+            """looping lists [[][][]] inside list"""
+            user_serializer = AdminAgentwiseClosedTicketListAPIViewSerializer(data_list, many=True)
+            '''convserting the all tickets into json by serializer'''
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': user_serializer.data
+            }
+            return Response(response)
+        except (Sci1stKey.DoesNotExist,ValidationError):
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+
 # # prashanth
 # class SciKeyNotFoundTicketsListAPIView(generics.ListAPIView):
 #     """
@@ -604,6 +863,102 @@ class SciKeyAdminNewTicketsListAPIView(generics.ListAPIView):
 #         # return responce data
 #         return Response(user_serializer.data)
 #
+
+
+
+## prashanth
+## agent wise process status count 
+class AdminProcessCountTicketListAPIView(APIView):
+    # fetching serializers
+    serializer_class = AdminProcessCountTicketListSerializer
+
+    def get(self, request):
+        try:
+            # get scikey model and filtering the data with exact fields, status and count of the status 
+            agentdata_notfound = Sci1stKey.objects.filter(process_status="notfound").values('agent','completed_date','process_status').order_by().annotate(Count('process_status'))
+            notfound_ticketsdata_serializer = AdminProcessCountTicketListSerializer(agentdata_notfound, many=True)
+            # converting db data into json(serializer) with n number of fields
+
+            # get scikey model and filtering the data with exact fields, status and count of the status
+            agentdata_exception = Sci1stKey.objects.filter(process_status="exception").values('agent','completed_date','process_status').order_by().annotate(Count('process_status'))
+            exception_ticketsdata_serializer = AdminProcessCountTicketListSerializer(agentdata_exception, many=True)
+            # converting db data into json(serializer) with n number of fields
+
+            # get scikey model and filtering the data with exact fields, status and count of the status
+            agentdata_completed = Sci1stKey.objects.filter(process_status="completed").values('agent','completed_date','process_status').order_by().annotate(Count('process_status'))
+            completed_ticketsdata_serializer = AdminProcessCountTicketListSerializer(agentdata_completed, many=True)
+            # converting db data into json(serializer) with n number of fields
+            
+            """
+            send the data into the responce and here we 
+            are fetching more than 3types of scikey data 
+            here if data is not available in db also not getting any error it will show emty list(maens data is not available)
+            """   
+            response = {
+                    'status': 'success',
+                    'code': status.HTTP_200_OK,
+                    'data':{'notfound_ticketsdata_serializer':notfound_ticketsdata_serializer.data,
+                            'exception_ticketsdata_serializer':exception_ticketsdata_serializer.data,
+                            'completed_ticketsdata_serializer':completed_ticketsdata_serializer.data
+                    }
+                }
+            return Response(response)
+        except:
+            return Response(
+                {'you dont have valid process status tickets'}, status=status.HTTP_404_NOT_FOUND)
+
+        
+
+
+## prashanth
+## agent wise process status count 
+class AdminAgentWiseCountTicketListAPIView(APIView):
+    # fetching serializers
+    serializer_class = AdminProcessCountTicketListSerializer
+
+    def get(self, request):
+        try:
+            # get scikey model and filtering the data with exact fields, status and count of the status 
+            agentdata_notfound = Sci1stKey.objects.filter(process_status="notfound").count()
+            
+            notfound_ticketsdata_serializer = AdminProcessCountTicketListSerializer(agentdata_notfound, many=True)
+            # converting db data into json(serializer) with n number of fields
+
+            # get scikey model and filtering the data with exact fields, status and count of the status
+            agentdata_exception = Sci1stKey.objects.filter(process_status="exception").count()
+            exception_ticketsdata_serializer = AdminProcessCountTicketListSerializer(agentdata_exception, many=True)
+            # converting db data into json(serializer) with n number of fields
+
+            # get scikey model and filtering the data with exact fields, status and count of the status
+            agentdata_completed = Sci1stKey.objects.filter(process_status="completed").count()
+            completed_ticketsdata_serializer = AdminProcessCountTicketListSerializer(agentdata_completed, many=True)
+            # converting db data into json(serializer) with n number of fields
+            
+            """
+            send the data into the responce and here we 
+            are fetching more than 3types of scikey data 
+            here if data is not available in db also not getting any error it will show emty list(maens data is not available)
+            """   
+            # response = {
+            #         'status': 'success',
+            #         'code': status.HTTP_200_OK,
+            #         'data':{'notfound_ticketsdata_serializer':notfound_ticketsdata_serializer.data,
+            #                 'exception_ticketsdata_serializer':exception_ticketsdata_serializer.data,
+            #                 'completed_ticketsdata_serializer':completed_ticketsdata_serializer.data
+            #         }
+            #     }
+            Responce ={
+                "agentdata_exception":agentdata_exception,
+                "agentdata_notfound":agentdata_notfound,
+                "agentdata_completed":agentdata_completed
+            }
+            return Response(json.dumps(Responce))
+            return Response(response)
+        except:
+                return Response(
+                    {'you dont have valid process status tickets'}, status=status.HTTP_404_NOT_FOUND)
+
+
 
 
 # prashanth
@@ -830,7 +1185,7 @@ class AllReAssign_Tickets_ListApi_View(APIView):
         this function is using for get the all agents and used get method
         and validating the data avilable or not checking
         """
-        List_of_AgentNames = UserProfile.objects.filter(role='Agent').values('id')
+        List_of_AgentNames = UserProfile.objects.filter(role='Agent').values('username')
         if not List_of_AgentNames:
             #  responce code
             return Response({"no agents in your database roles please add agent role"}, status=status.HTTP_404_NOT_FOUND)
@@ -839,12 +1194,14 @@ class AllReAssign_Tickets_ListApi_View(APIView):
             reassign = []
             for agentname in List_of_AgentNames:
                 reassign.append(agentname)
+            print(reassign,'userssssss')
             # storing agent ids here    
             userslist = []
             for x in reassign:
                 # selecting id
-                k = (x["id"])
+                k = (x["username"])
                 userslist.append(k)
+            print(userslist)
             #  responce code
             return Response({"received agent names"}, status=status.HTTP_200_OK)
 
@@ -886,7 +1243,7 @@ class AllReAssign_Tickets_ListApi_View(APIView):
 from rest_framework import authentication, permissions
 from UserAdministration.agent_permissions import *
 class ListUsers(generics.ListAPIView):
-    serializer_class = UserSerializer
+    serializer_class = DemoUserSerializer
     queryset = UserProfile.objects.all()
     permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
     # """
@@ -900,47 +1257,307 @@ class ListUsers(generics.ListAPIView):
     #
     # def get(self, request, format=None):
     #     """
-    #     Return a list of all users.
+    #     Return a list of all users.SciTicketDetail
+
+
+    
     #     """
     #     usernames = [user for user in UserProfile.objects.all().values('role')]
     #     return Response(usernames)
+from rest_framework import viewsets
 
 class Ticketreassign_to_agentview(APIView):
-    serializer_class = Assigntickets_listSerializer
-
-    def get_object(self, obj_id):
+    def get_object(self, pk):
         try:
-            obj = Sci1stKey.objects.get(id=obj_id)
-            return obj
-        except (Sci1stKey.DoesNotExist, ValidationError):
-            raise status.HTTP_400_BAD_REQUEST
+            return Sci1stKey.objects.get(pk=pk)
+        except Sci1stKey.DoesNotExist:
+            raise Http404
 
-    def validate_ids(self, ticket_ids):
-        for id in ticket_ids:
-            try:
-                Sci1stKey.objects.get(id=id)
-                print(Sci1stKey.objects.get(id=id))
-            except (Sci1stKey.DoesNotExist, ValidationError):
-                raise status.HTTP_400_BAD_REQUEST
-        return True
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = ReAssigntickets_listSerializer(snippet)
+        return Response(serializer.data)
+
+
+    # serializer_class = ReAssigntickets_listSerializer
+
+    # lookup_field = 'agent'
+
+    # def list(self, request):
+    #     queryset = Sci1stKey.objects.all()
+    #     serializer = ReAssigntickets_listSerializer(queryset, many=True)
+    #     return Response(serializer.data)
+
+    # def retrieve(self, request, agent=None):
+    #     print(agent)
+    #     queryset = Sci1stKey.objects.filter(sci_user__role=agent)
+    #     user = get_object_or_404(queryset)
+    #     serializer = ReAssigntickets_listSerializer(user)
+    #     return Response(serializer.data)
+    # """
+    # Retrieve, update or delete a snippet instance.
+    # """
+    # lookup_field = 'username'
+    
+    # def get_object(self,request, username):
+    #     postcode = self.kwargs.get('username', None)
+    #     print(postcode,'kkkkkkkkkkkkkkkk')
+    #     data = Sci1stKey.objects.filter()
+    #     print(data,'userid')
+    #     try:
+    #         return Sci1stKey.objects.get(sci_user_id=id)
+    #     except Sci1stKey.DoesNotExist:
+    #         raise Http404
+
+    # def get(self, request, id, format=None):
+    #     sci_reassign = self.get_object(id)
+    #     serializer = ReAssigntickets_listSerializer(sci_reassign)
+    #     return Response(serializer.data)
+
+    # def put(self, request, pk, format=None):
+    #     snippet = self.get_object(pk)
+    #     serializer = SnippetSerializer(snippet, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+class Logout(APIView):
+    def get(self, request, format=None):
+        # simply delete the token to force a login
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
+
+"""*************************************************************************************************************************"""
+
+##theja
+##theja
+##changing password after user login his account
+class ChangePasswordView(generics.UpdateAPIView):
+    '''
+    This class is used for get the user and change user password
+    '''
+
+    ## authentication token and permissions of user we can change permissions
+
+    # get the model data
+    model = UserProfile
+    serializer_class = ChangePasswordSerializers
+
+    def get_object(self, queryset=None):
+        """ getting the user"""
+        obj = self.request.user
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        """calling the above function """
+        serializer = self.get_serializer(data=request.data)
+        """getting the data from request"""
+
+        if serializer.is_valid():
+            # Check old password
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Old password is not correct"]}, status=status.HTTP_400_BAD_REQUEST)
+            self.object.set_password(serializer.data.get("password"))
+            '''getting the new password'''
+            self.object.save()
+            '''save the new password'''
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'message': 'Password updated successfully',
+                'data': serializer.data
+            }
+            '''sending the data in response'''
+            return Response(response)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+##theja
+###updating his profile after user login into the account
+class Update_his_ProfileView(APIView):
+    '''
+    This class is used for get the user and update his profile details
+    '''
+    ## authentication token and permissions of user we can change permissions
+    serializer_class = Update_his_profile_Serializer
+
+    # get the model data
+    queryset = UserProfile.objects.all()
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+
+    def get(self, request, *args, **kwargs):
+        calobj = self.get_object()
+
+        '''
+        getting his username
+        '''
+        serializer = Update_his_profile_Serializer(calobj)
+        response = {
+            'status': 'success',
+            'code': status.HTTP_200_OK,
+            'data': serializer.data
+        }
+        return Response(response)
 
     def put(self, request, *args, **kwargs):
-        data = request.data
-        str_data = json.dumps(data)#converting dict to str
-        lis_data = json.loads(str_data)["data"]#convering str to list
-        print(type(lis_data))
-        ticket_ids = [i['id'] for i in lis_data]
-        self.validate_ids(ticket_ids)
-        instances = []
-        for temp_dict in lis_data:
-            id = temp_dict['id']
-            agent = temp_dict['agent']
-            obj = self.get_object(id)
-            obj.agent = agent
-            obj.save()
-            instances.append(obj)
-        serializer = Sci1stKey(instances)
-        return Response(serializer.data)
+        object = self.get_object()
+        serializer = Update_his_profile_Serializer(object, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            body_data = serializer.data
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'message': 'Profile updated successfully',
+                'data' : serializer.data
+            }
+
+            return Response(response)
+            # return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+##theja
+# Adding Teams by Admin
+class Addingteams(generics.GenericAPIView):
+    ## authentication token and permissions of user we can change permissions
+    permission_classes = []
+    # fetch serializer data
+    serializer_class = Teamserialsers
+
+    def post(self, request, *args,  **kwargs):
+        '''
+        This function is used for post the data of adding teams
+        '''
+        parameters = request.data.copy()
+        serializer = self.get_serializer(data=parameters)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({"message": "Teams Created Successfully."},status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message": 'Team name already exist'},status=status.HTTP_406_NOT_ACCEPTABLE)
+
+##theja
+# View all_Team  by Admin
+class Team_ListView(APIView):
+    ## authentication token and permissions of user we can change permissions
+    permission_classes = []
+    def get(self, request):
+        try:
+            # get the model data
+            tutorial = Teams.objects.all()
+        except Teams.DoesNotExist:
+            return JsonResponse({'message': 'Teams does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        tutorial_serializer = Teamserialsers(tutorial, many=True)
+        return JsonResponse(tutorial_serializer.data, safe=False)
+
+
+##theja
+# view/update/delete Team  by Admin
+@api_view(['GET', 'PUT', 'DELETE'])
+def Team_detail(request, pk):
+    '''
+    This function is used for update team details of particular team and this
+    function contain get, put, delete
+    '''
+
+    try:
+        # get the model name with filtering team id
+        tutorial = Teams.objects.get(pk=pk)
+    except Teams.DoesNotExist:
+        return JsonResponse({'message': 'The Team does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        # fetch serializer data and add model into serializer
+        tutorial_serializer = Teamserialsers(tutorial)
+        return JsonResponse(tutorial_serializer.data)
+
+    elif request.method == 'PUT':
+        '''this function is used for update team detail '''
+        tutorial_data = JSONParser().parse(request)
+        tutorial_serializer = Teamserialsers(tutorial, data=tutorial_data)
+        if tutorial_serializer.is_valid():
+            tutorial_serializer.save()
+            return JsonResponse(tutorial_serializer.data,)
+        return JsonResponse(tutorial_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        tutorial.delete()
+        return JsonResponse({'message': 'Team was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
+
+
+##theja
+# All Persons(user Profile) by Admin
+class User_listApiview(APIView):
+    ## authentication token and permissions of user we can add permissions
+    permission_classes = []
+
+    def get(self, request):
+        """
+        this function is used for get the all user data
+        :param request:
+        :return:
+        """
+        try:
+            tutorial = UserProfile.objects.all()
+        except UserProfile.DoesNotExist:
+            return JsonResponse({'message': 'The user does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        # fetching serializer data
+        tutorial_serializer = UserProfileSerializer(tutorial, many=True)
+        return JsonResponse(tutorial_serializer.data, safe=False)
+
+
+##theja
+# view/update/delete person(one)  by Admin
+@api_view(['GET', 'PUT', 'DELETE'])
+def Person_detail(request, pk):
+    '''
+    this function is used for update his profie data single update or multiple update also
+    :param request:
+    :param pk:
+    :return:
+    '''
+    try:
+        # get the single user id and print the data
+        tutorial = UserProfile.objects.get(pk=pk)
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'message': 'The user does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        tutorial_serializer = UserProfileSerializer(tutorial)
+        return JsonResponse(tutorial_serializer.data)
+
+    elif request.method == 'PUT':
+        '''
+        this method is used for update single user data 
+        \with particular field and update more fields
+        '''
+        tutorial_data = JSONParser().parse(request)
+        tutorial_serializer = UserProfileSerializer(tutorial, data=tutorial_data)
+        if tutorial_serializer.is_valid():
+            tutorial_serializer.save()
+            return JsonResponse(tutorial_serializer.data)
+        return JsonResponse(tutorial_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        '''
+        this method is delete particular user record from db
+        '''
+        tutorial.delete()
+        return JsonResponse({'message': 'person was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
+
+
 
 #theja
 ## In this class  we are showing tl his team wise agents all tickets
@@ -989,7 +1606,7 @@ class Tl_Teamwise_AllticketsView(APIView):
             }
             return Response(response)
         except (UserProfile.DoesNotExist,ValidationError):
-            "if data does not exist enter into exception"
+            "if any exception thant enter into exception block"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -1039,7 +1656,7 @@ class Tl_Teamwise_AssignticketsView(APIView):
             }
             return Response(response)
         except (UserProfile.DoesNotExist,ValidationError):
-            "if data does not exist enter into exception"
+            "if any exception thant enter into exception block"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
 
 ##theja
@@ -1106,8 +1723,9 @@ class Tl_Teamwise_ticket_StatuscountView(APIView):
             return Response(response)
 
         except Exception:
-            "if data does not exist enter into exception"
+            "if any exception thant enter into exception block"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
 
 ##theja
 #showing exception/notfound/completd tickets count for tl under his team
@@ -1160,11 +1778,13 @@ class Tl_Teamwise_process_StatuscountView(APIView):
             return Response(response)
 
         except Exception:
-            "if data does not exist enter into exception"
+            "if any exception thant enter into exception block"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
 
-
-class Tl_Teamw_Datewise_countView(APIView):
+##theja
+#showing new/asssign/closed tickets tl team his agentwise count for tl under his team
+class Tl_Team_agentwise_countView(APIView):
+    serializer_class = TlwiseTeamdateTicketsSerializer
 
     def get(self, request):
         try:
@@ -1183,7 +1803,7 @@ class Tl_Teamw_Datewise_countView(APIView):
             for fullnames in agentname:
                 """ getting all agents names in list"""
                 agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(status="newtickets")).values(
-                    'agent', 'upload_date').order_by().annotate(Count('status'))
+                     'agent','upload_date').order_by().annotate(Count('status'))
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
                                 userprofile database and getting only new  tickets matches with fullnames with count values and agent names and date"""
                 newtickets.append(agentdata)
@@ -1198,7 +1818,7 @@ class Tl_Teamw_Datewise_countView(APIView):
             assigntickets = []
             for fullnames in agentname:
                 agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(status="assign")).values(
-                    'agent', 'upload_date').order_by().annotate(Count('status'))
+                     'agent','upload_date').order_by().annotate(Count('status'))
                 assigntickets.append(agentdata)
             assign_ticketsdata = [num for elem in assigntickets for num in elem]
             assign_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(assign_ticketsdata, many=True)
@@ -1206,13 +1826,11 @@ class Tl_Teamw_Datewise_countView(APIView):
             ###########closed tickets
             closedtickets = []
             for fullnames in agentname:
-                print(fullnames)
+
                 agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(status="closed")).values(
-                    'agent', 'completed_date').order_by().annotate(Count('status'))
+                    'agent','completed_date').order_by().annotate(Count('status'))
                 closedtickets.append(agentdata)
-            print(closedtickets)
             closed_ticketsdata = [num for elem in closedtickets for num in elem]
-            print(closed_ticketsdata)
             closed_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(closed_ticketsdata, many=True)
 
             response = {
@@ -1224,8 +1842,412 @@ class Tl_Teamw_Datewise_countView(APIView):
             }
             return Response(response)
         except Exception:
-            "if data does not exist enter into exception"
+            "if any exception thant enter into exception block"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+##theja
+#showing new/asssign/closed tickets tl team his datewise count for tl under his team
+class Tl_Team_datewise_countView(APIView):
+    serializer_class = TlwiseTeamdateTicketsSerializer
+    def get(self, request):
+        try:
+            user_id = request.user.team_name
+            'geting user team name'
+            new_tickets = Sci1stKey.objects.filter(team_name=user_id, status='newtickets').values(
+                'upload_date').order_by().annotate(Count('status'))
+            """1)filtering team names using  userfull team name and filtering new tickets
+                          2) Group By agents and uploade_date
+                          3)Select the count of the grouping"""
+            tl_new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_tickets, many=True)
+            ''''serializering the data convering into json'''
+            assign_tickets = Sci1stKey.objects.filter(team_name=user_id, status='assign').values(
+                'upload_date').order_by().annotate(Count('status'))
+            tl_assign_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(assign_tickets, many=True)
+            pending_tickets = Sci1stKey.objects.filter(team_name=user_id, status='pending').values(
+                'upload_date').order_by().annotate(Count('status'))
+            tl_pending_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(pending_tickets, many=True)
+            closed_tickets = Sci1stKey.objects.filter(team_name=user_id, status='closed').values(
+                'completed_date').order_by().annotate(Count('status'))
+            tl_closed_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(closed_tickets, many=True)
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': {'tl_datewise_newtickets_count': tl_new_ticketsdata_serializer.data,
+                         'tl_datewise_assigntickets_count': tl_assign_ticketsdata_serializer.data,
+                         'tl_datewise_pendingtickets_count': tl_pending_ticketsdata_serializer.data,
+                         'tl_datewise_closedtickets_count': tl_closed_ticketsdata_serializer.data
+                         }
+            }
+            '''returning the response'''
+            return Response(response)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+##theja
+#showing new/closed tickets previous week count for tl under his team
+class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
+    serializer_class = TlwiseTeamdateTicketsSerializer
+
+    def get(self,request):
+        try:
+            user_id = request.user.username
+            """ getting userid """
+            queryset = UserProfile.objects.get(username=user_id).team_name_id
+            """ comparing the userid with userprofile(database) username and getting the teamnameid"""
+            agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
+                team_name_id=queryset)).values('fullname')
+            """1)comparing teamnameid from database with your getting id
+                2) filter the agents with their roles 
+                3) satisfies both above two conditions and getting their fullnames"""
+            ###########New tickets
+            # date = datetime.date.today()
+            # start_week = date - datetime.timedelta(date.weekday())
+            # end_week = start_week + datetime.timedelta(7)
+            # year, week, _ = now().isocalendar()
+            some_day_last_week = timezone.now().date() - timedelta(days=7)
+            monday_of_last_week = some_day_last_week - timedelta(days=(some_day_last_week.isocalendar()[2] - 1))
+            monday_of_this_week = monday_of_last_week + timedelta(days=7)
+            """Note that I added 7 days to get the monday of the this week instead of adding 6 days to get the sunday of last week and that 
+            I used created_at__lt=monday_of_this_week (instead of __lte=). I did that because if your pub_date was a DateTimeField, it wouldn't 
+            include the sunday objects since the time is 00:00:00 when using now().date().
+            This could easily be adjusted to consider Sunday as the first day of the week instead,
+             but isocalendar() considers it the last, so I went with that."""
+            newtickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                """ getting all agents names in list"""
+                agentdata = (
+                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(upload_date__gte=monday_of_last_week,
+                                                                                 upload_date__lt=monday_of_this_week,
+                                                                                 status='newtickets')).values(
+                    'agent', 'upload_date').order_by().annotate(Count('status'))
+                """ looping the list objects and comparing the sci1st key agent names with full names from 
+                userprofile database and getting only uploaded date greater than and less than date ,new tickets 
+                matches with fullnames with count values and agent names and date"""
+                newtickets.append(agentdata)
+            """ appending in new list"""
+            new_ticketsdata = [num for elem in newtickets for num in elem]
+            """looping lists [[][][]] inside list"""
+            new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_ticketsdata, many=True)
+            '''convserting the all tickets into json by serializer'''
+
+            ###########closed tickets
+            '''sames as new tickets'''
+            closedtickets = []
+            for fullnames in agentname:
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(
+                    completed_date__gte=monday_of_last_week, completed_date__lt=monday_of_this_week,
+                    status="closed")).values(
+                    'agent', 'completed_date').order_by().annotate(Count('status'))
+                closedtickets.append(agentdata)
+            closed_ticketsdata = [num for elem in closedtickets for num in elem]
+            closed_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(closed_ticketsdata, many=True)
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': {'previous_week_newtickets': new_ticketsdata_serializer.data,
+
+                         'previous_week_closed': closed_ticketsdata_serializer.data}
+            }
+
+            return Response(response)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+##theja
+#showing new/closed tickets current week count for tl under his team
+class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
+    serializer_class = TlwiseTeamdateTicketsSerializer
+
+    def get(self,request):
+        try:
+            user_id = request.user.username
+            """ getting userid """
+            queryset = UserProfile.objects.get(username=user_id).team_name_id
+            """ comparing the userid with userprofile(database) username and getting the teamnameid"""
+            agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
+                team_name_id=queryset)).values('fullname')
+            """1)comparing teamnameid from database with your getting id
+                2) filter the agents with their roles 
+                3) satisfies both above two conditions and getting their fullnames"""
+            ###########New tickets
+            date = datetime.date.today()
+            '''getting today date'''
+            start_week = date - datetime.timedelta(date.weekday())
+            '''getting week start date'''
+            end_week = start_week + datetime.timedelta(7)
+            '''getting last day by adding 6 days to start week'''
+
+            newtickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                """ getting all agents names in list"""
+                agentdata = (
+                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(upload_date__range=[start_week, end_week],status='newtickets')).values(
+                    'agent', 'upload_date').order_by().annotate(Count('status'))
+
+                newtickets.append(agentdata)
+            """ appending in new list"""
+            new_ticketsdata = [num for elem in newtickets for num in elem]
+            new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_ticketsdata, many=True)
+            '''convserting the all tickets into json by serializer'''
+
+            ###########closed tickets
+            closedtickets = []
+            for fullnames in agentname:
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(completed_date__range=[start_week, end_week],status="closed")).values(
+                    'agent', 'completed_date').order_by().annotate(Count('status'))
+                closedtickets.append(agentdata)
+            closed_ticketsdata = [num for elem in closedtickets for num in elem]
+            closed_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(closed_ticketsdata, many=True)
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': {'current_week_newtickets': new_ticketsdata_serializer.data,
+
+                         'current_week_closed': closed_ticketsdata_serializer.data}
+            }
+            return Response(response)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+##theja
+#showing new/closed tickets currentmonth count for tl under his team
+class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
+    serializer_class = TlwiseTeamdateTicketsSerializer
+    def get(self,request):
+        try:
+            user_id = request.user.username
+            """ getting userid TL1"""
+            queryset = UserProfile.objects.get(username=user_id).team_name_id
+            """ (TL1=TL1,team_nameid=1)comparing the userid with userprofile(database) username and getting the teamnameid"""
+            agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
+                team_name_id=queryset)).values('fullname')
+            '''getting all agent names and filtering temaname id equal to queryset (all agents,1=1) '''
+            # quary = Teams.objects.filter(id=queryset).values('teamname')
+            # print(quary,'q66666666')
+            """1)comparing teamnameid from database with your getting id
+                2) filter the agents with their roles 
+                3) satisfies both above two conditions and getting their fullnames"""
+            ###########New tickets
+            from datetime import datetime
+            current_year = datetime.now().year
+            '''getting current month and year from datetime.now method'''
+            current_month = datetime.now().month
+            newtickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                """ getting all agents names in list"""
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(upload_date__year=current_year,upload_date__month=current_month,
+                                                                                 status='newtickets')).values('agent').order_by().annotate(Count('status'))
+                """ looping the list objects and comparing the sci1st key agent names with full names from 
+                userprofile database and getting only uploaded date greater than and less than date ,new tickets 
+                matches with fullnames with count values and agent names and date"""
+                newtickets.append(agentdata)
+            """ appending in new list"""
+            new_ticketsdata = [num for elem in newtickets for num in elem]
+            """looping lists [[][][]] inside list"""
+            new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_ticketsdata, many=True)
+            '''convserting the all tickets into json by serializer'''
+            ###########closed tickets
+            '''sames as new tickets'''
+            closedtickets = []
+            for fullnames in agentname:
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(
+                    completed_date__year=current_year,completed_date__month=current_month,
+                    status="closed")).values('agent').order_by().annotate(Count('status'))
+                closedtickets.append(agentdata)
+            closed_ticketsdata = [num for elem in closedtickets for num in elem]
+            closed_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(closed_ticketsdata, many=True)
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': {'current_month_newtickets': new_ticketsdata_serializer.data,
+
+                         'current_month_closed': closed_ticketsdata_serializer.data}
+            }
+            return Response(response)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+##theja
+#showing new/closed tickets previousmonth count for tl under his team
+class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
+    serializer_class = TlwiseTeamdateTicketsSerializer
+    def get(self,request):
+        try:
+            user_id = request.user.username
+            """ getting userid """
+            queryset = UserProfile.objects.get(username=user_id).team_name_id
+
+            """ comparing the userid with userprofile(database) username and getting the teamnameid"""
+            agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
+                team_name_id=queryset)).values('fullname')
+            """1)comparing teamnameid from database with your getting id
+                2) filter the agents with their roles 
+                3) satisfies both above two conditions and getting their fullnames"""
+            ###########New tickets
+            last_day_of_prev_month = date.today().replace(day=1) - timedelta(days=1)
+            '''getting last date of previous month'''
+            start_day_of_prev_month = date.today().replace(day=1) + timedelta(days=last_day_of_prev_month.day)
+            '''getting 1st date of month'''
+            newtickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                """ getting all agents names in list"""
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(upload_date__lte=last_day_of_prev_month,
+                                                                                 upload_date__gte=start_day_of_prev_month,
+                                                                                 status='newtickets')).values('agent').annotate(Count('status'))
+                """ looping the list objects and comparing the sci1st key agent names with full names from 
+                userprofile database and getting only uploaded date greater than and less than date ,new tickets 
+                matches with fullnames with count values and agent names and date"""
+                '''upload date will be less than are equal to last day of the month '''
+                '''upload date will be greater than are equal to starting day of the month '''
+                newtickets.append(agentdata)
+            """ appending in new list"""
+            new_ticketsdata = [num for elem in newtickets for num in elem]
+            """looping lists [[][][]] inside list"""
+            new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_ticketsdata, many=True)
+            '''convserting the all tickets into json by serializer'''
+
+            ###########closed tickets
+            '''sames as new tickets'''
+            closedtickets = []
+            for fullnames in agentname:
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(
+                    completed_date__lte=last_day_of_prev_month,completed_date__gte=start_day_of_prev_month,
+                    status="closed")).values('agent').annotate(Count('status'))
+
+                closedtickets.append(agentdata)
+
+            closed_ticketsdata = [num for elem in closedtickets for num in elem]
+            closed_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(closed_ticketsdata, many=True)
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': {'previous_month_newtickets': new_ticketsdata_serializer.data,
+
+                         'previous_month_closed': closed_ticketsdata_serializer.data}
+            }
+            return Response(response)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+##theja
+###Agent can view only his new/assign/pending/closed tickets count
+class Agent_ticket_status_count(APIView):
+    serializer_class = TlwiseTeamdateTicketsSerializer
+
+    def get(self, request):
+        try:
+            user_fullname = request.user.fullname
+            """ getting fullname of user """
+            agent_new_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='newtickets').count()
+            '''using the username equalizing the agent name which is mention in the sci1stkey database then getting the newtickets/assign/pending etc count values'''
+            agent_assign_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='assign').count()
+            agent_pending_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='pending').count()
+            agent_closed_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='closed').count()
+            context = {"agent_newtickets_count": agent_new_tickets, 'agent_assigntickets_count': agent_assign_tickets,
+                       'agent_pendingtickets_count': agent_pending_tickets,
+                       'agent_closedtickets_count': agent_closed_tickets}
+            '''putting in the dic'''
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': json.dumps(context)
+            }
+            ''' json.dumps() takes in a json object and returns a string.'''
+            return Response(response)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message': 'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+##theja
+###Agent can view only his exception/notfound/completed tickets count
+class Agent_process_status_count(APIView):
+    serializer_class = TlwiseTeamdateTicketsSerializer
+
+    def get(self, request):
+        try:
+            user_fullname = request.user.fullname
+            """ getting fullname from user """
+            agent_exception_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='closed',process_status='exception').count()
+            '''using the username equalizing the agent name which is mention in the sci1stkey database then getting the exception/notfound etc count values'''
+            agent_notfound_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='closed',process_status='notfound').count()
+            agent_completd_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='closed',process_status='completed').count()
+            context = {"agent_exceptiontickets_count": agent_exception_tickets, 'agent_notfoundtickets_count': agent_notfound_tickets,
+                       'agent_completedtickets_count': agent_completd_tickets}
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': json.dumps(context)
+            }
+            ''' json.dumps() takes in a json object and returns a string.'''
+            return Response(response)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message': 'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+##theja
+###Agent can view only his date wise count tickets
+class Agent_datewise_ticketstatus_count(APIView):
+    serializer_class = TlwiseTeamdateTicketsSerializer
+
+    def get(self, request):
+        try:
+            user_fullname = request.user.fullname
+            """ getting fullname """
+            agent_new_tickets = (Sci1stKey.objects.filter(agent=user_fullname).filter(status="newtickets")).values(
+                 'upload_date').order_by().annotate(Count('status'))
+            """1)filtering agents using  userfull name
+                2) filter the agents with the newtickets 
+              3) Group By agents and uploade_date
+              4)Select the count of the grouping"""
+            agent_new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(agent_new_tickets, many=True)
+            ''''serializering the data'''
+            agent_assign_tickets = (Sci1stKey.objects.filter(agent=user_fullname).filter(status="assign")).values(
+                'upload_date').order_by().annotate(Count('status'))
+            agent_assign_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(agent_assign_tickets, many=True)
+            agent_pending_tickets = (Sci1stKey.objects.filter(agent=user_fullname).filter(status="pending")).values(
+                'upload_date').order_by().annotate(Count('status'))
+            agent_pending_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(agent_pending_tickets, many=True)
+            agent_closed_tickets = (Sci1stKey.objects.filter(agent=user_fullname).filter(status="closed")).values(
+                'completed_date').order_by().annotate(Count('status'))
+            agent_closed_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(agent_closed_tickets, many=True)
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': {'agent_newtickets_count': agent_new_ticketsdata_serializer.data,
+                         'agent_assigntickets_count': agent_assign_ticketsdata_serializer.data,
+                         'agent_pendingtickets_count': agent_pending_ticketsdata_serializer.data,
+                         'agent_closedtickets_count': agent_closed_ticketsdata_serializer.data}
+            }
+            '''returning the respnse'''
+            return Response(response)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message': 'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
 
 
 

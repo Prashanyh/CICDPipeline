@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework', # 3rd party
     'rest_framework.authtoken', # 3rd party
     'corsheaders', # front-end
+    'drf_yasg2',
 
 ]
 
@@ -118,6 +119,7 @@ REST_FRAMEWORK = {
 	],
 }
 
+PASSWORD_RESET_TIMEOUT_DAYS=1
 
 # SIMPLE_JWT = {
 #     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=35),
@@ -141,6 +143,15 @@ SIMPLE_JWT = {
 #     # 'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
 # }
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'prashanth.chaduvala@arxtlabs.com'
+SERVER_EMAIL = 'prashanth.chaduvala@arxtlabs.com'
+EMAIL_HOST = 'smtp.office365.com'
+EMAIL_HOST_USER = 'prashanth.chaduvala@arxtlabs.com'
+EMAIL_HOST_PASSWORD = '#'
+EMAIL_PORT = 587
 
 
 # Internationalization
@@ -170,7 +181,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_ALLOW_ALL=True
 
- CORS_ORIGIN_WHITELIST = (
+CORS_ORIGIN_WHITELIST = (
 'http://127.0.0.1:8000',
 'http://localhost:8000',
 )

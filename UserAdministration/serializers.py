@@ -1,14 +1,14 @@
 import csv
-
-from django.contrib.auth.password_validation import validate_password
-from django.http import request, HttpResponse, JsonResponse
-from django.contrib.auth import login
-from django.http import HttpResponse
-from rest_framework import serializers
-from .models import *
 import re
+
 from django.contrib import auth
+from django.contrib.auth import login
+from django.contrib.auth.password_validation import validate_password
+from django.http import HttpResponse, JsonResponse, request
+from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
+
+from .models import *
 
 # def isValid(s):
 #      if not re.compile("(0|91)?[7-9][0-9]{9}").match(s):
@@ -44,28 +44,28 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 ##prasanth
-class EmailVerificationSerializer(serializers.ModelSerializer):
-    token=serializers.CharField(max_length=555)
-
-    class Meta:
-        model= UserProfile
-        fields=['token']
-
-##prasanth
 class LoginSerializer(serializers.ModelSerializer):
     '''
     Login user serializer with required fields
     '''
+    Roles = (
+        ('Manager', 'Manager'),
+        ('TL', 'TL'),
+        ('Admin', 'Admin'),
+        ('Agent', 'Agent'),)
+
     username=serializers.CharField()
     password=serializers.CharField(max_length=10,min_length=6,write_only=True)
     fullname=serializers.CharField(max_length=255,min_length=3,read_only=True)
-    tokens=serializers.CharField(max_length=135,min_length=6,read_only=True)
+    refresh=serializers.CharField(max_length=135,min_length=6,read_only=True)
+    access=serializers.CharField(max_length=135,min_length=6,read_only=True)
+    role = models.CharField( choices=Roles)
 
     class Meta:
         # model name
         model= UserProfile
         # required fields
-        fields=['username','password','fullname','tokens']
+        fields=['username','password','fullname','access','refresh','role']
 
 
     def validate(self, attrs):
@@ -81,36 +81,49 @@ class LoginSerializer(serializers.ModelSerializer):
             raise AuthenticationFailed('user is not verified')
         return {
             'username':user.username,
-            'fullname':user.fullname,
             'role':user.role,
-            'tokens':user.tokens
+            'refresh':user.refresh,
+            'access':user.access
         }
 
-##theja
-from django.contrib.auth.hashers import make_password
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    '''
-    User Profile data serializer
-    '''
+
+
+class ResetPasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
     class Meta:
-        # model name
         model = UserProfile
-        # fields = ("name", "email", "mobile")
-        # required fields
-        fields = ("fullname", "email", "mobile", "dob", "gender", "role", "team_name")
+        fields = ['email']
 
-###theja
-class Teamserialsers(serializers.ModelSerializer):
-    '''
-    get all team serializer
-    '''
-    team_by_persons = UserSerializer(read_only=True,many=True)
+from django.contrib.auth import authenticate
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(max_length=70,write_only=True)
+    token = serializers.CharField(min_length=2,write_only=True)
+    uidb64 = serializers.CharField(min_length=2,write_only=True)
+
     class Meta:
-        # model name
-        model = Teams
-        # all fields
-        fields = '__all__'
+        model = UserProfile
+        fields = ['password','token','uidb64']
+
+    def validate(self,attrs):
+        try:
+            password = attrs.get('password')
+            token = attrs.get('token')
+            uidb64= attrs.get('uidb64')
+            id =force_str(urlsafe_base64_decode(uidb64))
+            user = UserProfile.objects.get(id=id)
+            print(user)
+            if not PasswordResetTokenGenerator().check_token(user,token):
+                raise AuthenticationFailed('The reset link is invalid',401)
+            user.set_password(password)
+            user.save()
+
+        except Exception as e:
+            raise AuthenticationFailed('The reset link is invalid',401)
+        return super().validate(attrs)
+        
+
 
 ##prasanth
 class FileSerializer(serializers.ModelSerializer):
@@ -221,6 +234,184 @@ class ScikeyPendingTicketsListSerializer(serializers.ModelSerializer):
         model = Sci1stKey
         fields = '__all__'
 
+
+from UserAdministration.models import UserProfile
+
+
+#prashanth
+class Assigntickets_listSerializer(serializers.ModelSerializer):
+    # Roles = (
+    #     ('Manager', 'Manager'),
+    #     ('TL', 'TL'),
+    #     ('Admin', 'Admin'),
+    #     ('Agent', 'Agent'),)
+    # # name = serializers.SlugRelatedField(many=False, slug_field='name', queryset=UserProfile.objects.all())
+    # role = serializers.ChoiceField(choices=Roles)
+    class Meta:
+        model = UserProfile
+        # get model name
+        fields = '__all__'
+
+# prashanth
+class ReAssigntickets_listSerializer(serializers.ModelSerializer):
+    # category_name = serializers.RelatedField(source='sci_user.agent', read_only=True)
+    class Meta:
+        model = Sci1stKey
+        # get model name
+        fields = "__all__"
+
+
+
+from rest_framework import serializers
+
+
+class DemoUserSerializer(serializers.ModelSerializer):
+    # role = serializers.ChoicesField(choices=UserProfile.role)
+
+    class Meta:
+        model = UserProfile
+        fields = ['role']
+
+
+# prashanth
+#admin teamwise status count
+class AdminTeamwiseTicketListAPIViewSerializer(serializers.ModelSerializer):
+    '''
+    sci all tickets serializer use this serializer all users
+    
+    '''
+    class Meta:
+        # model name
+        model = Sci1stKey
+        # required fields
+        fields = ['upload_date', 'team_name','status']
+        # fields = '__all__'
+
+# prashanth
+# admin teamwise closed tickets serializer
+class AdminTeamwiseClosedTicketListAPIViewSerializer(serializers.ModelSerializer):
+    '''
+    sci all tickets serializer use this serializer all users
+    
+    '''
+    class Meta:
+        # model name
+        model = Sci1stKey
+        # required fields
+        fields = ['completed_date', 'team_name','status']
+        # fields = '__all__'
+
+## prashanth
+#admin teamwise status count
+class AdminAgentwiseTicketListAPIViewSerializer(serializers.ModelSerializer):
+    '''
+    sci all tickets serializer use this serializer all users
+    
+    '''
+    class Meta:
+        # model name
+        model = Sci1stKey
+        # required fields
+        fields = ['upload_date', 'agent','status']
+        # fields = '__all__'
+
+## prashanth
+# admin agentwise closed tickets serializer
+class AdminAgentwiseClosedTicketListAPIViewSerializer(serializers.ModelSerializer):
+    '''
+    sci all tickets serializer use this serializer all users
+    
+    '''
+    class Meta:
+        # model name
+        model = Sci1stKey
+        # required fields
+        fields = ['completed_date', 'agent','status']
+        # fields = '__all__'
+
+## prashanth
+# admin agentwise assign tickets serializer
+class AdminAgentwiseNewAssignTicketListAPIViewSerializer(serializers.ModelSerializer):
+    '''
+    sci all tickets serializer use this serializer all users
+    
+    '''
+    count = serializers.IntegerField()
+    class Meta:
+        # model name
+        model = Sci1stKey
+        # required fields
+        fields = ['upload_date','count']
+        # fields = '__all__'
+
+#
+# class AdminAgentwiseClosedTicketListAPIViewSerializer(serializers.ModelSerializer):
+#     '''
+#     sci all tickets serializer use this serializer all users
+#
+#     '''
+#     count = serializers.IntegerField()
+#     class Meta:
+#         # model name
+#         model = Sci1stKey
+#         # required fields
+#         fields = ['upload_date','count']
+
+
+ ###admin (agent team date wise count
+ ##prashanth
+class AdminProcessCountTicketListSerializer(serializers.ModelSerializer):
+    process_status__count = serializers.IntegerField()
+    '''
+    sci all tickets serializer use this serializer all users
+    '''
+    class Meta:
+        # model name
+        model = Sci1stKey
+        # required fields
+        fields = ('agent','completed_date','process_status__count')
+
+
+
+'''****************************************************************************************************'''
+
+##theja
+from django.contrib.auth.hashers import make_password
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    '''
+    User Profile data serializer
+    '''
+    class Meta:
+        # model name
+        model = UserProfile
+        # fields = ("name", "email", "mobile")
+        # required fields
+        fields = ("fullname", "email", "mobile", "dob", "gender", "role", "team_name")
+
+###theja
+class Teamserialsers(serializers.ModelSerializer):
+    '''
+    get all team serializer
+    '''
+    team_by_persons = UserSerializer(read_only=True,many=True)
+    class Meta:
+        # model name
+        model = Teams
+        # all fields
+        fields = '__all__'
+
+class ChangePasswordSerializer(serializers.Serializer):
+    model = UserProfile
+
+    """
+    Serializer for password change endpoint.
+    """
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+
 #######changing password
 ##theja
 class ChangePasswordSerializers(serializers.Serializer):
@@ -260,34 +451,6 @@ class Update_his_profile_Serializer(serializers.ModelSerializer):
         model = UserProfile
         # required fields which we have to update
         fields = ('username', 'fullname', 'email', 'mobile', 'role', 'team_name', 'gender', 'dob')
-
-
-from UserAdministration.models import UserProfile
-class Assigntickets_listSerializer(serializers.ModelSerializer):
-    # Roles = (
-    #     ('Manager', 'Manager'),
-    #     ('TL', 'TL'),
-    #     ('Admin', 'Admin'),
-    #     ('Agent', 'Agent'),)
-    # # name = serializers.SlugRelatedField(many=False, slug_field='name', queryset=UserProfile.objects.all())
-    # role = serializers.ChoiceField(choices=Roles)
-    class Meta:
-        model = UserProfile
-        # get model name
-        fields = '__all__'
-
-
-
-
-
-from rest_framework import serializers
-
-class UserSerializer(serializers.ModelSerializer):
-    # role = serializers.ChoicesField(choices=UserProfile.role)
-
-    class Meta:
-        model = UserProfile
-        fields = ['role']
 
 ##tl team wise all tickets
 ###theja

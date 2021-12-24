@@ -136,13 +136,14 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         # def __str__(self):
         #     return str(self.mobile) + ' is sent ' + str(self.otp)
 
-    def tokens(self):
+    def refresh(self):
         refresh = RefreshToken.for_user(self)
-        return {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token)
-        }
+        return  str(refresh)
 
+    def access(self):
+        refresh = RefreshToken.for_user(self)
+        return str(refresh.access_token)
+        
 
 class Sci1stKey(models.Model):
     sci_user = models.ForeignKey(UserProfile, related_name='sci', on_delete=models.CASCADE, default=1, blank=True,
