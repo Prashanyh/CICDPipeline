@@ -90,7 +90,6 @@ class LoginSerializer(serializers.ModelSerializer):
 
 
 
-
 ##prasanth
 class FileSerializer(serializers.ModelSerializer):
   class Meta:

@@ -18,20 +18,20 @@ from datetime import timedelta,date
 from django.utils import timezone
 from rest_framework import permissions
 from UserAdministration.manager_permissions import IsManagerPermission
-# from django.utils.six import python_2_unicode_compatible
-# from .utils import Util
-# from drf_yasg import openapi
-# from drf_yasg.utils import swagger_auto_schema
-# from six import python_2_unicode_compatible
-# from django.contrib.sites.shortcuts import get_current_site
-# from django.urls import reverse
-# import jwt
-# from django.contrib.auth.tokens import PasswordResetTokenGenerator
-# from django.utils.encoding import smart_str,force_str,smart_bytes,DjangoUnicodeDecodeError
-# from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-# from django.contrib.sites.shortcuts import get_current_site
-# from django.urls import reverse
-# from rest_framework.response import Response
+from django.utils.six import python_2_unicode_compatible
+from .utils import Util
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from six import python_2_unicode_compatible
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+import jwt
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import smart_str,force_str,smart_bytes,DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+from rest_framework.response import Response
 
 ##prasanth
 #user Registration
@@ -74,7 +74,6 @@ class LoginAPIView(generics.GenericAPIView):
         serializer=self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
-
 
 
 
