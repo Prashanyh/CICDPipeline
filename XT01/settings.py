@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'rest_framework', # 3rd party
     'rest_framework.authtoken', # 3rd party
     'corsheaders', # front-end
-    'drf_yasg2',
+    # 'drf_yasg2',
 
 ]
 
@@ -150,7 +150,7 @@ DEFAULT_FROM_EMAIL = 'prashanth.chaduvala@arxtlabs.com'
 SERVER_EMAIL = 'prashanth.chaduvala@arxtlabs.com'
 EMAIL_HOST = 'smtp.office365.com'
 EMAIL_HOST_USER = 'prashanth.chaduvala@arxtlabs.com'
-EMAIL_HOST_PASSWORD = '#'
+EMAIL_HOST_PASSWORD = 'Bhahubali@2'
 EMAIL_PORT = 587
 
 
@@ -181,7 +181,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_ALLOW_ALL=True
 
-CORS_ORIGIN_WHITELIST = (
-'http://127.0.0.1:8000',
-'http://localhost:8000',
-)

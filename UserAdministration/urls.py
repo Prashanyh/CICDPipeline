@@ -6,9 +6,6 @@ from UserAdministration import views
 urlpatterns = [
     path('user_registration/', views.RegisterApi.as_view(), name='user_registration'),#user registration
     path('user_login/', views.LoginAPIView.as_view(), name='auth_login'),#Login Url
-    path('request_reset_email/',views.RequestPasswordResetEmail.as_view(),name='request_reset_email'),
-    path('password_reset/<uidb64>/<token>/',views.PasswordTokenCheckApiView.as_view(),name='password_reset_confirm'),
-    path('password_reset_complete/',views.SetNewPasswordApiView.as_view(),name='password_reset_complete'),
     
 
     path('user_change_password/', views.ChangePasswordView.as_view(), name='user_change_password'),## changing password

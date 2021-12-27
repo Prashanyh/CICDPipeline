@@ -18,20 +18,20 @@ from datetime import timedelta,date
 from django.utils import timezone
 from rest_framework import permissions
 from UserAdministration.manager_permissions import IsManagerPermission
-from django.utils.six import python_2_unicode_compatible
-from .utils import Util
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
-from six import python_2_unicode_compatible
-from django.contrib.sites.shortcuts import get_current_site
-from django.urls import reverse
-import jwt
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.encoding import smart_str,force_str,smart_bytes,DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.contrib.sites.shortcuts import get_current_site
-from django.urls import reverse
-from rest_framework.response import Response
+# from django.utils.six import python_2_unicode_compatible
+# from .utils import Util
+# from drf_yasg import openapi
+# from drf_yasg.utils import swagger_auto_schema
+# from six import python_2_unicode_compatible
+# from django.contrib.sites.shortcuts import get_current_site
+# from django.urls import reverse
+# import jwt
+# from django.contrib.auth.tokens import PasswordResetTokenGenerator
+# from django.utils.encoding import smart_str,force_str,smart_bytes,DjangoUnicodeDecodeError
+# from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+# from django.contrib.sites.shortcuts import get_current_site
+# from django.urls import reverse
+# from rest_framework.response import Response
 
 ##prasanth
 #user Registration
@@ -76,61 +76,6 @@ class LoginAPIView(generics.GenericAPIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 
-## prashanth
-# email send and verify mail
-class RequestPasswordResetEmail(generics.GenericAPIView):
-    # fetching serializer data
-    serializer_class = ResetPasswordResetSerializer
-
-    def post(self,request):
-        serializer = self.serializer_class(data=request.data)
-        # get the request data from end user
-        email = request.data['email']
-        if UserProfile.objects.filter(email=email):
-            user = UserProfile.objects.get(email=email)
-            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
-            token = PasswordResetTokenGenerator().make_token(user)
-            current_site = get_current_site(request=request).domain
-            relativeLink = reverse('password_reset_confirm',kwargs={'uidb64':uidb64,'token':token})
-            absurl = 'http://' + current_site + relativeLink
-            email_body = 'Hey Use link below to verify your password' + absurl
-            data = {'email_body': email_body,'to_email':user.email ,'email_subject': 'verify your email'}
-            Util.send_email(data)
-        return Response({'we have sent you a link to reset your password'},status=status.HTTP_200_OK)
-       
-## prashanth
-## check the token of api(gmail)
-class PasswordTokenCheckApiView(generics.GenericAPIView):
-
-    def get(self, request, uidb64, token):
-        try:
-            id = smart_str(urlsafe_base64_decode(uidb64))
-            user=UserProfile.objects.get(id=id)
-            if not PasswordResetTokenGenerator().check_token(user,token):
-                return Response({'error':'Token is invalid please request a new token'},status=status.HTTP_401_UNAUTHORIZED)
-            return Response({'sucess':True,'message':'valid credentials','uidb64':uidb64,'token':token},status=status.HTTP_200_OK)
-
-        except DjangoUnicodeDecodeError as identifier:
-            if not PasswordResetTokenGenerator().check_token(user):
-                return Response({'error':'Token is not valid please request a new  one'})
-
-## prashanth
-## creating new password 
-class SetNewPasswordApiView(generics.GenericAPIView):
-    serializer_class = SetNewPasswordSerializer
-
-    def patch(self,request):
-        serializer = self.serializer_class(data=request.data)
-
-        if serializer.is_valid():
-            # url = serializer.validated_data.get('url')
-            # message = f'The url is {url}'
-            return Response({'message': 'message'})
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # serilizer = self.serializer_class(data=request.data)
-        # serializer.is_valid()
-        # return Response({'status':True,'message':'password reset sucess'},status=status.HTTP_200_OK)
 
 
 ##prasanth

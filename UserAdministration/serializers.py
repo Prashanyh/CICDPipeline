@@ -89,40 +89,6 @@ class LoginSerializer(serializers.ModelSerializer):
 
 
 
-class ResetPasswordResetSerializer(serializers.Serializer):
-    email = serializers.EmailField(min_length=2)
-
-    class Meta:
-        model = UserProfile
-        fields = ['email']
-
-from django.contrib.auth import authenticate
-class SetNewPasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(max_length=70,write_only=True)
-    token = serializers.CharField(min_length=2,write_only=True)
-    uidb64 = serializers.CharField(min_length=2,write_only=True)
-
-    class Meta:
-        model = UserProfile
-        fields = ['password','token','uidb64']
-
-    def validate(self,attrs):
-        try:
-            password = attrs.get('password')
-            token = attrs.get('token')
-            uidb64= attrs.get('uidb64')
-            id =force_str(urlsafe_base64_decode(uidb64))
-            user = UserProfile.objects.get(id=id)
-            print(user)
-            if not PasswordResetTokenGenerator().check_token(user,token):
-                raise AuthenticationFailed('The reset link is invalid',401)
-            user.set_password(password)
-            user.save()
-
-        except Exception as e:
-            raise AuthenticationFailed('The reset link is invalid',401)
-        return super().validate(attrs)
-        
 
 
 ##prasanth
