@@ -18,20 +18,25 @@ from datetime import timedelta,date
 from django.utils import timezone
 from rest_framework import permissions
 from UserAdministration.manager_permissions import IsManagerPermission
-# from django.utils.six import python_2_unicode_compatible
-# from .utils import Util
-# from drf_yasg import openapi
-# from drf_yasg.utils import swagger_auto_schema
-# from six import python_2_unicode_compatible
-# from django.contrib.sites.shortcuts import get_current_site
-# from django.urls import reverse
-# import jwt
-# from django.contrib.auth.tokens import PasswordResetTokenGenerator
-# from django.utils.encoding import smart_str,force_str,smart_bytes,DjangoUnicodeDecodeError
-# from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-# from django.contrib.sites.shortcuts import get_current_site
-# from django.urls import reverse
-# from rest_framework.response import Response
+from django.utils.six import python_2_unicode_compatible
+from .utils import Util
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from six import python_2_unicode_compatible
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+import jwt
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import smart_str,force_str,smart_bytes,DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+from rest_framework.response import Response
+from rest_framework import viewsets
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 
 ##prasanth
 #user Registration
@@ -75,6 +80,72 @@ class LoginAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
+
+## prashanth
+# email send and verify mail
+class RequestPasswordResetEmail(generics.GenericAPIView):
+    # fetching serializer data
+    serializer_class = ResetPasswordResetSerializer
+    
+
+    def post(self,request):
+        try:
+            """
+            this class is get the data from end user (end user enter mail id)
+            verifying the mail in db and mail is available in db generate the token 
+            with uid (uid is same for each mail) every time token is changing
+            once mail is availble in db one link will send to end user mail with token and uid with 
+            current site url if end user click the link it will verify user credentials valid or not
+            """
+            serializer = self.serializer_class(data=request.data)
+            # get the request data from end user
+            email = request.data['email']
+            if UserProfile.objects.filter(email=email):
+                user = UserProfile.objects.get(email=email)
+                uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+                token = PasswordResetTokenGenerator().make_token(user)
+                current_site = get_current_site(request=request).domain
+                relativeLink = reverse('password_reset_confirm',kwargs={'uidb64':uidb64,'token':token})
+                absurl = 'http://' + current_site + relativeLink
+                email_body = 'Hey Use link below to verify your password' + absurl
+                data = {'email_body': email_body,'to_email':user.email ,'email_subject': 'verify your email'}
+                Util.send_email(data)
+            return Response({'we have sent you a link to reset your password'},status=status.HTTP_200_OK)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message':'please enter valid email id'}, status=status.HTTP_404_NOT_FOUND)
+## prashanth
+## check the token of api(gmail)
+class PasswordTokenCheckApiView(generics.GenericAPIView):
+    """
+    this class is contating end user received link verify mail he will clink the site link it 
+    will render to this page and validating credentials and sending current site link
+    """
+
+    def get(self, request, uidb64, token):
+        try:
+            id = smart_str(urlsafe_base64_decode(uidb64))
+            user=UserProfile.objects.get(id=id)
+            if not PasswordResetTokenGenerator().check_token(user,token):
+                return Response({'error':'Token is invalid please request a new token'},status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'sucess':True,'message':'valid credentials','uidb64':uidb64,'token':token},status=status.HTTP_200_OK)
+
+        except DjangoUnicodeDecodeError as identifier:
+            if not PasswordResetTokenGenerator().check_token(user):
+                return Response({'error':'Token is not valid please request a new  one'})
+
+## prashanth
+## creating new password 
+class SetNewPasswordApiView(generics.GenericAPIView):
+    serializer_class = SetNewPasswordSerializer
+    """
+    This class is used for once verifying the token he can create new password this 
+    class is verifying token and uid in serializers with requested params
+    """
+    def patch(self,request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({'status':True,'message':'password reset sucess'},status=status.HTTP_200_OK)
 
 
 ##prasanth
@@ -1117,7 +1188,8 @@ class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModel
 
 
 
-
+## prashanth
+# admin side view all agents tickets
 class AllReAssign_Tickets_ListApi_View(APIView):
     # fetching serializer class
     serializer_class = Assigntickets_listSerializer
@@ -1129,59 +1201,88 @@ class AllReAssign_Tickets_ListApi_View(APIView):
         this function is using for get the all agents and used get method
         and validating the data avilable or not checking
         """
+        
         List_of_AgentNames = UserProfile.objects.filter(role='Agent').values('username')
         if not List_of_AgentNames:
             #  responce code
-            return Response({"no agents in your database roles please add agent role"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"no agents in your database roles,, please add agent role"}, status=status.HTTP_404_NOT_FOUND)
         else:
             # stored agent names & ids
             reassign = []
             for agentname in List_of_AgentNames:
+
                 reassign.append(agentname)
-            print(reassign,'userssssss')
+            print(agentname,'userssssss')
             # storing agent ids here    
-            userslist = []
-            for x in reassign:
-                # selecting id
-                k = (x["username"])
-                userslist.append(k)
-            print(userslist)
+            # userslist = []
+            # for x in reassign:
+            #     # selecting id
+            #     k = (x["username"])
+            #     userslist.append(k)
+            # print(userslist)
+            countArray =[]
+            for profile in reassign:
+                print(profile,'sssssssssssssssssssssssssss')
+                countArray.append(profile)
+            # return JsonResponse(serializer.data, safe=False)
+            return Response(json.dumps(countArray))
             #  responce code
-            return Response({"received agent names"}, status=status.HTTP_200_OK)
+            # return Response({"received agent names"}, status=status.HTTP_200_OK)
 
 
+## prashanth
+## get the particular agent with his all tickets
+class Ticketreassign_to_agentview(APIView):
+    def get_object(self,agent):
+        # queryset = Sci1stKey.objects.filter(agent=agent)
+        try:
+            queryset = Sci1stKey.objects.filter(agent=agent,status='closed')
+            data=list(queryset)
+            # user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+            return data
+        except Sci1stKey.DoesNotExist:
+            raise Http404
 
-            
-            
-        
+    def get(self, request, agent=None, *args, **kwargs):
+        if agent:
+            calobj = self.get_object(agent)
+            serializer = ReAssigntickets_listSerializer(calobj,many=True)
+            return Response(serializer.data)
+            return Response(serializer.data,{'sucessfully received agent details'})
+        else:
+            alldata = Sci1stKey.objects.all()
+            serializer = ReAssigntickets_listSerializer(alldata, many=True)
+            return Response(serializer.data)
+            return Response({"no agent please check your agents"})
 
+## prashanth
+## reassign to another user class
+class Ticketreassign_to_agentsCompleteview(APIView):
+    ## fetching serializer data
+    serializer_class = TicketreassignAgentsCompleteSerializer
 
-        # try:
-        #     queryset = Sci1stKey.objects.filter(status='assign' )
-        #     user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
-        #     # return the reponce of data body
-        #     return Response(user_serializer.data)
-        # except:
-        #     return Response(
-        #         {'your dont have any pending tickets'}, status=status.HTTP_404_NOT_FOUND)
-        #
-        # try:
-        #     tutorial = Sci1stKey.objects.filter(status='assign')
-        #     """
-        #         get the sci 1st key all assigned tickets
-        #         :param request:
-        #         :param id:
-        #         :param args:
-        #         :param kwargs:
-        #         :return:
-        #     """
-        # except (Sci1stKey.DoesNotExist):
-        #     return JsonResponse({'message': 'No details'}, status=status.HTTP_404_NOT_FOUND)
-        #
-        # tutorial_serializer = Assigntickets_listSerializer(tutorial,many=True)
-        # data = {'list_of_data': tutorial_serializer.data}
-        # return Response(data)
-
+    def put(self,request):
+        """
+        This function is used for get the agent name and agent tickets
+        once get the tickets and assign agent name , this function is update the tickets
+        to exact agent
+        """
+        serializer = self.serializer_class(data=request.data)
+        try:
+            agent_name = request.data['agent']
+            id = request.data['id']
+            values = id.split(',')
+            user = Sci1stKey.objects.filter(id__in=values)
+            for x in user:
+                print(x,'ssssssssssssssss')
+                x.status = 'assign'
+                x.save()
+                user.update(agent=agent_name)
+            return Response({"message":"sucessfully reassigned tickets"}, status=status.HTTP_200_OK)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message':'please select agent name and tickets'}, status=status.HTTP_404_NOT_FOUND)
+  
 
 
 from rest_framework import authentication, permissions
@@ -1190,85 +1291,7 @@ class ListUsers(generics.ListAPIView):
     serializer_class = DemoUserSerializer
     queryset = UserProfile.objects.all()
     permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
-    # """
-    # View to list all users in the system.
-    #
-    # * Requires token authentication.
-    # * Only admin users are able to access this view.
-    # """
-    # # authentication_classes = [authentication.TokenAuthentication]
-    # # permission_classes = [permissions.BasePermission]
-    #
-    # def get(self, request, format=None):
-    #     """
-    #     Return a list of all users.SciTicketDetail
 
-
-    
-    #     """
-    #     usernames = [user for user in UserProfile.objects.all().values('role')]
-    #     return Response(usernames)
-from rest_framework import viewsets
-
-class Ticketreassign_to_agentview(APIView):
-    def get_object(self, pk):
-        try:
-            return Sci1stKey.objects.get(pk=pk)
-        except Sci1stKey.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        serializer = ReAssigntickets_listSerializer(snippet)
-        return Response(serializer.data)
-
-
-    # serializer_class = ReAssigntickets_listSerializer
-
-    # lookup_field = 'agent'
-
-    # def list(self, request):
-    #     queryset = Sci1stKey.objects.all()
-    #     serializer = ReAssigntickets_listSerializer(queryset, many=True)
-    #     return Response(serializer.data)
-
-    # def retrieve(self, request, agent=None):
-    #     print(agent)
-    #     queryset = Sci1stKey.objects.filter(sci_user__role=agent)
-    #     user = get_object_or_404(queryset)
-    #     serializer = ReAssigntickets_listSerializer(user)
-    #     return Response(serializer.data)
-    # """
-    # Retrieve, update or delete a snippet instance.
-    # """
-    # lookup_field = 'username'
-    
-    # def get_object(self,request, username):
-    #     postcode = self.kwargs.get('username', None)
-    #     print(postcode,'kkkkkkkkkkkkkkkk')
-    #     data = Sci1stKey.objects.filter()
-    #     print(data,'userid')
-    #     try:
-    #         return Sci1stKey.objects.get(sci_user_id=id)
-    #     except Sci1stKey.DoesNotExist:
-    #         raise Http404
-
-    # def get(self, request, id, format=None):
-    #     sci_reassign = self.get_object(id)
-    #     serializer = ReAssigntickets_listSerializer(sci_reassign)
-    #     return Response(serializer.data)
-
-    # def put(self, request, pk, format=None):
-    #     snippet = self.get_object(pk)
-    #     serializer = SnippetSerializer(snippet, data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 class Logout(APIView):
     def get(self, request, format=None):

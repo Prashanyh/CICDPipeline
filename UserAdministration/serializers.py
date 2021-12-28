@@ -7,8 +7,11 @@ from django.contrib.auth.password_validation import validate_password
 from django.http import HttpResponse, JsonResponse, request
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
-
-from .models import *
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import smart_str,force_str,smart_bytes,DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from UserAdministration.models import *
+from django.contrib.auth import authenticate
 
 # def isValid(s):
 #      if not re.compile("(0|91)?[7-9][0-9]{9}").match(s):
@@ -44,6 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 ##prasanth
+import datetime
 class LoginSerializer(serializers.ModelSerializer):
     '''
     Login user serializer with required fields
@@ -72,6 +76,7 @@ class LoginSerializer(serializers.ModelSerializer):
         username = attrs.get('username', '')
         password = attrs.get('password', '')
         user = auth.authenticate(username=username,password=password)
+        
 
         if not user:
             raise AuthenticationFailed('Invalid credentials, try again')
@@ -85,9 +90,51 @@ class LoginSerializer(serializers.ModelSerializer):
             'refresh':user.refresh,
             'access':user.access
         }
+        
 
 
+# prashanth
+## password 
+class ResetPasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+    """
+    This serializer is used for password reset api eg: end user will enter his mail id
+    """
 
+    class Meta:
+        model = UserProfile
+        fields = ['email']
+
+
+## create new password
+class SetNewPasswordSerializer(serializers.Serializer):
+    # required fields 
+    password = serializers.CharField(max_length=70,write_only=True)
+    token = serializers.CharField(min_length=2,write_only=True)
+    uidb64 = serializers.CharField(min_length=2,write_only=True)
+
+    class Meta:
+        # model
+        model = UserProfile
+        fields = ('password','token','uidb64')
+
+    def validate(self,attrs):
+        try:
+            # validating attributes and verifying email
+            password = attrs.get('password')
+            token = attrs.get('token')
+            uidb64= attrs.get('uidb64')
+            id =force_str(urlsafe_base64_decode(uidb64))
+            user = UserProfile.objects.get(id=id)
+            user.set_password(password)
+            user.save()
+            # saving new password
+
+            return (user)
+        except Exception as e:
+            raise AuthenticationFailed('The reset link is invalid')
+        return super().validate(attrs)
+        
 
 
 ##prasanth
@@ -336,6 +383,18 @@ class AdminProcessCountTicketListSerializer(serializers.ModelSerializer):
         # required fields
         fields = ('agent','completed_date','process_status__count')
 
+
+
+class TicketreassignAgentsCompleteSerializer(serializers.Serializer):
+    agent = serializers.CharField(required=True)
+    id = serializers.IntegerField()
+    """
+    This serializer is used for password reset api eg: end user will enter his mail id
+    """
+
+    class Meta:
+        model = Sci1stKey
+        fields = ['agent','id']
 
 
 '''****************************************************************************************************'''

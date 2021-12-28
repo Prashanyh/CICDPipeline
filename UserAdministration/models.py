@@ -181,3 +181,24 @@ class Sci1stKey(models.Model):
     def __str__(self):
         return f"{self.agent},{self.status}"
 
+
+
+
+
+class AllLogin(models.Model):
+    user = models.ForeignKey(UserProfile,on_delete= models.CASCADE)
+    login_date = models.DateField(null=True) # user login date store with custom date field
+    login_time = models.TimeField(auto_now_add=True) # user login time stores this time will be generating automatically once login into the user page
+
+
+    def __str__(self):
+        return str(self.user) + ': ' + str(self.login_time)
+
+
+class AllLogout(models.Model):
+    user = models.ForeignKey(UserProfile,on_delete= models.CASCADE)
+    logout_date = models.DateField(null=True) # user login date storing with cutom date field
+    logout_time = models.TimeField(auto_now_add=True, null=True) # user logout time stores this time will be generating automatically once login into the user page
+
+    def __str__(self):
+        return str(self.user) + ': ' + str(self.logout_time)

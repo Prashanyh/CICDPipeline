@@ -7,7 +7,12 @@ urlpatterns = [
     path('user_registration/', views.RegisterApi.as_view(), name='user_registration'),#user registration
     path('user_login/', views.LoginAPIView.as_view(), name='auth_login'),#Login Url
     
-
+    # user mail apis with forgot password and tokens 
+    path('request_reset_email/',views.RequestPasswordResetEmail.as_view(),name='request_reset_email'), # verify email
+    path('password_reset/<uidb64>/<token>/',views.PasswordTokenCheckApiView.as_view(),name='password_reset_confirm'), # verifying token
+    path('password_reset_complete/',views.SetNewPasswordApiView.as_view(),name='password_reset_complete'), # create new password and veriying tokens
+    
+    # update user password in portal no mail option(eg:not sending any mail to the user)
     path('user_change_password/', views.ChangePasswordView.as_view(), name='user_change_password'),## changing password
     path('user_edit_hisprofile/', views.Update_his_ProfileView.as_view(), name='user_edit_hisprofile'),##edit his profile
 
@@ -28,9 +33,14 @@ urlpatterns = [
     path('admin_ticket_get_delete/<int:pk>/', views.SciTicketDetail.as_view(), name='admin_ticket_get_delete'),##viewing single ticket
 
     path('admin_bulk_assign/', views.SciKeyAdminBulkAssignTicketsAPIView.as_view(), name='admin_bulk_assign'), # Assign tickets to agents
+    
     path('admin_ticketstatus_count/', views.SciKeyAdminAllTicketsCountAPIView.as_view(), name='admin_ticketstatus_count'), # Count All tickets
-
     path('admin_all_tickets/', views.SciListViewView.as_view(), name='admin_all_tickets'),##viewing all tickets
+
+    # admin bulk reassign
+    path('admin_bulk_reasign/', views.AllReAssign_Tickets_ListApi_View.as_view(),name='admin_bulk_reasign'),  # showing all assign tickets to admin/manager
+    path('bulk_reassign_agent/<agent>/', views.Ticketreassign_to_agentview.as_view(), name='bulk_reassign_agent'),# reassign tickets afor single agent
+    path('bulk_reassign_agent_complete/', views.Ticketreassign_to_agentsCompleteview.as_view(), name='bulk_reassign_agent_complete'),# reassign tickets one agent to another agent
 
     # agent wise table count (dashboard )
     path('admin_assigntickets_list/', views.SciKeyAdminAssignTicketsListAPIView.as_view(),name="admin_assigntickets_list"), # agent assign tickets api
@@ -90,9 +100,7 @@ urlpatterns = [
     path('agent_processstatus_count/', views.Agent_process_status_count.as_view(), name='agent_processstatus_count'),# agent his processstatus tickets counts
     path('agent_datewise_ticketstatus_count/',views.Agent_datewise_ticketstatus_count.as_view(),name='agent_datewise_ticketstatus_count'),#agent date wise ticket status count
 
-    path('admin_bulk_reasign/', views.AllReAssign_Tickets_ListApi_View.as_view(),name='show_assigntickets_viewlist'),  # showing all assign tickets to admin/manager
-    path('tickets_reassign_agent/<int:pk>/', views.Ticketreassign_to_agentview.as_view(), name='tickets_reassign_agent'),# reassign tickets to agent
-
+    
 
     path('logout/', views.Logout.as_view()),
 
