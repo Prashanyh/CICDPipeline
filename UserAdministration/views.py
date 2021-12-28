@@ -1290,7 +1290,7 @@ from UserAdministration.agent_permissions import *
 class ListUsers(generics.ListAPIView):
     serializer_class = DemoUserSerializer
     queryset = UserProfile.objects.all()
-    permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
+    permission_classes = [IsAgentPermission]
 
 
 class Logout(APIView):
