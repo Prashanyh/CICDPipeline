@@ -12,7 +12,9 @@ from django.utils.encoding import smart_str,force_str,smart_bytes,DjangoUnicodeD
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from UserAdministration.models import *
 from django.contrib.auth import authenticate
-
+from django.utils.text import gettext_lazy as _
+from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 # def isValid(s):
 #      if not re.compile("(0|91)?[7-9][0-9]{9}").match(s):
 #         raise serializers.ValidationError({"Mobile": "Please Check Mobile Number"}
@@ -69,7 +71,7 @@ class LoginSerializer(serializers.ModelSerializer):
         # model name
         model= UserProfile
         # required fields
-        fields=['username','password','fullname','access','refresh','role']
+        fields=['username','password','fullname','access','refresh','role','id']
 
 
     def validate(self, attrs):
@@ -88,7 +90,8 @@ class LoginSerializer(serializers.ModelSerializer):
             'username':user.username,
             'role':user.role,
             'refresh':user.refresh,
-            'access':user.access
+            'access':user.access,
+            'id': user.id
         }
         
 
@@ -500,3 +503,23 @@ class TlwiseTeamdateTicketsSerializer(serializers.ModelSerializer):
         model = Sci1stKey
         # required fields
         fields = ('agent','upload_date','status__count','completed_date')
+
+
+class RefreshTokenSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+    '''field for entering the refresh token'''
+    default_error_messages = {
+        'bad_token': _('Token is invalid or expired')
+    }
+    '''if token is expired or invalid it will raise this exception message'''
+    def validate(self, attrs):
+        self.token = attrs['refresh']
+        '''validateing the given token and returning'''
+        return attrs
+
+    def save(self, **kwargs):
+        try:
+            RefreshToken(self.token).blacklist()
+            '''getting the token and put in the blacklist'''
+        except TokenError:
+            self.fail('bad_token')

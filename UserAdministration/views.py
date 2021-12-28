@@ -18,6 +18,9 @@ from datetime import timedelta,date
 from django.utils import timezone
 from rest_framework import permissions
 from UserAdministration.manager_permissions import IsManagerPermission
+from UserAdministration.admin_permissions import IsAdminPermission
+from UserAdministration.tl_permissions import IsTlPermission
+from UserAdministration.agent_permissions import IsAgentPermission
 from django.utils.six import python_2_unicode_compatible
 from .utils import Util
 from drf_yasg import openapi
@@ -36,6 +39,13 @@ from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+
+
 
 
 ##prasanth
@@ -67,7 +77,6 @@ class RegisterApi(generics.GenericAPIView):
 #user Login
 class LoginAPIView(generics.GenericAPIView):
     # adding authentications & auth user with role
-    permission_classes = []
     # fetching serializer data
     serializer_class = LoginSerializer
 
@@ -78,12 +87,35 @@ class LoginAPIView(generics.GenericAPIView):
         '''
         serializer=self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
+        # if serializer.is_valid():
+        user = serializer.data
+        userid = (user['id'])
+        '''from the login serializer getting the user id'''
+        m = datetime.date.today()
+        '''getting the today date'''
+        getting_ids = AllLogin.objects.filter(user_id=userid, login_date=m)
+        '''filtering the userid and login date'''
+        for x in getting_ids:
+            '''looping the userid and login date'''
+            if x.login_date == datetime.date.today():
+                '''checking the condition login date and today date is equal breaking the condition
+                and return the response'''
+                break
+        else:
+            user = serializer.data
+            userid = (user['id'])
+            '''from the login serializer getting the user id'''
+            getting_ids = AllLogin(user_id=userid,login_date=m)
+            '''if the date is not today it will create the record'''
+            getting_ids.save()
+            '''returning the serializer data'''
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 
 ## prashanth
 # email send and verify mail
 class RequestPasswordResetEmail(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     # fetching serializer data
     serializer_class = ResetPasswordResetSerializer
     
@@ -114,6 +146,8 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
         except Exception:
             "if any exception thant enter into exception block"
             return Response({'message':'please enter valid email id'}, status=status.HTTP_404_NOT_FOUND)
+
+
 ## prashanth
 ## check the token of api(gmail)
 class PasswordTokenCheckApiView(generics.GenericAPIView):
@@ -150,6 +184,7 @@ class SetNewPasswordApiView(generics.GenericAPIView):
 
 ##prasanth
 class UploadFileView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission]
     # fetching Serializer data (file upload serializer)
     serializer_class = FileUploadSerializer
 
@@ -203,6 +238,7 @@ class UploadFileView(APIView):
 
 
 class UploadPersonView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission]
     serializer_class = PersonUploadSerializer
 
     def post(self, request, *args, **kwargs):
@@ -238,6 +274,7 @@ class UploadPersonView(APIView):
 
 ##prasanth
 class SciListViewView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     """
     This function is used for get the list availble records in this function used get method
         get method is used for get the data in db or any local also this get method contains
@@ -253,6 +290,7 @@ class SciListViewView(APIView):
 
 ##prasanth
 class SciTicketDetail(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     """
     Retrieve, update or delete a scikey instance.
     """
@@ -281,6 +319,7 @@ class SciTicketDetail(APIView):
 
 ## prashanth
 class SciKeyAdminBulkAssignTicketsAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     # fetching serilizer
     serializer_class = ScikeyAssignSerializer
 
@@ -335,6 +374,7 @@ class SciKeyAdminBulkAssignTicketsAPIView(generics.GenericAPIView):
 
 # prashanth
 class SciKeyAdminAllTicketsCountAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     # fetching serializer data
     serializer_class = ScikeyAssignSerializer
     # get the token of user and checking user perimissions
@@ -357,6 +397,7 @@ class SciKeyAdminAllTicketsCountAPIView(APIView):
 
 # prashanth
 class SciKeyAdminAssignTicketsListAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     """fetching the serializer and Scikey data"""
     serializer_class = ScikeyTicketsListSerializer
     queryset = Sci1stKey.objects.all()
@@ -380,6 +421,7 @@ class SciKeyAdminAssignTicketsListAPIView(generics.ListAPIView):
 
 # prashanth
 class SciKeyAddminClosedTicketsListAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     """
     fetching the serializer and Scikey data
     """
@@ -405,6 +447,7 @@ class SciKeyAddminClosedTicketsListAPIView(generics.ListAPIView):
 
 # prashanth
 class SciKeyAdminNewTicketsListAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     """
     fetching the serializer and Scikey data
     """
@@ -433,6 +476,7 @@ class SciKeyAdminNewTicketsListAPIView(generics.ListAPIView):
 ## prashanth
 # teamwise newtickets count
 class AdminTeamwiseNewTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     serializer_class = AdminTeamwiseTicketListAPIViewSerializer
     queryset = Sci1stKey.objects.all()
 
@@ -469,6 +513,7 @@ class AdminTeamwiseNewTicketListAPIView(APIView):
 ## prashanth
 # teamwise Assign count
 class AdminTeamwiseAssignTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     serializer_class = AdminTeamwiseTicketListAPIViewSerializer
     queryset = Sci1stKey.objects.all()
 
@@ -503,6 +548,7 @@ class AdminTeamwiseAssignTicketListAPIView(APIView):
 ## prashanth
 # teamwise Pending count
 class AdminTeamwisePendingTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     serializer_class = AdminTeamwiseTicketListAPIViewSerializer
     queryset = Sci1stKey.objects.all()
 
@@ -537,6 +583,7 @@ class AdminTeamwisePendingTicketListAPIView(APIView):
 ## prashanth
 # teamwise closed count
 class AdminTeamwiseClosedTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     serializer_class = AdminTeamwiseClosedTicketListAPIViewSerializer
     queryset = Sci1stKey.objects.all()
 
@@ -572,6 +619,7 @@ class AdminTeamwiseClosedTicketListAPIView(APIView):
 
 # agent assign tickets
 class AdminAgentwiseNewTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     serializer_class = AdminAgentwiseTicketListAPIViewSerializer
     queryset = Sci1stKey.objects.all()
     def get(self, request):
@@ -602,6 +650,7 @@ class AdminAgentwiseNewTicketListAPIView(APIView):
 
 # agent assign tickets
 class AdminAgentwiseAssignTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     serializer_class = AdminAgentwiseTicketListAPIViewSerializer
     queryset = Sci1stKey.objects.all()
     def get(self, request):
@@ -632,6 +681,7 @@ class AdminAgentwiseAssignTicketListAPIView(APIView):
 
 # agent pending tickets
 class AdminAgentwisePendingTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     serializer_class = AdminAgentwiseTicketListAPIViewSerializer
     queryset = Sci1stKey.objects.all()
     def get(self, request):
@@ -662,6 +712,7 @@ class AdminAgentwisePendingTicketListAPIView(APIView):
 
 # agent pending tickets
 class AdminAgentwiseClosedTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     serializer_class = AdminAgentwiseClosedTicketListAPIViewSerializer
     queryset = Sci1stKey.objects.all()
     def get(self, request):
@@ -691,6 +742,7 @@ class AdminAgentwiseClosedTicketListAPIView(APIView):
 
 
 class AdminDatewiseNewTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     """
         fetching the serializer and Scikey data
     """
@@ -727,6 +779,7 @@ class AdminDatewiseNewTicketListAPIView(APIView):
 # prashanth
 # admin agent datewise pending
 class AdminDatewisePendingTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     """
         fetching the serializer and Scikey data
     """
@@ -762,6 +815,7 @@ class AdminDatewisePendingTicketListAPIView(APIView):
 # prashanth
 ## agent datewise assign tickets
 class AdminDatewiseAssignTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     """
         fetching the serializer and Scikey data
     """
@@ -799,6 +853,7 @@ class AdminDatewiseAssignTicketListAPIView(APIView):
 # prashanth
 # admin agent datewise pending
 class AdminDatewiseClosedTicketListAPIView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     """
         fetching the serializer and Scikey data
     """
@@ -1133,9 +1188,11 @@ class SciKeyAgentPendingTicketsListAPIView(generics.ListAPIView):
 # prashanth
 class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModelMixin,
                                  mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+
     """
     fetching the serializer and Scikey data
     """
+    
     queryset = Sci1stKey.objects.all()
     serializer_class = ScikeyPendingTicketsListSerializer
     # authentication token and permissions of user we can change permissions
@@ -1191,6 +1248,7 @@ class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModel
 ## prashanth
 # admin side view all agents tickets
 class AllReAssign_Tickets_ListApi_View(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     # fetching serializer class
     serializer_class = Assigntickets_listSerializer
     # model name and get all users
@@ -1233,6 +1291,7 @@ class AllReAssign_Tickets_ListApi_View(APIView):
 ## prashanth
 ## get the particular agent with his all tickets
 class Ticketreassign_to_agentview(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     def get_object(self,agent):
         # queryset = Sci1stKey.objects.filter(agent=agent)
         try:
@@ -1258,6 +1317,7 @@ class Ticketreassign_to_agentview(APIView):
 ## prashanth
 ## reassign to another user class
 class Ticketreassign_to_agentsCompleteview(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     ## fetching serializer data
     serializer_class = TicketreassignAgentsCompleteSerializer
 
@@ -1290,14 +1350,12 @@ from UserAdministration.agent_permissions import *
 class ListUsers(generics.ListAPIView):
     serializer_class = DemoUserSerializer
     queryset = UserProfile.objects.all()
-    permission_classes = [IsAgentPermission]
+    permission_classes = [IsAuthenticated,IsManagerPermission|IsAgentPermission]
 
 
-class Logout(APIView):
-    def get(self, request, format=None):
-        # simply delete the token to force a login
-        request.user.auth_token.delete()
-        return Response(status=status.HTTP_200_OK)
+
+
+
 
 """*************************************************************************************************************************"""
 
@@ -1305,6 +1363,7 @@ class Logout(APIView):
 ##theja
 ##changing password after user login his account
 class ChangePasswordView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
     '''
     This class is used for get the user and change user password
     '''
@@ -1349,6 +1408,8 @@ class ChangePasswordView(generics.UpdateAPIView):
 ##theja
 ###updating his profile after user login into the account
 class Update_his_ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
     '''
     This class is used for get the user and update his profile details
     '''
@@ -1398,7 +1459,7 @@ class Update_his_ProfileView(APIView):
 # Adding Teams by Admin
 class Addingteams(generics.GenericAPIView):
     ## authentication token and permissions of user we can change permissions
-    permission_classes = []
+    permission_classes = [IsAuthenticated,IsAdminPermission]
     # fetch serializer data
     serializer_class = Teamserialsers
 
@@ -1417,8 +1478,8 @@ class Addingteams(generics.GenericAPIView):
 ##theja
 # View all_Team  by Admin
 class Team_ListView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission]
     ## authentication token and permissions of user we can change permissions
-    permission_classes = []
     def get(self, request):
         try:
             # get the model data
@@ -1429,10 +1490,12 @@ class Team_ListView(APIView):
         tutorial_serializer = Teamserialsers(tutorial, many=True)
         return JsonResponse(tutorial_serializer.data, safe=False)
 
+from rest_framework.permissions import IsAuthenticated
 
 ##theja
 # view/update/delete Team  by Admin
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated,IsAdminPermission])
 def Team_detail(request, pk):
     '''
     This function is used for update team details of particular team and this
@@ -1468,7 +1531,7 @@ def Team_detail(request, pk):
 # All Persons(user Profile) by Admin
 class User_listApiview(APIView):
     ## authentication token and permissions of user we can add permissions
-    permission_classes = []
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
 
     def get(self, request):
         """
@@ -1488,6 +1551,7 @@ class User_listApiview(APIView):
 ##theja
 # view/update/delete person(one)  by Admin
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated,IsAdminPermission|IsManagerPermission])
 def Person_detail(request, pk):
     '''
     this function is used for update his profie data single update or multiple update also
@@ -1529,6 +1593,7 @@ def Person_detail(request, pk):
 #theja
 ## In this class  we are showing tl his team wise agents all tickets
 class Tl_Teamwise_AllticketsView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsTlPermission]
     """
         fetching the serializer and Scikey data
     """
@@ -1580,6 +1645,7 @@ class Tl_Teamwise_AllticketsView(APIView):
 #theja
 ## In this class  we are showing tl his team wise agents assign tickets
 class Tl_Teamwise_AssignticketsView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
     """
         fetching the serializer and Scikey data
     """
@@ -1629,6 +1695,7 @@ class Tl_Teamwise_AssignticketsView(APIView):
 ##theja
 #showing newtickets/assign/closed tickets count for tl under his team
 class Tl_Teamwise_ticket_StatuscountView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
     """
             fetching the serializer and Scikey data
         """
@@ -1697,6 +1764,7 @@ class Tl_Teamwise_ticket_StatuscountView(APIView):
 ##theja
 #showing exception/notfound/completd tickets count for tl under his team
 class Tl_Teamwise_process_StatuscountView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
     serializer_class = TlwiseTeamAllTicketsSerializer
 
     def get(self, request):
@@ -1751,6 +1819,7 @@ class Tl_Teamwise_process_StatuscountView(APIView):
 ##theja
 #showing new/asssign/closed tickets tl team his agentwise count for tl under his team
 class Tl_Team_agentwise_countView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
     serializer_class = TlwiseTeamdateTicketsSerializer
 
     def get(self, request):
@@ -1815,6 +1884,7 @@ class Tl_Team_agentwise_countView(APIView):
 ##theja
 #showing new/asssign/closed tickets tl team his datewise count for tl under his team
 class Tl_Team_datewise_countView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
     serializer_class = TlwiseTeamdateTicketsSerializer
     def get(self, request):
         try:
@@ -1856,6 +1926,7 @@ class Tl_Team_datewise_countView(APIView):
 ##theja
 #showing new/closed tickets previous week count for tl under his team
 class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
     serializer_class = TlwiseTeamdateTicketsSerializer
 
     def get(self,request):
@@ -1929,6 +2000,7 @@ class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
 ##theja
 #showing new/closed tickets current week count for tl under his team
 class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
     serializer_class = TlwiseTeamdateTicketsSerializer
 
     def get(self,request):
@@ -1989,6 +2061,7 @@ class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
 ##theja
 #showing new/closed tickets currentmonth count for tl under his team
 class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
     serializer_class = TlwiseTeamdateTicketsSerializer
     def get(self,request):
         try:
@@ -2051,6 +2124,7 @@ class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
 ##theja
 #showing new/closed tickets previousmonth count for tl under his team
 class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
     serializer_class = TlwiseTeamdateTicketsSerializer
     def get(self,request):
         try:
@@ -2115,6 +2189,7 @@ class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
 ##theja
 ###Agent can view only his new/assign/pending/closed tickets count
 class Agent_ticket_status_count(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsAgentPermission]
     serializer_class = TlwiseTeamdateTicketsSerializer
 
     def get(self, request):
@@ -2146,6 +2221,8 @@ class Agent_ticket_status_count(APIView):
 ##theja
 ###Agent can view only his exception/notfound/completed tickets count
 class Agent_process_status_count(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsAgentPermission]
+
     serializer_class = TlwiseTeamdateTicketsSerializer
 
     def get(self, request):
@@ -2175,6 +2252,7 @@ class Agent_process_status_count(APIView):
 ##theja
 ###Agent can view only his date wise count tickets
 class Agent_datewise_ticketstatus_count(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsAgentPermission]
     serializer_class = TlwiseTeamdateTicketsSerializer
 
     def get(self, request):
@@ -2217,4 +2295,46 @@ class Agent_datewise_ticketstatus_count(APIView):
 
 
 
+
+##prasanth & theja
+class Logout(GenericAPIView):
+    serializer_class = RefreshTokenSerializer
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args):
+        sz = self.get_serializer(data=request.data)
+        '''getting serializers data (only refresh token)'''
+        sz.is_valid(raise_exception=True)
+        '''if token is invalid raise the exception'''
+        data = sz.data
+        '''assign variable to the serializer data'''
+        user = OutstandingToken.objects.get(token=data['refresh']).user_id
+        '''getting the user_id based on the token stored in the Outstandingtoken table'''
+        m = datetime.date.today()
+        '''today data and time '''
+        name = AllLogout.objects.filter(user_id=user, logout_date=m)
+        '''filter the userid and logout data'''
+        for x in name:
+            '''looping the userid and date '''
+            '''storing the last logout time'''
+            if x.logout_date == datetime.date.today():
+                '''checking the condition if logout data equal to today date'''
+                x.logout_date = datetime.date.today()
+                x.save()
+                '''saving the date as it is'''
+                times = datetime.datetime.now()
+                '''getting the time'''
+                name.update(logout_time=times)
+                '''updating the logout time'''
+                break
+        else:
+            user = OutstandingToken.objects.get(token=data['refresh']).user_id
+            '''getting the user_id based on the token stored in the Outstandingtoken table'''
+            m = datetime.date.today()
+            '''getting the today date'''
+            name = AllLogout.objects.create(user_id=user, logout_date=m)
+            '''creating the new record if it is  new date '''
+            name.save()
+        sz.save()###saving the token in outstanding table
+        return Response({'message':'Succssfully Logout'},status=status.HTTP_204_NO_CONTENT)
 

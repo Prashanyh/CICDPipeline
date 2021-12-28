@@ -22,7 +22,7 @@ urlpatterns = [
     ##admin/manger
     path('team_adding/',views.Addingteams.as_view(),name='team_adding'),# Adding/Create Teams
     path('team_list/',views.Team_ListView.as_view(),name='team_list'),# Showing Teams
-    path('team_update_delete/<int:pk>',views.Team_detail,name='team_update_delete'),#view/update/delete Team
+    path('team_update_delete/<int:pk>/',views.Team_detail,name='team_update_delete'),#view/update/delete Team
 
     path('user_list/',views.User_listApiview.as_view(),name='user_list'),# Showing all persons
     path('person_update_delete/<int:pk>',views.Person_detail,name='persons_update_delete'),#view/update/delete persons(we have to change the nameing)
