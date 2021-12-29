@@ -1459,6 +1459,22 @@ class TeamNames(generics.ListAPIView):
     """fetching the serializer and Scikey data"""
     serializer_class = TeamNameListSerializer
     queryset = Teams.objects.all()
+    def get(self, request, *args, **kwargs):
+        try:
+            """ getting teamname """
+            queryset = Teams.objects.values('teamname')
+            userslist=[]
+            for x in queryset:
+                k = (x["teamname"])
+                userslist.append(k)
+            return Response(json.dumps(userslist))
+            # tutorial_serializer = TeamNameListSerializer(x)
+            # return JsonResponse(tutorial_serializer.data)
+            return Response({'message':'team names in table data'},status=status.HTTP_200_OK)
+        except Exception:
+            "if data does not exist enter into exception"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+    
 
 ##theja
 # Adding Teams by Admin
