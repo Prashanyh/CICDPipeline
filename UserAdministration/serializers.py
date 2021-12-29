@@ -400,6 +400,17 @@ class TicketreassignAgentsCompleteSerializer(serializers.Serializer):
         fields = ['agent','id']
 
 
+class TlReassignAgentsSerializer(serializers.ModelSerializer):
+    '''
+    sci all tickets serializer use this serializer all users
+    '''
+    class Meta:
+        # model name
+        model = UserProfile
+        # required fields
+        fields = ['fullname']
+
+
 '''****************************************************************************************************'''
 
 ##theja
@@ -502,6 +513,20 @@ class TlwiseTeamAllTicketsSerializer(serializers.ModelSerializer):
         model = Sci1stKey
         # required fields
         fields = '__all__'
+
+
+
+class AllTlReAssignTicketsListSerializer(serializers.ModelSerializer):
+    '''
+    sci all tickets serializer use this serializer all users
+    '''
+    class Meta:
+        # model name
+        model = Sci1stKey
+        # required fields
+        fields = '__all__'
+
+
 
  ###tl team date wise count
  ##theja

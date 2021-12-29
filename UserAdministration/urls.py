@@ -84,6 +84,11 @@ urlpatterns = [
     path('tl_currentmonth_tickets_list/', views.Tl_Teamwise_ticketstatus_currentmonth_countView.as_view(),name='tl_currentmonth_tickets_list'),  # showing new/closed tickets current month count for tl under his team
     path('tl_previousmonth_tickets_list/', views.Tl_Teamwise_ticketstatus_previousmonth_countView.as_view(),name='tl_previousmonth_tickets_list'),  # showing new/closed tickets prevoius month count for tl under his team
 
+    # Tl bulk reassign
+    path('tl_bulk_reasign/', views.AllTlReAssign_Tickets_ListApi_View.as_view(),name='tl_bulk_reasign'),  # showing all assign tickets to admin/manager
+    path('tl_bulk_reassign_agent/<agent>/', views.TLTicketreassignAgentDetailview.as_view(), name='tl_bulk_reassign_agent'),# reassign tickets afor single agent
+    path('tl_bulk_reassign_agent_complete/', views.TLTicketreassign_to_agentsCompleteview.as_view(), name='tl_bulk_reassign_agent_complete'),# reassign tickets one agent to another agent
+
 
 
     ###agent

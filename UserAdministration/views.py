@@ -184,7 +184,7 @@ class SetNewPasswordApiView(generics.GenericAPIView):
 
 ##prasanth
 class UploadFileView(APIView):
-    permission_classes = [IsAuthenticated,IsAdminPermission]
+    # permission_classes = [IsAuthenticated,IsAdminPermission]
     # fetching Serializer data (file upload serializer)
     serializer_class = FileUploadSerializer
 
@@ -228,6 +228,7 @@ class UploadFileView(APIView):
                           tl_name=data[18],
                           team_name=data[19],
                           )
+                print(sci_data,'aaaaaaaaaaaaaaaaa')
                 sci_data.save()
                 # return response
             return Response({'sucessfully uploaded your file'},status=status.HTTP_200_OK)
@@ -1480,7 +1481,7 @@ class TeamNames(generics.ListAPIView):
 # Adding Teams by Admin
 class Addingteams(generics.GenericAPIView):
     ## authentication token and permissions of user we can change permissions
-    permission_classes = [IsAuthenticated,IsAdminPermission]
+    # permission_classes = [IsAuthenticated,IsAdminPermission]
     # fetch serializer data
     serializer_class = Teamserialsers
 
@@ -2313,6 +2314,109 @@ class Agent_datewise_ticketstatus_count(APIView):
             return Response({'message': 'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
 
 
+
+
+
+class AllTlReAssign_Tickets_ListApi_View(APIView):
+    permission_classes = [IsTlPermission,IsAdminPermission|IsManagerPermission|IsTlPermission]
+    """
+        fetching the serializer and Scikey data
+    """
+    serializer_class = TlReassignAgentsSerializer
+    queryset = UserProfile.objects.all()
+    def get(self, request, *args, **kwargs):
+        '''
+        get the login user (TL)  particular all tickets
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
+        try:
+            user_id = request.user.username
+            """ getting userid """
+            queryset = UserProfile.objects.get(username=user_id).team_name_id
+            print(queryset)
+            """ comparing the userid with userprofile(database) username and getting the teamnameid"""
+            agentfilter = UserProfile.objects.filter(role='Agent')
+            
+            """ filter the agents with their roles from database"""
+            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values('fullname')
+            """1)comparing teamnameid from database with your getting id
+              2) filter the agents with their roles 
+              3) satisfies both above two conditions and getting their fullnames"""
+            res = []
+            for fullname in agent_names:
+            #     # selecting id
+                k = (fullname["fullname"])
+            #     userslist.append(k)
+                """ getting all agents names in list"""
+                # agentdata = Sci1stKey.objects.filter(agent=fullname['fullname']).all().filter(status="closed")
+                """ looping the list objects and comparing the sci1st key agent names with full names from 
+                userprofile database and getting only assign tickets matches with fullnames"""
+                res.append(k)
+                """ appending in new list"""
+            return Response(json.dumps(res))
+        except (UserProfile.DoesNotExist,ValidationError):
+            "if any exception thant enter into exception block"
+            return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+## prashanth
+## get the particular agent with his all tickets
+class TLTicketreassignAgentDetailview(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
+    def get_object(self,agent):
+        # queryset = Sci1stKey.objects.filter(agent=agent)
+        try:
+            queryset = Sci1stKey.objects.filter(agent=agent,status='closed')
+            data=list(queryset)
+            # user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+            return data
+        except Sci1stKey.DoesNotExist:
+            raise Http404
+
+    def get(self, request, agent=None, *args, **kwargs):
+        if agent:
+            calobj = self.get_object(agent)
+            serializer = ReAssigntickets_listSerializer(calobj,many=True)
+            return Response(serializer.data)
+            return Response(serializer.data,{'sucessfully received agent details'})
+        else:
+            alldata = Sci1stKey.objects.all()
+            serializer = ReAssigntickets_listSerializer(alldata, many=True)
+            return Response(serializer.data)
+            return Response({"no agent please check your agents"})
+
+
+## prashanth
+## reassign to another user class
+class TLTicketreassign_to_agentsCompleteview(APIView):
+    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
+    ## fetching serializer data
+    serializer_class = TicketreassignAgentsCompleteSerializer
+
+    def put(self,request):
+        """
+        This function is used for get the agent name and agent tickets
+        once get the tickets and assign agent name , this function is update the tickets
+        to exact agent
+        """
+        serializer = self.serializer_class(data=request.data)
+        try:
+            agent_name = request.data['agent']
+            id = request.data['id']
+            values = id.split(',')
+            user = Sci1stKey.objects.filter(id__in=values)
+            for x in user:
+                print(x,'ssssssssssssssss')
+                x.status = 'assign'
+                x.save()
+                user.update(agent=agent_name)
+            return Response({"message":"sucessfully reassigned tickets"}, status=status.HTTP_200_OK)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message':'please select agent name and tickets'}, status=status.HTTP_404_NOT_FOUND)
+  
 
 
 

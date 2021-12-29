@@ -148,7 +148,6 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 class Sci1stKey(models.Model):
     sci_user = models.ForeignKey(UserProfile, related_name='sci', on_delete=models.CASCADE, default=1, blank=True,
                                  null=True)
-    xl_id = models.CharField(max_length=5000,blank=True, null=True)
     projectId = models.CharField(max_length=200, null=True,blank=True)
     name = models.CharField(max_length=200, null=True,blank=True)
     reference = models.CharField(max_length=200,  null=True, blank=True)
@@ -180,8 +179,6 @@ class Sci1stKey(models.Model):
 
     def __str__(self):
         return f"{self.agent},{self.status}"
-
-
 
 
 
