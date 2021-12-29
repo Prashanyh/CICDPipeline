@@ -417,6 +417,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
         # required fields
         fields = ("fullname", "email", "mobile", "dob", "gender", "role", "team_name")
 
+
+
+class TeamNameListSerializer(serializers.ModelSerializer):
+    '''
+    get all team serializer
+    '''
+    class Meta:
+        # model name
+        model = Teams
+        # all fields
+        fields = ['teamname']
+
 ###theja
 class Teamserialsers(serializers.ModelSerializer):
     '''

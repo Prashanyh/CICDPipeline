@@ -1454,6 +1454,11 @@ class Update_his_ProfileView(APIView):
             # return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class TeamNames(generics.ListAPIView):
+    # permission_classes = [IsAuthenticated,IsAdminPermission]
+    """fetching the serializer and Scikey data"""
+    serializer_class = TeamNameListSerializer
+    queryset = Teams.objects.all()
 
 ##theja
 # Adding Teams by Admin

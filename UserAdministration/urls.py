@@ -20,6 +20,7 @@ urlpatterns = [
 
 
     ##admin/manger
+    path('team_name/',views.TeamNames.as_view(),name='team_name'),
     path('team_adding/',views.Addingteams.as_view(),name='team_adding'),# Adding/Create Teams
     path('team_list/',views.Team_ListView.as_view(),name='team_list'),# Showing Teams
     path('team_update_delete/<int:pk>/',views.Team_detail,name='team_update_delete'),#view/update/delete Team
