@@ -428,7 +428,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         # fields = ("name", "email", "mobile")
         # required fields
-        fields = ("fullname", "email", "mobile", "dob", "gender", "role", "team_name")
+        fields = ("id","fullname", "email", "mobile", "dob", "gender", "role", "team_name")
 
 
 
