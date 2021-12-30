@@ -466,7 +466,7 @@ class SciKeyAdminNewTicketsListAPIView(generics.ListAPIView):
         queryset = Sci1stKey.objects.filter(status='newtickets')
         try:
             user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
-            # return responce data
+            
             return Response(user_serializer.data)
         except:
             return Response(
@@ -1164,7 +1164,7 @@ class SciKeyAgentPendingTicketsListAPIView(generics.ListAPIView):
     serializer_class = ScikeyPendingTicketsListSerializer
     queryset = Sci1stKey.objects.all()
     # authentication token and permissions of user we can change permissions
-    permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
+    permission_classes = (permissions.IsAuthenticated, IsAdminPermission|IsManagerPermission|IsAgentPermission)
 
     def get(self, request, *args, **kwargs):
         '''
@@ -2418,6 +2418,26 @@ class TLTicketreassign_to_agentsCompleteview(APIView):
             return Response({'message':'please select agent name and tickets'}, status=status.HTTP_404_NOT_FOUND)
   
 
+
+
+
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+class ExampleCookie(APIView):
+    @csrf_exempt
+    def get(self,request):  
+        permission_classes = (permissions.IsAuthenticated,)
+        response = HttpResponse("Welcome Guest.")  
+        data=response.set_cookie('programink', 'We love Django') 
+        print(data,'ssssssssssssssssssssssss')
+        return response  
+
+def getcookie(request):  
+    info  = request.COOKIES.get('programink') 
+    return HttpResponse("Welcome Back." +  info);  
+                                
 
 
 

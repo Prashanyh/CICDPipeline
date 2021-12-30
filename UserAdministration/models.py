@@ -66,8 +66,8 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     orginization = models.CharField(max_length=200, null=True, default=False)
     dob=models.DateField(default=False)
     GENDER_CHOICES = (
-        ('M', 'Male'),
-        ('F', 'Female'),
+        ('Male', 'Male'),
+        ('Male', 'Female'),
     )
     Roles = (
         ('Manager', 'Manager'),
@@ -75,7 +75,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         ('Admin', 'Admin'),
         ('Agent', 'Agent'),)
 
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default=False)
+    gender = models.CharField(max_length=8, choices=GENDER_CHOICES, default=False)
     team_name = models.ForeignKey(Teams, on_delete=models.CASCADE, default=False, null=True, related_name='person_team')
     role = models.CharField(max_length=100, null=True, choices=Roles, default=False)
     objects =  UserManager()

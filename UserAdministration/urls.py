@@ -110,7 +110,7 @@ urlpatterns = [
 
     path('logout/', views.Logout.as_view()),
 
-    
+    path('set_cookie/',views.ExampleCookie.as_view()),
     path('demoapi/', views.ListUsers.as_view())
 
 ]

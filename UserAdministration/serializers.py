@@ -418,6 +418,8 @@ from django.contrib.auth.hashers import make_password
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    team_name = serializers.SlugRelatedField(queryset=Teams.objects.all(),slug_field='teamname')
+
     '''
     User Profile data serializer
     '''
@@ -492,6 +494,7 @@ class ChangePasswordSerializers(serializers.Serializer):
 ##updating his own profile
 ##theja
 class Update_his_profile_Serializer(serializers.ModelSerializer):
+    team_name = serializers.SlugRelatedField(queryset=Teams.objects.all(),slug_field='teamname')
     '''
     Update user profile serializer with required fields
     '''
