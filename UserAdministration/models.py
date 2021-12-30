@@ -67,7 +67,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     dob=models.DateField(default=False)
     GENDER_CHOICES = (
         ('Male', 'Male'),
-        ('Male', 'Female'),
+        ('Female', 'Female'),
     )
     Roles = (
         ('Manager', 'Manager'),
