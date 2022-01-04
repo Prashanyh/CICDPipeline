@@ -115,7 +115,6 @@ class LoginAPIView(generics.GenericAPIView):
 ## prashanth
 # email send and verify mail
 class RequestPasswordResetEmail(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission]
     # fetching serializer data
     serializer_class = ResetPasswordResetSerializer
     
