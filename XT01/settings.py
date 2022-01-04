@@ -154,7 +154,7 @@ DEFAULT_FROM_EMAIL = 'prashanth.chaduvala@arxtlabs.com'
 SERVER_EMAIL = 'prashanth.chaduvala@arxtlabs.com'
 EMAIL_HOST = 'smtp.office365.com'
 EMAIL_HOST_USER = 'prashanth.chaduvala@arxtlabs.com'
-EMAIL_HOST_PASSWORD = 'Bhahubali@2'
+EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 
 
