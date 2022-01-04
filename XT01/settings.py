@@ -150,11 +150,11 @@ SIMPLE_JWT = {
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = ''
-SERVER_EMAIL = ''
+DEFAULT_FROM_EMAIL = 'prashanth.chaduvala@arxtlabs.com'
+SERVER_EMAIL = 'prashanth.chaduvala@arxtlabs.com'
 EMAIL_HOST = 'smtp.office365.com'
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER = 'prashanth.chaduvala@arxtlabs.com'
+EMAIL_HOST_PASSWORD = 'Bhahubali@2'
 EMAIL_PORT = 587
 
 
