@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     # 'drf_yasg2',
 
-
 ]
 
 MIDDLEWARE = [
@@ -118,7 +117,10 @@ from datetime import timedelta
 REST_FRAMEWORK = {
 	'DEFAULT_AUTHENTICATION_CLASSES': [
 		'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+
 	],
+    
 }
 
 PASSWORD_RESET_TIMEOUT_DAYS=1

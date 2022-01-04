@@ -50,6 +50,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 ##prasanth
 import datetime
+from django.http import HttpResponse
+
 class LoginSerializer(serializers.ModelSerializer):
     '''
     Login user serializer with required fields
@@ -78,8 +80,6 @@ class LoginSerializer(serializers.ModelSerializer):
         username = attrs.get('username', '')
         password = attrs.get('password', '')
         user = auth.authenticate(username=username,password=password)
-        
-
         if not user:
             raise AuthenticationFailed('Invalid credentials, try again')
         if not user.is_active:
@@ -285,7 +285,7 @@ class DemoUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['role']
+        fields = ['id']
 
 
 # prashanth
