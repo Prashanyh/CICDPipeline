@@ -46,6 +46,16 @@ from rest_framework.generics import GenericAPIView
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 
+import string
+import random
+  
+# initializing size of string 
+N = 7
+  
+# using random.choices()
+# generating random strings 
+res = ''.join(random.choices(string.ascii_uppercase +
+                             string.digits, k = N))
 
 
 ##prasanth
@@ -136,7 +146,7 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
                 uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
                 token = PasswordResetTokenGenerator().make_token(user)
                 current_site = get_current_site(request=request).domain
-                relativeLink = reverse('password_reset_complete',kwargs={'uidb64':uidb64,'token':token})
+                relativeLink = reverse('password_reset_confirm',kwargs={'uidb64':uidb64,'token':token})
                 absurl = 'http://' + current_site + relativeLink
                 email_body = 'Hey Use link below to verify your password  ' + absurl
                 #'Hey Use link below to verify your password' + absurl
@@ -176,7 +186,7 @@ class SetNewPasswordApiView(generics.GenericAPIView):
     This class is used for once verifying the token he can create new password this 
     class is verifying token and uid in serializers with requested params
     """
-    def patch(self,request,uidb64, token):
+    def patch(self,request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({'status':True,'message':'password reset sucess'},status=status.HTTP_200_OK)

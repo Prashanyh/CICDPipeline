@@ -154,7 +154,7 @@ DEFAULT_FROM_EMAIL = 'prashanth.chaduvala@arxtlabs.com'
 SERVER_EMAIL = 'prashanth.chaduvala@arxtlabs.com'
 EMAIL_HOST = 'smtp.office365.com'
 EMAIL_HOST_USER = 'prashanth.chaduvala@arxtlabs.com'
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_PASSWORD = 'Bhahubali@2'
 EMAIL_PORT = 587
 
 
@@ -185,14 +185,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_ALLOW_ALL=True
 
-# configure Djoser
-DJOSER = {
-    "USER_ID_FIELD": "username",
-    "LOGIN_FIELD": "email",
-    "SEND_ACTIVATION_EMAIL": True,
-    "ACTIVATION_URL": "activate/{uid}/{token}",
-    "PASSWORD_RESET_CONFIRM_URL": "reset_password/{uid}/{token}", # the reset link 
-    'SERIALIZERS': {
-        'token_create': 'apps.accounts.serializers.CustomTokenCreateSerializer',
-    },
-}
+# # configure Djoser
+# DJOSER = {
+#     "USER_ID_FIELD": "username",
+#     "LOGIN_FIELD": "email",
+#     "SEND_ACTIVATION_EMAIL": True,
+#     "ACTIVATION_URL": "activate/{uid}/{token}",
+#     "PASSWORD_RESET_CONFIRM_URL": "reset_password/{uid}/{token}", # the reset link 
+#     'SERIALIZERS': {
+#         'token_create': 'apps.accounts.serializers.CustomTokenCreateSerializer',
+#     },
+# }
