@@ -1297,7 +1297,7 @@ class Ticketreassign_to_agentview(APIView):
     def get_object(self,agent):
         # queryset = Sci1stKey.objects.filter(agent=agent)
         try:
-            queryset = Sci1stKey.objects.filter(agent=agent,status='closed')
+            queryset = Sci1stKey.objects.filter(agent=agent,status='assign')
             data=list(queryset)
             # user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
             return data
@@ -2369,7 +2369,7 @@ class TLTicketreassignAgentDetailview(APIView):
     def get_object(self,agent):
         # queryset = Sci1stKey.objects.filter(agent=agent)
         try:
-            queryset = Sci1stKey.objects.filter(agent=agent,status='closed')
+            queryset = Sci1stKey.objects.filter(agent=agent,status='assign')
             data=list(queryset)
             # user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
             return data
