@@ -24,6 +24,7 @@ from UserAdministration import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/',include('UserAdministration.urls')),
+    path('reset/<uidb64>/<token>/',views.PasswordTokenCheckApiView.as_view(),name='password_reset_confirm'), # verifying token
 
     # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh')
