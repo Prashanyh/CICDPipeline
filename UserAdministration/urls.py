@@ -9,7 +9,7 @@ urlpatterns = [
     
     # user mail apis with forgot password and tokens 
     path('request_reset_email/',views.RequestPasswordResetEmail.as_view(),name='request_reset_email'), # verify email
-    path('password_reset/<uidb64>/<token>/',views.PasswordTokenCheckApiView.as_view(),name='password_reset_confirm'), # verifying token
+    #path('password_reset/<uidb64>/<token>/',views.PasswordTokenCheckApiView.as_view(),name='password_reset_confirm'), # verifying token
     path('password_reset_complete/',views.SetNewPasswordApiView.as_view(),name='password_reset_complete'), # create new password and veriying tokens
     
     # update user password in portal no mail option(eg:not sending any mail to the user)
