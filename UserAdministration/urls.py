@@ -101,17 +101,24 @@ urlpatterns = [
 
     path('agent_pending_tickets_list/', views.SciKeyAgentPendingTicketsListAPIView.as_view(),name="agent_pending_tickets_list"),# agent own pending tickets
     path('agent_pending_ticket_viewupdate/<int:id>/', views.AgentPendingDetailTicketApiView.as_view(),name="agent_pending_ticket_viewupdate"), # agent update own ticktes
+
+    path('agent_new_tickets_list/',views.AgentNewticketsTicketsListApiView.as_view(),name='agent_new_tickets_list'),#agent getting his his new tickets
+    path('agent_closedtickets_list/',views.AgentClosedticketsTicketsListApiView.as_view(),name='agent_closedtickets_list'),#agent getting his closed tickets
+
     ##agent reports
     path('agent_ticketstatus_count/',views.Agent_ticket_status_count.as_view(),name='agent_ticketstatus_count'),#agent his ticketstatus counts
     path('agent_processstatus_count/', views.Agent_process_status_count.as_view(), name='agent_processstatus_count'),# agent his processstatus tickets counts
     path('agent_datewise_ticketstatus_count/',views.Agent_datewise_ticketstatus_count.as_view(),name='agent_datewise_ticketstatus_count'),#agent date wise ticket status count
 
-    
-
     path('logout/', views.Logout.as_view()),
 
     path('set_cookie/',views.ExampleCookie.as_view()),
-    path('demoapi/', views.ListUsers.as_view())
+    path('demoapi/', views.ListUsers.as_view()),
+
+
+    ##all tickets list api asked by rohith (for front end)
+    path('show_alltickets_without_user_login/',views.ALLTicketListViewView.as_view(),name='show_alltickets_without_user_login'),
+
 
 ]
 
