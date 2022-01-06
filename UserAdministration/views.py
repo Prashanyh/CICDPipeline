@@ -1813,7 +1813,7 @@ class Tl_Teamwise_ticket_StatuscountView(APIView):
             response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
-                'data': context
+                'data': [context]
             }
             ''' json.loads() takes in a string and returns a json object.
                 json.dumps() takes in a json object and returns a string.'''
