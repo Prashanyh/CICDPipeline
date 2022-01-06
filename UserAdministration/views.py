@@ -103,22 +103,22 @@ class LoginAPIView(generics.GenericAPIView):
         '''from the login serializer getting the user id'''
         m = datetime.date.today()
         '''getting the today date'''
-        getting_ids = AllLogin.objects.filter(user_id=userid, login_date=m)
-        '''filtering the userid and login date'''
-        for x in getting_ids:
-            '''looping the userid and login date'''
-            if x.login_date == datetime.date.today():
-                '''checking the condition login date and today date is equal breaking the condition
-                and return the response'''
-                break
-        else:
-            user = serializer.data
-            userid = (user['id'])
-            '''from the login serializer getting the user id'''
-            getting_ids = AllLogin(user_id=userid,login_date=m)
-            '''if the date is not today it will create the record'''
-            getting_ids.save()
-            '''returning the serializer data'''
+        # getting_ids = AllLogin.objects.filter(user_id=userid, login_date=m)
+        # '''filtering the userid and login date'''
+        # for x in getting_ids:
+        #     '''looping the userid and login date'''
+        #     if x.login_date == datetime.date.today():
+        #         '''checking the condition login date and today date is equal breaking the condition
+        #         and return the response'''
+        #         break
+        # else:
+        user = serializer.data
+        userid = (user['id'])
+        '''from the login serializer getting the user id'''
+        getting_ids = AllLogin(user_id=userid,login_date=m)
+        '''if the date is not today it will create the record'''
+        getting_ids.save()
+        '''returning the serializer data'''
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 
@@ -1355,13 +1355,21 @@ class Ticketreassign_to_agentsCompleteview(APIView):
             return Response({'message':'please select agent name and tickets'}, status=status.HTTP_404_NOT_FOUND)
   
 
-
+# from django.db.models import Count
+# from datetime import datetime, timedelta
 from rest_framework import authentication, permissions
 from UserAdministration.agent_permissions import *
-class ListUsers(generics.ListAPIView):
-    serializer_class = DemoUserSerializer
-    queryset = UserProfile.objects.all()
-    permission_classes = [IsAuthenticated,IsManagerPermission|IsAgentPermission]
+from django.db.models import F, ExpressionWrapper, DecimalField    
+from django.db.models import F, Sum, FloatField, Avg
+
+class ListUsers(generics.GenericAPIView):
+    def get(self,request):
+        # last_month = datetime.today() - timedelta(days=0)
+        m = datetime.date.today()
+        login_details = AllLogin.objects.filter(login_time__startswith=timezone.now().date())
+        print(login_details,'jjjjjjjjjjjjjjjjjjjjjjjjjjj')
+        return Response( status=status.HTTP_404_NOT_FOUND)
+
 
 
 
