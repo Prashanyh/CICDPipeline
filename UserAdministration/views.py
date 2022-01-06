@@ -251,7 +251,7 @@ class UploadFileView(APIView):
 
 
 class UploadPersonView(APIView):
-    permission_classes = [IsAuthenticated,IsAdminPermission]
+    # permission_classes = [IsAuthenticated,IsAdminPermission]
     serializer_class = PersonUploadSerializer
 
     def post(self, request, *args, **kwargs):
@@ -406,8 +406,13 @@ class SciKeyAdminAllTicketsCountAPIView(APIView):
         completed_tickets_count = Sci1stKey.objects.filter(process_status="completed").count()
         pending_tickets_count = Sci1stKey.objects.filter(status="pending").count()
         total_count = new_tickets_count + assign_tickets_count +completed_tickets_count
-        context =[{'total_count':{"total_count":total_count}},{'new':{"new": new_tickets_count}},{'assign':{'assign':assign_tickets_count}},{'completed':{'completed':completed_tickets_count}},{'pending':{'pending_tickets_count':pending_tickets_count}}]
-        return Response(json.dumps(context), status=status.HTTP_200_OK)
+        context =[{"total_count":total_count},{"new": new_tickets_count},{'assign':assign_tickets_count},{'completed':completed_tickets_count},{'pending_tickets_count':pending_tickets_count}]
+        response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': [context]
+            }
+        return Response(response)
 
 
 # prashanth
@@ -953,7 +958,7 @@ class AdminDatewiseClosedTicketListAPIView(APIView):
 
 ## prashanth
 ## agent wise process status count 
-class AdminProcessCountTicketListAPIView(APIView):
+class AdminAgentWiseCountTicketListAPIView(APIView):
     # fetching serializers
     serializer_class = AdminProcessCountTicketListSerializer
 
@@ -997,7 +1002,7 @@ class AdminProcessCountTicketListAPIView(APIView):
 
 ## prashanth
 ## agent wise process status count 
-class AdminAgentWiseCountTicketListAPIView(APIView):
+class AdminProcessCountTicketListAPIView(APIView):
     # fetching serializers
     serializer_class = AdminProcessCountTicketListSerializer
 
@@ -1024,20 +1029,13 @@ class AdminAgentWiseCountTicketListAPIView(APIView):
             are fetching more than 3types of scikey data 
             here if data is not available in db also not getting any error it will show emty list(maens data is not available)
             """   
-            # response = {
-            #         'status': 'success',
-            #         'code': status.HTTP_200_OK,
-            #         'data':{'notfound_ticketsdata_serializer':notfound_ticketsdata_serializer.data,
-            #                 'exception_ticketsdata_serializer':exception_ticketsdata_serializer.data,
-            #                 'completed_ticketsdata_serializer':completed_ticketsdata_serializer.data
-            #         }
-            #     }
-            Responce ={
-                "agentdata_exception":agentdata_exception,
-                "agentdata_notfound":agentdata_notfound,
-                "agentdata_completed":agentdata_completed
+            context =[{"agentdata_notfound":agentdata_notfound},{"agentdata_exception": agentdata_exception},{'agentdata_completed':agentdata_completed}]
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': [context]
             }
-            return Response(json.dumps(Responce))
             return Response(response)
         except:
                 return Response(
@@ -1365,6 +1363,9 @@ from UserAdministration.agent_permissions import *
 from django.db.models import F, ExpressionWrapper, DecimalField    
 from django.db.models import F, Sum, FloatField, Avg
 import datetime
+from datetime import timedelta
+import pandas as pd
+
 class ListUsers(generics.GenericAPIView):
     def get(self,request):
         # last_month = datetime.today() - timedelta(days=0)
@@ -1375,14 +1376,33 @@ class ListUsers(generics.GenericAPIView):
         # data1 = UserProfile.objects.filter(role='Agent').values_list('id', flat=True)
         # res = []
         # for agentname in data1:
-        agentdata = AllLogin.objects.all().annotate(total_sales=Sum('login_time')) \
-                .filter(login_date__year='2022', login_date__month='01')
+        agentdata = AllLogin.objects.all()
         # for  x in agentdata:
         #     # res.append(agentdata)
         #     v=(x['login_time'])
             # data_list = [num for elem in res for num in elem]
-        print(agentdata,'xxxxxxxxxxxxx')
-            
+        # print(agentdata,'xxxxxxxxxxxxx')
+        # FROM Customers INNER JOIN Orders ON Customers.CustomerID = Orders.CustomerID;
+        # queryset=AllLogin.objects.extra(select={'logintime':'login_time'})
+        queryset=AllLogin.objects.values('login_time')
+        querySet3 = AllLogout.objects.values('logout_time')
+        data=zip(queryset,querySet3)
+        for x in queryset:
+            x
+        for y in querySet3:
+            y
+        # c=x-y
+        d = x.copy()
+        d.update(y)
+        print(d,'ccccccccccccccccccccccccccccccc')
+        a=(d['login_time'])
+        b=(d['logout_time'])
+        k = a ,b * 11
+        print(k,'kkkkkkkk')
+        # c=k
+        
+        
+        
 
         # lasttime = []
         # for agentname in data1:
@@ -1390,8 +1410,8 @@ class ListUsers(generics.GenericAPIView):
         for y in agentdatalast:
             # lasttime.append(agentdatalast)
             # agent_logout = [num for elem in lasttime for num in elem]
-            print(y,'jjjjjjjjjjjjjjjjjjjjjjjjjjj')
-        return Response( status=status.HTTP_404_NOT_FOUND)
+            y
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 
