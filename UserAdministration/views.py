@@ -404,7 +404,9 @@ class SciKeyAdminAllTicketsCountAPIView(APIView):
         new_tickets_count = Sci1stKey.objects.filter(status="newtickets").count()
         assign_tickets_count = Sci1stKey.objects.filter(status="assign").count()
         completed_tickets_count = Sci1stKey.objects.filter(process_status="completed").count()
-        context = {"new": new_tickets_count,'assign':assign_tickets_count,'completed':completed_tickets_count}
+        pending_tickets_count = Sci1stKey.objects.filter(status="pending").count()
+        total_count = new_tickets_count + assign_tickets_count +completed_tickets_count
+        context =[{"total_count":total_count},{"new": new_tickets_count},{'assign':assign_tickets_count},{'completed':completed_tickets_count},{'pending_tickets_count':pending_tickets_count}]
         return Response(json.dumps(context), status=status.HTTP_200_OK)
 
 
@@ -1362,13 +1364,33 @@ from rest_framework import authentication, permissions
 from UserAdministration.agent_permissions import *
 from django.db.models import F, ExpressionWrapper, DecimalField    
 from django.db.models import F, Sum, FloatField, Avg
-
+import datetime
 class ListUsers(generics.GenericAPIView):
     def get(self,request):
         # last_month = datetime.today() - timedelta(days=0)
         m = datetime.date.today()
-        login_details = AllLogin.objects.filter(login_time__startswith=timezone.now().date())
-        print(login_details,'jjjjjjjjjjjjjjjjjjjjjjjjjjj')
+        # login_details = AllLogin.objects.filter(login_time__startswith=timezone.now().date())
+        # login_details = AllLogin.objects.filter(login_time__startswith=timezone.now().date())
+        
+        # data1 = UserProfile.objects.filter(role='Agent').values_list('id', flat=True)
+        # res = []
+        # for agentname in data1:
+        agentdata = AllLogin.objects.all().annotate(total_sales=Sum('login_time')) \
+                .filter(login_date__year='2022', login_date__month='01')
+        # for  x in agentdata:
+        #     # res.append(agentdata)
+        #     v=(x['login_time'])
+            # data_list = [num for elem in res for num in elem]
+        print(agentdata,'xxxxxxxxxxxxx')
+            
+
+        # lasttime = []
+        # for agentname in data1:
+        agentdatalast = AllLogout.objects.values('logout_time','user')
+        for y in agentdatalast:
+            # lasttime.append(agentdatalast)
+            # agent_logout = [num for elem in lasttime for num in elem]
+            print(y,'jjjjjjjjjjjjjjjjjjjjjjjjjjj')
         return Response( status=status.HTTP_404_NOT_FOUND)
 
 
@@ -2406,7 +2428,8 @@ class AgentClosedticketsTicketsListApiView(generics.ListAPIView):
         except:
             return Response({'message': 'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
 
-#creating class to show all tikets with authentication
+
+#creating class to show all tikets without authentication
 #asked by rohit
 class ALLTicketListViewView(APIView):
     def get(self, request, format=None):
