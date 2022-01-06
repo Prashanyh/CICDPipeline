@@ -58,6 +58,8 @@ res = ''.join(random.choices(string.ascii_uppercase +
                              string.digits, k = N))
 
 
+"**********************************************Prasanth**************************************************************************"
+
 ##prasanth
 #user Registration
 class RegisterApi(generics.GenericAPIView):
@@ -1041,7 +1043,6 @@ class AdminAgentWiseCountTicketListAPIView(APIView):
 
 
 
-
 # prashanth
 from .agent_permissions import *
 class AgentAssignTicketsListApiView(generics.ListAPIView):
@@ -1376,7 +1377,7 @@ class ListUsers(generics.GenericAPIView):
 
 
 
-"""*************************************************************************************************************************"""
+"****************************************Theja*********************************************************************************"
 
 ##theja
 ##theja
@@ -2331,9 +2332,104 @@ class Agent_datewise_ticketstatus_count(APIView):
             "if any exception thant enter into exception block"
             return Response({'message': 'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
 
+#theja
+###showing Agent his new tickets list
+class AgentNewticketsTicketsListApiView(generics.ListAPIView):
+
+    """
+    fetching the serializer and Scikey data
+    """
+    queryset = Sci1stKey.objects.all()
+    serializer_class = AgentOwnTicketsSerializer
+    # authentication token and permissions of user we can change permissions
+    permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
+
+    def get(self, request, *args, **kwargs):
+        '''
+        get the login user (agent)  particular all tickets
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
+        user_name = request.user.username
+        '''getting paricular username'''
+        try:
+            queryset = Sci1stKey.objects.filter(status="newtickets",agent=user_name)
+            '''filtering the newtickets under his name'''
+            user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+            '''getting the serializing data'''
+            response = {
+                'status':'success',
+                'code': status.HTTP_200_OK,
+                'data': user_serializer.data
+            }
+            return Response(response)
+        except:
+            return Response(
+                {'message': 'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+#theja
+###showing Agent his closed tickets list
+class AgentClosedticketsTicketsListApiView(generics.ListAPIView):
+    """
+    fetching the serializer and Scikey data
+    """
+    queryset = Sci1stKey.objects.all()
+    serializer_class = AgentOwnTicketsSerializer
+    # authentication token and permissions of user we can change permissions
+    permission_classes = (permissions.IsAuthenticated, IsAgentPermission)
+
+    def get(self, request, *args, **kwargs):
+        '''
+        get the login user (agent)  particular all tickets
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
+        user_name = request.user.username
+        '''getting paricular username'''
+        try:
+            queryset = Sci1stKey.objects.filter(status="closed",agent=user_name)
+            '''filtering the closed tickets under his name'''
+            user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
+            '''getting the serializing data'''
+            response = {
+                'status':'success',
+                'code': status.HTTP_200_OK,
+                'data': user_serializer.data
+            }
+            '''sending the json response'''
+            return Response(response)
+        except:
+            return Response({'message': 'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
+#creating class to show all tikets with authentication
+#asked by rohit
+class ALLTicketListViewView(APIView):
+    def get(self, request, format=None):
+        # fetching model object
+        try:
+            scikeylist = Sci1stKey.objects.all()
+            '''getting all tickets'''
+            serializer = ScikeylistSerializer(scikeylist, many=True)
+            # return response
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': serializer.data
+            }
+            '''sending the json response'''
+            return Response(response)
+
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 
+"**********************************************Prasanth**************************************************************************"
 
 class AllTlReAssign_Tickets_ListApi_View(APIView):
     permission_classes = [IsTlPermission,IsAdminPermission|IsManagerPermission|IsTlPermission]
