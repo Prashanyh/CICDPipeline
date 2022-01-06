@@ -406,7 +406,7 @@ class SciKeyAdminAllTicketsCountAPIView(APIView):
         completed_tickets_count = Sci1stKey.objects.filter(process_status="completed").count()
         pending_tickets_count = Sci1stKey.objects.filter(status="pending").count()
         total_count = new_tickets_count + assign_tickets_count +completed_tickets_count
-        context =[{"total_count":total_count},{"new": new_tickets_count},{'assign':assign_tickets_count},{'completed':completed_tickets_count},{'pending_tickets_count':pending_tickets_count}]
+        context =[{'total_count':{"total_count":total_count}},{'new':{"new": new_tickets_count}},{'assign':{'assign':assign_tickets_count}},{'completed':{'completed':completed_tickets_count}},{'pending':{'pending_tickets_count':pending_tickets_count}}]
         return Response(json.dumps(context), status=status.HTTP_200_OK)
 
 
@@ -1808,12 +1808,12 @@ class Tl_Teamwise_ticket_StatuscountView(APIView):
                 closedtickets.append(agentdata)
             tlteam_closed_tickets = (sum(closedtickets))
 
-            context = {"newticketscount": tlteam_new_tickets , 'assignticketscount': tlteam_assign_tickets, 'pendingticketscount':tlteam_pending_tickets,'closedticketscount': tlteam_closed_tickets}
+            context =[{"newticketscount": tlteam_new_tickets }, {'assignticketscount': tlteam_assign_tickets}, {'pendingticketscount':tlteam_pending_tickets},{'closedticketscount': tlteam_closed_tickets}]
             '''all count values added in the dict'''
             response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
-                'data': json.dumps(context)
+                'data': context
             }
             ''' json.loads() takes in a string and returns a json object.
                 json.dumps() takes in a json object and returns a string.'''
