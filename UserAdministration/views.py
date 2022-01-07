@@ -405,7 +405,7 @@ class SciKeyAdminAllTicketsCountAPIView(APIView):
         assign_tickets_count = Sci1stKey.objects.filter(status="assign").count()
         closed_tickets_count = Sci1stKey.objects.filter(status="closed").count()
         pending_tickets_count = Sci1stKey.objects.filter(status="pending").count()
-        total_count = new_tickets_count + assign_tickets_count +closed_tickets_count
+        total_count = new_tickets_count + assign_tickets_count +closed_tickets_count+pending_tickets_count
         # context =[{"total_count":total_count},{"new": new_tickets_count},{'assign':assign_tickets_count},{'completed':completed_tickets_count},{'pending_tickets_count':pending_tickets_count}]
         response = {
                 'status': 'success',
@@ -1034,12 +1034,14 @@ class AdminProcessCountTicketListAPIView(APIView):
             are fetching more than 3types of scikey data 
             here if data is not available in db also not getting any error it will show emty list(maens data is not available)
             """   
-            context =[{"agentdata_notfound":agentdata_notfound},{"agentdata_exception": agentdata_exception},{'agentdata_completed':agentdata_completed}]
-
             response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
-                'data': [context]
+                'data': [
+                         {"notfoundticketscount":agentdata_notfound},
+                         {"exceptionticketscount": agentdata_exception},
+                         {'completedticketscount':agentdata_completed}
+                         ]
             }
             return Response(response)
         except:
@@ -1832,16 +1834,20 @@ class Tl_Teamwise_ticket_StatuscountView(APIView):
                 agentdata = Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(status="closed").count()
                 closedtickets.append(agentdata)
             tlteam_closed_tickets = (sum(closedtickets))
-
-            context =[{"newticketscount": tlteam_new_tickets }, {'assignticketscount': tlteam_assign_tickets}, {'pendingticketscount':tlteam_pending_tickets},{'closedticketscount': tlteam_closed_tickets}]
+            totalticketscount = tlteam_new_tickets+tlteam_assign_tickets+tlteam_closed_tickets+tlteam_pending_tickets
+            # context =[{"newticketscount": tlteam_new_tickets }, {'assignticketscount': tlteam_assign_tickets}, {'pendingticketscount':tlteam_pending_tickets},{'closedticketscount': tlteam_closed_tickets}]
             '''all count values added in the dict'''
             response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
-                'data': [context]
+                'data': [
+                         {"totalticketscount": totalticketscount},
+                         {"newticketscount": tlteam_new_tickets },
+                         {'assignticketscount': tlteam_assign_tickets},
+                         {'pendingticketscount':tlteam_pending_tickets},
+                         {'closedticketscount': tlteam_closed_tickets}]
             }
-            ''' json.loads() takes in a string and returns a json object.
-                json.dumps() takes in a json object and returns a string.'''
+            '''all count values added in the dict inside list'''
             return Response(response)
 
         except Exception:
@@ -1890,14 +1896,16 @@ class Tl_Teamwise_process_StatuscountView(APIView):
                 completedtickets.append(agentdata)
             tlteam_completd_tickets = (sum(completedtickets))
 
-            context = {"exceptionticketscount": tlteam_exception_tickets, 'notfoundticketscount': tlteam_notfound_tickets,'completedticketscount': tlteam_completd_tickets}
-            '''all count values added in the dict'''
             response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
-                'data': json.dumps(context)
+                'data': [
+                    {"notfoundticketscount": tlteam_notfound_tickets},
+                    {"exceptionticketscount": tlteam_exception_tickets},
+                    {'completedticketscount': tlteam_completd_tickets}
+                    ]
             }
-            '''json.dumps() takes in a json object and returns a string.'''
+            '''all count values added in the dict inside list'''
             return Response(response)
 
         except Exception:
@@ -2289,17 +2297,23 @@ class Agent_ticket_status_count(APIView):
             agent_assign_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='assign').count()
             agent_pending_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='pending').count()
             agent_closed_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='closed').count()
-            context = {"agent_newtickets_count": agent_new_tickets, 'agent_assigntickets_count': agent_assign_tickets,
-                       'agent_pendingtickets_count': agent_pending_tickets,
-                       'agent_closedtickets_count': agent_closed_tickets}
+            total_count = agent_new_tickets+agent_assign_tickets+agent_pending_tickets+agent_closed_tickets
+            # context = {"agent_newtickets_count": agent_new_tickets, 'agent_assigntickets_count': agent_assign_tickets,
+            #            'agent_pendingtickets_count': agent_pending_tickets,
+            #            'agent_closedtickets_count': agent_closed_tickets}
             '''putting in the dic'''
 
             response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
-                'data': json.dumps(context)
+                'data': [{"totalticketscount":total_count},
+                         {"newticketscount": agent_new_tickets},
+                         {'assignticketscount':agent_assign_tickets},
+                         {'pendingticketscount': agent_pending_tickets},
+                         {'closedticketscount':agent_closed_tickets}
+                         ]
             }
-            ''' json.dumps() takes in a json object and returns a string.'''
+            '''putting in the dic'''
             return Response(response)
         except Exception:
             "if any exception thant enter into exception block"
@@ -2321,15 +2335,16 @@ class Agent_process_status_count(APIView):
             '''using the username equalizing the agent name which is mention in the sci1stkey database then getting the exception/notfound etc count values'''
             agent_notfound_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='closed',process_status='notfound').count()
             agent_completd_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='closed',process_status='completed').count()
-            context = {"agent_exceptiontickets_count": agent_exception_tickets, 'agent_notfoundtickets_count': agent_notfound_tickets,
-                       'agent_completedtickets_count': agent_completd_tickets}
+            # context = {"agent_exceptiontickets_count": agent_exception_tickets, 'agent_notfoundtickets_count': agent_notfound_tickets,
+            #            'agent_completedtickets_count': agent_completd_tickets}
 
             response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
-                'data': json.dumps(context)
+                'data': [{"notfoundticketscount":agent_notfound_tickets},
+                         {"exceptionticketscount": agent_exception_tickets},
+                         {'completedticketscount':agent_completd_tickets}]
             }
-            ''' json.dumps() takes in a json object and returns a string.'''
             return Response(response)
         except Exception:
             "if any exception thant enter into exception block"
