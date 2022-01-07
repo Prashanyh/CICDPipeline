@@ -403,14 +403,19 @@ class SciKeyAdminAllTicketsCountAPIView(APIView):
         """
         new_tickets_count = Sci1stKey.objects.filter(status="newtickets").count()
         assign_tickets_count = Sci1stKey.objects.filter(status="assign").count()
-        completed_tickets_count = Sci1stKey.objects.filter(process_status="completed").count()
+        closed_tickets_count = Sci1stKey.objects.filter(status="closed").count()
         pending_tickets_count = Sci1stKey.objects.filter(status="pending").count()
-        total_count = new_tickets_count + assign_tickets_count +completed_tickets_count
-        context =[{"total_count":total_count},{"new": new_tickets_count},{'assign':assign_tickets_count},{'completed':completed_tickets_count},{'pending_tickets_count':pending_tickets_count}]
+        total_count = new_tickets_count + assign_tickets_count +closed_tickets_count
+        # context =[{"total_count":total_count},{"new": new_tickets_count},{'assign':assign_tickets_count},{'completed':completed_tickets_count},{'pending_tickets_count':pending_tickets_count}]
         response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
-                'data': [context]
+                'data': [{"totalticketscount":total_count},
+                         {"newticketscount": new_tickets_count},
+                         {'assignticketscount':assign_tickets_count},
+                         {'pendingticketscount': pending_tickets_count},
+                         {'closedticketscount':closed_tickets_count}
+                         ]
             }
         return Response(response)
 
