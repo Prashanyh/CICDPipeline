@@ -67,8 +67,8 @@ urlpatterns = [
     path('admin_datewise_closedticket_count/', views.AdminDatewiseClosedTicketListAPIView.as_view(),name="admin_datewise_closedticket_count"), # agent closed tickets with date api
 
     # date wise count with agents
-    path('admin_processtatus_count/', views.AdminProcessCountTicketListAPIView.as_view()), 
-    path('admin_agentwise_processstatus_count/', views.AdminAgentWiseCountTicketListAPIView.as_view()),
+    path('admin_agentwise_processstatus_count/', views.AdminAgentWiseCountTicketListAPIView.as_view(),name='admin_agentwise_processstatus_count'), 
+    path('admin_processtatus_count/', views.AdminProcessCountTicketListAPIView.as_view(),name='admin_processtatus_count'),
 
 
     ####tl
