@@ -1299,8 +1299,8 @@ class AllReAssign_Tickets_ListApi_View(APIView):
             # print(userslist)
             countArray =[]
             for profile in reassign:
-                print(profile,'sssssssssssssssssssssssssss')
-                countArray.append(profile)
+                v=(profile['username'])
+                countArray.append(v)
             # return JsonResponse(serializer.data, safe=False)
             return Response(json.dumps(countArray))
             #  responce code
@@ -1404,7 +1404,7 @@ class ListUsers(generics.GenericAPIView):
         print(d,'ccccccccccccccccccccccccccccccc')
         a=(d['login_time'])
         b=(d['logout_time'])
-        k = a ,b * 11
+        k = a ,b
         print(k,'kkkkkkkk')
         # c=k
         
@@ -2634,29 +2634,29 @@ class Logout(GenericAPIView):
         '''getting the user_id based on the token stored in the Outstandingtoken table'''
         m = datetime.date.today()
         '''today data and time '''
-        name = AllLogout.objects.filter(user_id=user, logout_date=m)
-        '''filter the userid and logout data'''
-        for x in name:
-            '''looping the userid and date '''
-            '''storing the last logout time'''
-            if x.logout_date == datetime.date.today():
-                '''checking the condition if logout data equal to today date'''
-                x.logout_date = datetime.date.today()
-                x.save()
-                '''saving the date as it is'''
-                times = datetime.datetime.now()
-                '''getting the time'''
-                name.update(logout_time=times)
-                '''updating the logout time'''
-                break
-        else:
-            user = OutstandingToken.objects.get(token=data['refresh']).user_id
-            '''getting the user_id based on the token stored in the Outstandingtoken table'''
-            m = datetime.date.today()
-            '''getting the today date'''
-            name = AllLogout.objects.create(user_id=user, logout_date=m)
-            '''creating the new record if it is  new date '''
-            name.save()
+        # name = AllLogout.objects.filter(user_id=user, logout_date=m)
+        # '''filter the userid and logout data'''
+        # for x in name:
+        #     '''looping the userid and date '''
+        #     '''storing the last logout time'''
+        #     if x.logout_date == datetime.date.today():
+        #         '''checking the condition if logout data equal to today date'''
+        #         x.logout_date = datetime.date.today()
+        #         x.save()
+        #         '''saving the date as it is'''
+        #         times = datetime.datetime.now()
+        #         '''getting the time'''
+        #         name.update(logout_time=times)
+        #         '''updating the logout time'''
+        #         break
+        # else:
+        user = OutstandingToken.objects.get(token=data['refresh']).user_id
+        '''getting the user_id based on the token stored in the Outstandingtoken table'''
+        m = datetime.date.today()
+        '''getting the today date'''
+        name = AllLogout.objects.create(user_id=user, logout_date=m)
+        '''creating the new record if it is  new date '''
+        name.save()
         sz.save()###saving the token in outstanding table
         return Response({'message':'Succssfully Logout'},status=status.HTTP_204_NO_CONTENT)
 
