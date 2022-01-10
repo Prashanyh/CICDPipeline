@@ -1374,6 +1374,8 @@ from django.db.models import F, Sum, FloatField, Avg
 import datetime
 from datetime import timedelta
 import pandas as pd
+from datetime import timedelta    
+
 
 class ListUsers(generics.GenericAPIView):
     def get(self,request):
@@ -1403,23 +1405,40 @@ class ListUsers(generics.GenericAPIView):
         # c=x-y
         d = x.copy()
         d.update(y)
-        print(d,'ccccccccccccccccccccccccccccccc')
+        # print(d,'ccccccccccccccccccccccccccccccc')
         a=(d['login_time'])
         b=(d['logout_time'])
-        k = a ,b
-        print(k,'kkkkkkkk')
+        k = x,y
+        # print(k,'kkkkkkkk')
         # c=k
-        
-        
-        
+        df1 = pd.DataFrame(queryset, columns = ['login_time','user'])
+        df2 = pd.DataFrame(querySet3, columns = ['logout_time','user'])
+        # print(df1,df2)
+        # df_row = pd.concat([df1, df2], ignore_index=True)
+        df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
+        count_series = df.groupby(['login_time', 'logout_time']).size()
+        print(data.count())
+        # df[['login_time','logout_time']]=df[['login_time','logout_time']].apply(pd.to_datetime,1)
 
-        # lasttime = []
-        # for agentname in data1:
-        agentdatalast = AllLogout.objects.values('logout_time','user')
-        for y in agentdatalast:
-            # lasttime.append(agentdatalast)
-            # agent_logout = [num for elem in lasttime for num in elem]
-            y
+        # df.groupby('Name').apply(lambda x : (x['login_time']-x['logout_time'].shift()).dt.total_seconds().mean()/60)
+        # print(df,'sssssssssssssssss')
+        # df['login_time'] = pd.to_timedelta(df['login_time'])
+        # df['logout_time'] = pd.to_timedelta(df['logout_time'])
+        # df.set_index('Time', inplace=True)
+        # change index type to datetime
+        # df.index = pd.to_datetime(df.index)
+        # new_df = df.resample('60T').mean().reset_index()
+        # new_df['logout_time'] = new_df['logout_time'] + timedelta(seconds=3600)
+        # new_df.rename(columns={'login_time': 'login_time', 'Value': 'AvgValue'}, inplace=True)
+
+
+
+
+
+
+        # print(df2,'llllllllll')
+        # res.groupby(level=0).user.nunique().max()
+        # d=pd.join(df1.join(df2.set_index('user'), on='id')
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
@@ -2663,7 +2682,8 @@ class TLTicketreassignAgentDetailview(APIView):
     def get_object(self,agent):
         # queryset = Sci1stKey.objects.filter(agent=agent)
         try:
-            queryset = Sci1stKey.objects.filter(agent=agent,status='assign')
+            queryset = Sci1stKey.objects.filter(agent=agent).filter(status='assign')
+            print(queryset,'aaaaaaaaaaaa')
             data=list(queryset)
             # user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
             return data
