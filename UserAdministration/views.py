@@ -599,8 +599,7 @@ class AdminTeamwisePendingTicketListAPIView(APIView):
                 countArray.append(data)
             
 
-            return Response(json.dumps(countArray))
-            return Response({'message':'assign tickets table data'}, status=status.HTTP_200_OK)
+            return Response(json.dumps(countArray),{'message':'assign tickets table data'}, status=status.HTTP_200_OK)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
@@ -634,8 +633,8 @@ class AdminTeamwiseClosedTicketListAPIView(APIView):
                 countArray.append(data)
             
 
-            return Response(json.dumps(countArray))
-            return Response({'message':'assign tickets table data'}, status=status.HTTP_200_OK)
+            # return Response(json.dumps(countArray))
+            return Response(json.dumps(countArray),{'message':'assign tickets table data'}, status=status.HTTP_200_OK)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
@@ -667,7 +666,7 @@ class AdminAgentwiseNewTicketListAPIView(APIView):
             #     'data': {
             #              'closed': countArray.data}
             # }
-            return Response(response)
+            # return Response(response)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
@@ -698,7 +697,7 @@ class AdminAgentwiseAssignTicketListAPIView(APIView):
             #     'data': {
             #              'closed': countArray.data}
             # }
-            return Response(response)
+            # return Response(response)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
@@ -729,7 +728,7 @@ class AdminAgentwisePendingTicketListAPIView(APIView):
             #     'data': {
             #              'closed': countArray.data}
             # }
-            return Response(response)
+            # return Response(response)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)    
@@ -760,7 +759,7 @@ class AdminAgentwiseClosedTicketListAPIView(APIView):
             #     'data': {
             #              'closed': countArray.data}
             # }
-            return Response(response)
+            # return Response(response)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)    
@@ -1273,39 +1272,42 @@ class AllReAssign_Tickets_ListApi_View(APIView):
     # model name and get all users
     queryset = UserProfile.objects.all()
 
-    def get(self, request,*args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """
         this function is using for get the all agents and used get method
         and validating the data avilable or not checking
         """
-        
         List_of_AgentNames = UserProfile.objects.filter(role='Agent').values('username')
         if not List_of_AgentNames:
             #  responce code
-            return Response({"no agents in your database roles,, please add agent role"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"no agents in your database roles,, please add agent role"},
+                            status=status.HTTP_404_NOT_FOUND)
         else:
             # stored agent names & ids
             reassign = []
             for agentname in List_of_AgentNames:
-
-                reassign.append(agentname)
-            print(agentname,'userssssss')
-            # storing agent ids here    
+                reassign.append(agentname['username'])
+            # storing agent ids here
             # userslist = []
             # for x in reassign:
             #     # selecting id
             #     k = (x["username"])
             #     userslist.append(k)
             # print(userslist)
-            countArray =[]
+            countArray = []
             for profile in reassign:
-                v=(profile['username'])
-                countArray.append(v)
+                countArray.append(profile)
+            # print(countArray)
+            # context = {'username':countArray}
             # return JsonResponse(serializer.data, safe=False)
-            return Response(json.dumps(countArray))
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': {'username': countArray}
+            }
+            return Response(response)
             #  responce code
             # return Response({"received agent names"}, status=status.HTTP_200_OK)
-
 
 ## prashanth
 ## get the particular agent with his all tickets
@@ -1955,6 +1957,16 @@ class Tl_Team_agentwise_countView(APIView):
             assign_ticketsdata = [num for elem in assigntickets for num in elem]
             assign_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(assign_ticketsdata, many=True)
 
+            ### pending tickets
+            pendingtickets = []
+            for fullnames in agentname:
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(status="pending")).values(
+                    'agent', 'upload_date').order_by().annotate(Count('status'))
+                pendingtickets.append(agentdata)
+            pending_ticketsdata = [num for elem in pendingtickets for num in elem]
+            pending_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(pending_ticketsdata, many=True)
+
+
             ###########closed tickets
             closedtickets = []
             for fullnames in agentname:
@@ -1970,6 +1982,7 @@ class Tl_Team_agentwise_countView(APIView):
                 'code': status.HTTP_200_OK,
                 'data': {'newtickets': new_ticketsdata_serializer.data,
                          'assigntickets': assign_ticketsdata_serializer.data,
+                         'pendingtickets':pending_ticketsdata_serializer.data,
                          'closed': closed_ticketsdata_serializer.data}
             }
             return Response(response)
@@ -2053,11 +2066,7 @@ class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
             '''empty list'''
             for fullnames in agentname:
                 """ getting all agents names in list"""
-                agentdata = (
-                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(upload_date__gte=monday_of_last_week,
-                                                                                 upload_date__lt=monday_of_this_week,
-                                                                                 status='newtickets')).values(
-                    'agent', 'upload_date').order_by().annotate(Count('status'))
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(upload_date__gte=monday_of_last_week,upload_date__lt=monday_of_this_week,status='newtickets')).values('agent', 'upload_date').order_by().annotate(Count('status'))
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
                 userprofile database and getting only uploaded date greater than and less than date ,new tickets 
                 matches with fullnames with count values and agent names and date"""
@@ -2067,6 +2076,30 @@ class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
             """looping lists [[][][]] inside list"""
             new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_ticketsdata, many=True)
             '''convserting the all tickets into json by serializer'''
+
+            ##assign tickets
+            assigntickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(upload_date__gte=monday_of_last_week,upload_date__lt=monday_of_this_week,status='assign')).values('agent', 'upload_date').order_by().annotate(Count('status'))
+                assigntickets.append(agentdata)
+            assign_ticketsdata = [num for elem in assigntickets for num in elem]
+            assign_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(assign_ticketsdata, many=True)
+
+            ##pending tickets
+
+            pendingtickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                agentdata = (
+                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(upload_date__gte=monday_of_last_week,
+                                                                                 upload_date__lt=monday_of_this_week,
+                                                                                 status='pending')).values('agent',
+                                                                                                          'upload_date').order_by().annotate(
+                    Count('status'))
+                pendingtickets.append(agentdata)
+            pending_ticketsdata = [num for elem in pendingtickets for num in elem]
+            pending_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(pending_ticketsdata, many=True)
 
             ###########closed tickets
             '''sames as new tickets'''
@@ -2084,7 +2117,8 @@ class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
                 'status': 'success',
                 'code': status.HTTP_200_OK,
                 'data': {'previous_week_newtickets': new_ticketsdata_serializer.data,
-
+                         'previous_week_assigntickets':assign_ticketsdata_serializer.data,
+                         'previous_week_pendingtickets':pending_ticketsdata_serializer.data,
                          'previous_week_closed': closed_ticketsdata_serializer.data}
             }
 
@@ -2132,6 +2166,30 @@ class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
             new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_ticketsdata, many=True)
             '''convserting the all tickets into json by serializer'''
 
+            ##assign tixkets
+            assigntickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                agentdata = (
+                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(
+                        upload_date__range=[start_week, end_week], status='assign')).values(
+                    'agent', 'upload_date').order_by().annotate(Count('status'))
+                assigntickets.append(agentdata)
+            assign_ticketsdata = [num for elem in assigntickets for num in elem]
+            assign_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(assign_ticketsdata , many=True)
+
+            # pending tickets
+            pendingtickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                agentdata = (
+                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(
+                        upload_date__range=[start_week, end_week], status='pending')).values(
+                    'agent', 'upload_date').order_by().annotate(Count('status'))
+                pendingtickets.append(agentdata)
+            pending_ticketsdata = [num for elem in pendingtickets for num in elem]
+            pending_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(pending_ticketsdata , many=True)
+
             ###########closed tickets
             closedtickets = []
             for fullnames in agentname:
@@ -2145,7 +2203,8 @@ class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
                 'status': 'success',
                 'code': status.HTTP_200_OK,
                 'data': {'current_week_newtickets': new_ticketsdata_serializer.data,
-
+                         'current_week_assigntickets':assign_ticketsdata_serializer.data,
+                         'current_week_pendingtickets':pending_ticketsdata_serializer.data,
                          'current_week_closed': closed_ticketsdata_serializer.data}
             }
             return Response(response)
@@ -2193,6 +2252,34 @@ class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
             """looping lists [[][][]] inside list"""
             new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_ticketsdata, many=True)
             '''convserting the all tickets into json by serializer'''
+
+            ##asign tickets
+            assigntickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                agentdata = (
+                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(upload_date__year=current_year,
+                                                                                 upload_date__month=current_month,
+                                                                                 status='assign')).values(
+                    'agent').order_by().annotate(Count('status'))
+                assigntickets.append(agentdata)
+            assign_ticketsdata = [num for elem in assigntickets for num in elem]
+            assign_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(assign_ticketsdata, many=True)
+
+            ##pending tickets
+
+            pendingtickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                agentdata = (
+                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(upload_date__year=current_year,
+                                                                                 upload_date__month=current_month,
+                                                                                 status='pending')).values(
+                    'agent').order_by().annotate(Count('status'))
+                pendingtickets.append(agentdata)
+            pending_ticketsdata = [num for elem in pendingtickets for num in elem]
+            pending_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(pending_ticketsdata, many=True)
+
             ###########closed tickets
             '''sames as new tickets'''
             closedtickets = []
@@ -2208,7 +2295,8 @@ class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
                 'status': 'success',
                 'code': status.HTTP_200_OK,
                 'data': {'current_month_newtickets': new_ticketsdata_serializer.data,
-
+                         'current_month_assigntickets':assign_ticketsdata_serializer.data,
+                         'current_month_peningtickets':pending_ticketsdata_serializer.data,
                          'current_month_closed': closed_ticketsdata_serializer.data}
             }
             return Response(response)
@@ -2258,6 +2346,30 @@ class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
             new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_ticketsdata, many=True)
             '''convserting the all tickets into json by serializer'''
 
+            ##assign tickets
+            assigntickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(
+                    upload_date__lte=last_day_of_prev_month,
+                    upload_date__gte=start_day_of_prev_month,
+                    status='assign')).values('agent').annotate(Count('status'))
+                assigntickets.append(agentdata)
+            assign_ticketsdata = [num for elem in assigntickets for num in elem]
+            assign_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(assign_ticketsdata, many=True)
+
+            ##pending
+            pendingtickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(
+                    upload_date__lte=last_day_of_prev_month,
+                    upload_date__gte=start_day_of_prev_month,
+                    status='pending')).values('agent').annotate(Count('status'))
+                pendingtickets.append(agentdata)
+            pending_ticketsdata = [num for elem in pendingtickets for num in elem]
+            pending_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(pending_ticketsdata, many=True)
+
             ###########closed tickets
             '''sames as new tickets'''
             closedtickets = []
@@ -2275,7 +2387,8 @@ class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
                 'status': 'success',
                 'code': status.HTTP_200_OK,
                 'data': {'previous_month_newtickets': new_ticketsdata_serializer.data,
-
+                         'previous_month_assigntickets':assign_ticketsdata_serializer.data ,
+                         'previous_month_pendingtickets':pending_ticketsdata_serializer.data,
                          'previous_month_closed': closed_ticketsdata_serializer.data}
             }
             return Response(response)
@@ -2525,15 +2638,20 @@ class AllTlReAssign_Tickets_ListApi_View(APIView):
             res = []
             for fullname in agent_names:
             #     # selecting id
-                k = (fullname["fullname"])
+                nameslist = (fullname["fullname"])
             #     userslist.append(k)
                 """ getting all agents names in list"""
                 # agentdata = Sci1stKey.objects.filter(agent=fullname['fullname']).all().filter(status="closed")
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
                 userprofile database and getting only assign tickets matches with fullnames"""
-                res.append(k)
+                res.append(nameslist)
                 """ appending in new list"""
-            return Response(json.dumps(res))
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': {'username': res}
+            }
+            return Response(response)
         except (UserProfile.DoesNotExist,ValidationError):
             "if any exception thant enter into exception block"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
@@ -2556,13 +2674,11 @@ class TLTicketreassignAgentDetailview(APIView):
         if agent:
             calobj = self.get_object(agent)
             serializer = ReAssigntickets_listSerializer(calobj,many=True)
-            return Response(serializer.data)
             return Response(serializer.data,{'sucessfully received agent details'})
         else:
             alldata = Sci1stKey.objects.all()
             serializer = ReAssigntickets_listSerializer(alldata, many=True)
-            return Response(serializer.data)
-            return Response({"no agent please check your agents"})
+            return Response(serializer.data,{"no agent please check your agents"})
 
 
 ## prashanth
