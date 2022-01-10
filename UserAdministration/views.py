@@ -2547,7 +2547,7 @@ class AgentNewticketsTicketsListApiView(generics.ListAPIView):
         :return:
         '''
         user_name = request.user.username
-        '''getting paricular username'''
+        '''gettin paricular username'''
         try:
             queryset = Sci1stKey.objects.filter(status="newtickets",agent=user_name)
             '''filtering the newtickets under his name'''
