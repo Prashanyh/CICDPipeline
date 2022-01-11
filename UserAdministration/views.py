@@ -1129,7 +1129,7 @@ class AgentAssignDetailTicketListApiView(generics.GenericAPIView,mixins.ListMode
                 x.start_time_ticket = datetime.datetime.now()
                 x.save()
                 qs.update(start_time_ticket=datetime.datetime.now())
-                data = Sci1stKey.objects.filter(id=id,status="assign", process_status="emty")
+                data = Sci1stKey.objects.filter(id=id).filter(status="assign").filter(process_status="emty")
                 return data
         except Sci1stKey.DoesNotExist:
             raise Http404
@@ -2674,10 +2674,9 @@ class TLTicketreassignAgentDetailview(APIView):
         # queryset = Sci1stKey.objects.filter(agent=agent)
         try:
             queryset = Sci1stKey.objects.filter(agent=agent).filter(status='assign')
-            print(queryset,'aaaaaaaaaaaa')
             data=list(queryset)
             # user_serializer = AgentOwnTicketsSerializer(queryset, many=True)
-            return data
+            return queryset
         except Sci1stKey.DoesNotExist:
             raise Http404
 
@@ -2685,11 +2684,11 @@ class TLTicketreassignAgentDetailview(APIView):
         if agent:
             calobj = self.get_object(agent)
             serializer = ReAssigntickets_listSerializer(calobj,many=True)
-            return Response(serializer.data,{'sucessfully received agent details'})
+            return Response(serializer.data,status=status.HTTP_200_OK)
         else:
             alldata = Sci1stKey.objects.all()
             serializer = ReAssigntickets_listSerializer(alldata, many=True)
-            return Response(serializer.data,{"no agent please check your agents"})
+            return Response(serializer.data,status=status.HTTP_404_NOT_FOUND)
 
 
 ## prashanth
