@@ -1129,7 +1129,7 @@ class AgentAssignDetailTicketListApiView(generics.GenericAPIView,mixins.ListMode
                 x.start_time_ticket = datetime.datetime.now()
                 x.save()
                 qs.update(start_time_ticket=datetime.datetime.now())
-                data = Sci1stKey.objects.filter(id=id).filter(status="assign").filter(process_status="emty")
+                data = Sci1stKey.objects.get(id=id,status="assign",process_status="emty")
                 return data
         except Sci1stKey.DoesNotExist:
             raise Http404
@@ -1216,7 +1216,8 @@ class AgentPendingDetailTicketApiView(generics.GenericAPIView,mixins.UpdateModel
             get the sci key id and get the ticket and 
                             change the status of ticket
             '''
-            return Sci1stKey.objects.get(id=id)
+            data = Sci1stKey.objects.get(id=id,status="pending")
+            return data
         except Sci1stKey.DoesNotExist:
             raise Http404
 
