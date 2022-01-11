@@ -1105,7 +1105,7 @@ class AgentAssignTicketsListApiView(generics.ListAPIView):
 
 import datetime
 # prashanth
-class AgentAssignDetailTicketListApiView(generics.GenericAPIView,mixins.UpdateModelMixin,
+class AgentAssignDetailTicketListApiView(generics.GenericAPIView,mixins.ListModelMixin,mixins.UpdateModelMixin,
                                  mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
     """
     fetching the serializer and Scikey data
@@ -1155,16 +1155,6 @@ class AgentAssignDetailTicketListApiView(generics.GenericAPIView,mixins.UpdateMo
         :return:
         '''
         calobj = self.get_object(id)
-        # qs = Sci1stKey.objects.filter(id=id).values_list('agent')
-        # for i in qs:
-        #     a=list(i)
-        #     agent_name=a[0]
-        #     qs = Sci1stKey.objects.filter(agent=agent_name)
-        #     for x in qs:
-        #         print(x,'sssssssssssssssssssssssssssssss')
-        #         x.stop_time_ticket = datetime.datetime.now()
-        #         x.save()
-        #         qs.update(start_time_ticket=datetime.datetime.now())
         serializer = AgentRetriveSerializer(calobj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
