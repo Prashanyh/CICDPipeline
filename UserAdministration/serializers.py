@@ -211,6 +211,7 @@ class AgentOwnTicketsSerializer(serializers.ModelSerializer):
 
 ##prasanth
 class AgentRetriveSerializer(serializers.ModelSerializer):
+    stop_time_ticket = serializers.DateTimeField(input_formats=datetime.datetime.now())
     '''
     agent update status of scikey serializer
     '''
