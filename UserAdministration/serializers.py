@@ -305,11 +305,12 @@ class AdminTeamwiseTicketListAPIViewSerializer(serializers.ModelSerializer):
     sci all tickets serializer use this serializer all users
     
     '''
+    count = serializers.IntegerField()
     class Meta:
         # model name
         model = Sci1stKey
         # required fields
-        fields = ['upload_date', 'team_name','status']
+        fields = ['upload_date', 'team_name','count']
         # fields = '__all__'
 
 # prashanth
@@ -319,11 +320,12 @@ class AdminTeamwiseClosedTicketListAPIViewSerializer(serializers.ModelSerializer
     sci all tickets serializer use this serializer all users
     
     '''
+    count = serializers.IntegerField()
     class Meta:
         # model name
         model = Sci1stKey
         # required fields
-        fields = ['completed_date', 'team_name','status']
+        fields = ['completed_date', 'team_name','status','count']
         # fields = '__all__'
 
 ## prashanth
@@ -333,11 +335,12 @@ class AdminAgentwiseTicketListAPIViewSerializer(serializers.ModelSerializer):
     sci all tickets serializer use this serializer all users
     
     '''
+    count = serializers.IntegerField()
     class Meta:
         # model name
         model = Sci1stKey
         # required fields
-        fields = ['upload_date', 'agent','status']
+        fields = ['upload_date', 'agent','count']
         # fields = '__all__'
 
 ## prashanth
@@ -347,11 +350,12 @@ class AdminAgentwiseClosedTicketListAPIViewSerializer(serializers.ModelSerialize
     sci all tickets serializer use this serializer all users
     
     '''
+    count = serializers.IntegerField()
     class Meta:
         # model name
         model = Sci1stKey
         # required fields
-        fields = ['completed_date', 'agent','status']
+        fields = ['completed_date', 'agent','status','count']
         # fields = '__all__'
 
 ## prashanth
