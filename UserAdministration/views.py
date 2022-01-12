@@ -1408,7 +1408,7 @@ class ListUsers(generics.GenericAPIView):
 
         print(diff)
 
-        print(output)
+        # print(output)
         # means = df.groupby(pd.Grouper(freq='1D')).mean()
 
         df_row_reindex = pd.concat([df1, df2], ignore_index=True)
@@ -1915,7 +1915,7 @@ class Tl_Teamwise_process_StatuscountView(APIView):
 
 ##theja
 #showing new/asssign/closed tickets tl team his agentwise count for tl under his team
-class Tl_Team_agentwise_countView(APIView):
+class Tl_Team_agentwise_ticketstatus_countView(APIView):
     permission_classes = [IsAuthenticated,IsAdminPermission|IsManagerPermission|IsTlPermission]
     serializer_class = TlwiseTeamdateTicketsSerializer
 
@@ -1988,6 +1988,74 @@ class Tl_Team_agentwise_countView(APIView):
         except Exception:
             "if any exception thant enter into exception block"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+##theja
+#showing exception/notfound/completd tickets tl team his agentwise count for tl under his team
+class Tl_Team_agentwise_processstatus_countView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminPermission | IsManagerPermission | IsTlPermission]
+    serializer_class = TlwiseTeamdateTicketsSerializer
+
+    def get(self, request):
+        try:
+            user_id = request.user.username
+            """ getting userid """
+            queryset = UserProfile.objects.get(username=user_id).team_name_id
+            """ comparing the userid with userprofile(database) username and getting the teamnameid"""
+            agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
+                team_name_id=queryset)).values('fullname')
+            """1)comparing teamnameid from database with your getting id
+                2) filter the agents with their roles 
+                3) satisfies both above two conditions and getting their fullnames"""
+            ##########notfound tickets
+            notfoundtickets = []
+            '''empty list'''
+            for fullnames in agentname:
+                """ getting all agents names in list"""
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(process_status="notfound")).values(
+                    'agent', 'completed_date').order_by().annotate(Count('status'))
+                """ 1)filtering the agent names and status
+                2)getting values of agentnames and completd date
+                3) count the no.of process status tickets
+                """
+                notfoundtickets.append(agentdata)
+                """ appending in new list"""
+            notfound_ticketsdata = [num for elem in notfoundtickets for num in elem]
+            """looping lists [[][][]] inside list"""
+            notfound_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(notfound_ticketsdata, many=True)
+            '''convserting the all tickets into json by serializer'''
+
+            ###########exception tickets
+            '''same as new rickets'''
+            exceptiontickets = []
+            for fullnames in agentname:
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(process_status="exception")).values(
+                    'agent', 'completed_date').order_by().annotate(Count('status'))
+                exceptiontickets.append(agentdata)
+            exception_ticketsdata = [num for elem in exceptiontickets for num in elem]
+            exception_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(exception_ticketsdata, many=True)
+
+            ### completed tickets
+            completedtickets = []
+            for fullnames in agentname:
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(process_status="completed")).values(
+                    'agent', 'completed_date').order_by().annotate(Count('status'))
+                completedtickets.append(agentdata)
+            completed_ticketsdata = [num for elem in completedtickets for num in elem]
+            completed_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(completed_ticketsdata, many=True)
+
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': {'notfoundtickets': notfound_ticketsdata_serializer.data,
+                         'exceptiontickets': exception_ticketsdata_serializer.data,
+                         'completedtickets': completed_ticketsdata_serializer.data,
+                         }
+            }
+            return Response(response)
+        except Exception:
+            "if any exception thant enter into exception block"
+            return Response({'message': 'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
+
 
 ##theja
 #showing new/asssign/closed tickets tl team his datewise count for tl under his team

@@ -227,7 +227,7 @@ class AgentRetriveSerializer(serializers.ModelSerializer):
         # model name
         model = Sci1stKey
         # required fields
-        fields = ['id','process_status','status','stop_time_ticket']
+        fields = ['id','process_status','status','stop_time_ticket','completed_date']
     stop_time_ticket = DateTimeFieldWihTZ(format='%Y-%m-%d %H:%M')
         # fields = '__all__'
     # def update(self, instance, validated_data):
