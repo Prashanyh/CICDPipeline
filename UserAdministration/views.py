@@ -650,7 +650,6 @@ class AdminAgentwiseNewTicketListAPIView(APIView):
         try:
             # queryset=Sci1stKey.objects.values('upload_date', 'Agent','team_name').order_by().annotate(Count('status')).filter(status="newtickets")
             queryset=Sci1stKey.objects.filter(status="newtickets").values('upload_date', 'agent','status').annotate(count=Count('status'))
-            print(queryset)
             
             countArray =[]
             for profile in queryset:
@@ -658,15 +657,12 @@ class AdminAgentwiseNewTicketListAPIView(APIView):
                 countArray.append(data)
             closed_ticketsdata_serializer = AdminAgentwiseTicketListAPIViewSerializer(countArray, many=True)
             # return JsonResponse(serializer.data, safe=False)
-            return Response(json.dumps(countArray))
-
-            # response = {
-            #     'status': 'success',
-            #     'code': status.HTTP_200_OK,
-            #     'data': {
-            #              'closed': countArray.data}
-            # }
-            # return Response(response)
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': closed_ticketsdata_serializer.data
+            }
+            return Response(response)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
@@ -681,7 +677,6 @@ class AdminAgentwiseAssignTicketListAPIView(APIView):
         try:
             # queryset=Sci1stKey.objects.values('upload_date', 'Agent','team_name').order_by().annotate(Count('status')).filter(status="newtickets")
             queryset=Sci1stKey.objects.filter(status="assign").values('upload_date', 'agent','status').annotate(count=Count('status'))
-            print(queryset)
             
             countArray =[]
             for profile in queryset:
@@ -689,15 +684,13 @@ class AdminAgentwiseAssignTicketListAPIView(APIView):
                 countArray.append(data)
             closed_ticketsdata_serializer = AdminAgentwiseTicketListAPIViewSerializer(countArray, many=True)
             # return JsonResponse(serializer.data, safe=False)
-            return Response(json.dumps(countArray))
 
-            # response = {
-            #     'status': 'success',
-            #     'code': status.HTTP_200_OK,
-            #     'data': {
-            #              'closed': countArray.data}
-            # }
-            # return Response(response)
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': closed_ticketsdata_serializer.data
+            }
+            return Response(response)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
@@ -712,7 +705,6 @@ class AdminAgentwisePendingTicketListAPIView(APIView):
         try:
             # queryset=Sci1stKey.objects.values('upload_date', 'Agent','team_name').order_by().annotate(Count('status')).filter(status="newtickets")
             queryset=Sci1stKey.objects.filter(status="pending").values('upload_date', 'agent','status').annotate(count=Count('status'))
-            print(queryset)
             
             countArray =[]
             for profile in queryset:
@@ -720,15 +712,14 @@ class AdminAgentwisePendingTicketListAPIView(APIView):
                 countArray.append(data)
             closed_ticketsdata_serializer = AdminAgentwiseTicketListAPIViewSerializer(countArray, many=True)
             # return JsonResponse(serializer.data, safe=False)
-            return Response(json.dumps(countArray))
+            # return Response(json.dumps(countArray))
 
-            # response = {
-            #     'status': 'success',
-            #     'code': status.HTTP_200_OK,
-            #     'data': {
-            #              'closed': countArray.data}
-            # }
-            # return Response(response)
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': closed_ticketsdata_serializer.data
+            }
+            return Response(response)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)    
@@ -743,7 +734,6 @@ class AdminAgentwiseClosedTicketListAPIView(APIView):
         try:
             # queryset=Sci1stKey.objects.values('upload_date', 'Agent','team_name').order_by().annotate(Count('status')).filter(status="newtickets")
             queryset=Sci1stKey.objects.filter(status="closed").values('completed_date', 'agent','status').annotate(count=Count('status'))
-            print(queryset)
             
             countArray =[]
             for profile in queryset:
@@ -751,15 +741,14 @@ class AdminAgentwiseClosedTicketListAPIView(APIView):
                 countArray.append(data)
             closed_ticketsdata_serializer = AdminAgentwiseClosedTicketListAPIViewSerializer(countArray, many=True)
             # return JsonResponse(serializer.data, safe=False)
-            return Response(json.dumps(countArray))
+            # return Response(json.dumps(countArray))
 
-            # response = {
-            #     'status': 'success',
-            #     'code': status.HTTP_200_OK,
-            #     'data': {
-            #              'closed': countArray.data}
-            # }
-            # return Response(response)
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': closed_ticketsdata_serializer.data
+            }
+            return Response(response)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)    
@@ -1380,31 +1369,12 @@ class ListUsers(generics.GenericAPIView):
         df1 = pd.DataFrame(queryset, columns = ['login_time','user'])
         df2 = pd.DataFrame(querySet3, columns = ['logout_time','user'])
         df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
-        arrival = pd.to_datetime(df['login_time'], format=' %H:%M:%S.%f%z')
-        dept = pd.to_datetime(df['logout_time'], format=' %H:%M:%S.%f%z')
+        arrival = pd.to_datetime(df['login_time'].loc[0].replace("'",""), format=' %H:%M:%S.%f')
+        dept = datetime.strptime(df['logout_time'].loc[0].replace("'",""), format=' %H:%M:%S.%f')
         diff = arrival - dept
-
-        # print(df1,df2)
-        # df['duration_bike_idle_between_rides'] = df['login_time'] - df['logout_time']
-        # df['previous_ride_end_time'] = df['logout_time'].Timestamp(date_1)
-        # df['duration_bike_idle_between_rides'] = df['login_time'] - df['previous_ride_end_time']
 
         print(diff)
 
-
-        # df_row = pd.concat([df1, df2], ignore_index=True)
-        # df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
-        # df1.login_time=pd.to_datetime((df1.login_time), format='%H:%M:%S.%f')
-        # df1.login_time=df1.login_time.dt.month+df1.login_time.dt.year*100
-        # df1['login_time']=df1['login_time'].astype(int)
-        # print(df1)
-
-        # output=df1.groupby(['user','login_time']).count()
-        # output=output.unstack(2).stack(dropna=False).fillna(0)# missing one .
-
-
-        # output['Count']=output.max(1)
-        # output.reset_index().sort_values(['Product_ID','ID'])
         print(output)
         # means = df.groupby(pd.Grouper(freq='1D')).mean()
 
