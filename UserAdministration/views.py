@@ -783,7 +783,6 @@ class AdminDatewiseNewTicketListAPIView(APIView):
             res = []
             agentdata = Sci1stKey.objects.filter(status="newtickets").values('upload_date','status').annotate(count=Count('status'))
             res.append(agentdata)
-            print(agentdata,'ssssssssssssssss')
             
             data_list = [num for elem in res for num in elem]
             
@@ -807,7 +806,7 @@ class AdminDatewisePendingTicketListAPIView(APIView):
     """
         fetching the serializer and Scikey data
     """
-    serializer_class = AdminAgentwiseClosedTicketListAPIViewSerializer
+    serializer_class = AdminAgentwiseClosedTicketListCountAPIViewSerializer
     queryset = Sci1stKey.objects.all()
     def get(self, request, *args, **kwargs):
         '''
@@ -821,10 +820,9 @@ class AdminDatewisePendingTicketListAPIView(APIView):
             agentdata = Sci1stKey.objects.filter(status="pending").values('completed_date','status').annotate(count=Count('status'))
             res.append(agentdata)            
             data_list = [num for elem in res for num in elem]
-            print(agentdata,'aaaaaaaaaaaaaaa')
             
             """looping lists [[][][]] inside list"""
-            user_serializer = AdminAgentwiseClosedTicketListAPIViewSerializer(data_list, many=True)
+            user_serializer = AdminAgentwiseClosedTicketListCountAPIViewSerializer(data_list, many=True)
             '''convserting the all tickets into json by serializer'''
             response = {
                 'status': 'success',
@@ -857,7 +855,6 @@ class AdminDatewiseAssignTicketListAPIView(APIView):
             agentdata = Sci1stKey.objects.filter(status="assign").values('upload_date','status').annotate(count=Count('status'))
             res.append(agentdata)            
             data_list = [num for elem in res for num in elem]
-            print(agentdata,'aaaaaaaaaaaaaaa')
             
             """looping lists [[][][]] inside list"""
             user_serializer = AdminAgentwiseNewAssignTicketListAPIViewSerializer(data_list, many=True)
@@ -881,7 +878,7 @@ class AdminDatewiseClosedTicketListAPIView(APIView):
     """
         fetching the serializer and Scikey data
     """
-    serializer_class = AdminAgentwiseClosedTicketListAPIViewSerializer
+    serializer_class = AdminAgentwiseClosedTicketListCountSerializer
     queryset = Sci1stKey.objects.all()
     def get(self, request, *args, **kwargs):
         '''
@@ -895,10 +892,9 @@ class AdminDatewiseClosedTicketListAPIView(APIView):
             agentdata = Sci1stKey.objects.filter(status="closed").values('completed_date','status').annotate(count=Count('status'))
             res.append(agentdata)            
             data_list = [num for elem in res for num in elem]
-            print(agentdata,'aaaaaaaaaaaaaaa')
             
             """looping lists [[][][]] inside list"""
-            user_serializer = AdminAgentwiseClosedTicketListAPIViewSerializer(data_list, many=True)
+            user_serializer = AdminAgentwiseClosedTicketListCountSerializer(data_list, many=True)
             '''convserting the all tickets into json by serializer'''
             response = {
                 'status': 'success',
@@ -1368,69 +1364,57 @@ from datetime import timedelta
 import pandas as pd
 from datetime import timedelta    
 
-
+import time
+import pytz
+jst = pytz.timezone('Asia/Kolkata')
+dt = jst.localize(datetime.datetime.now())
 class ListUsers(generics.GenericAPIView):
     def get(self,request):
         # last_month = datetime.today() - timedelta(days=0)
         m = datetime.date.today()
-        # login_details = AllLogin.objects.filter(login_time__startswith=timezone.now().date())
-        # login_details = AllLogin.objects.filter(login_time__startswith=timezone.now().date())
-        
-        # data1 = UserProfile.objects.filter(role='Agent').values_list('id', flat=True)
-        # res = []
-        # for agentname in data1:
         agentdata = AllLogin.objects.all()
-        # for  x in agentdata:
-        #     # res.append(agentdata)
-        #     v=(x['login_time'])
-            # data_list = [num for elem in res for num in elem]
-        # print(agentdata,'xxxxxxxxxxxxx')
-        # FROM Customers INNER JOIN Orders ON Customers.CustomerID = Orders.CustomerID;
-        # queryset=AllLogin.objects.extra(select={'logintime':'login_time'})
         queryset=AllLogin.objects.values('login_time')
         querySet3 = AllLogout.objects.values('logout_time')
         data=zip(queryset,querySet3)
-        for x in queryset:
-            x
-        for y in querySet3:
-            y
-        # c=x-y
-        d = x.copy()
-        d.update(y)
-        # print(d,'ccccccccccccccccccccccccccccccc')
-        a=(d['login_time'])
-        b=(d['logout_time'])
-        k = x,y
-        # print(k,'kkkkkkkk')
-        # c=k
+
         df1 = pd.DataFrame(queryset, columns = ['login_time','user'])
         df2 = pd.DataFrame(querySet3, columns = ['logout_time','user'])
-        # print(df1,df2)
-        # df_row = pd.concat([df1, df2], ignore_index=True)
         df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
-        count_series = df.groupby(['login_time', 'logout_time']).size()
-        print(data.count())
-        # df[['login_time','logout_time']]=df[['login_time','logout_time']].apply(pd.to_datetime,1)
+        arrival = pd.to_datetime(df['login_time'], format=' %H:%M:%S.%f%z')
+        dept = pd.to_datetime(df['logout_time'], format=' %H:%M:%S.%f%z')
+        diff = arrival - dept
 
-        # df.groupby('Name').apply(lambda x : (x['login_time']-x['logout_time'].shift()).dt.total_seconds().mean()/60)
-        # print(df,'sssssssssssssssss')
-        # df['login_time'] = pd.to_timedelta(df['login_time'])
-        # df['logout_time'] = pd.to_timedelta(df['logout_time'])
-        # df.set_index('Time', inplace=True)
-        # change index type to datetime
-        # df.index = pd.to_datetime(df.index)
-        # new_df = df.resample('60T').mean().reset_index()
-        # new_df['logout_time'] = new_df['logout_time'] + timedelta(seconds=3600)
-        # new_df.rename(columns={'login_time': 'login_time', 'Value': 'AvgValue'}, inplace=True)
+        # print(df1,df2)
+        # df['duration_bike_idle_between_rides'] = df['login_time'] - df['logout_time']
+        # df['previous_ride_end_time'] = df['logout_time'].Timestamp(date_1)
+        # df['duration_bike_idle_between_rides'] = df['login_time'] - df['previous_ride_end_time']
+
+        print(diff)
 
 
+        # df_row = pd.concat([df1, df2], ignore_index=True)
+        # df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
+        # df1.login_time=pd.to_datetime((df1.login_time), format='%H:%M:%S.%f')
+        # df1.login_time=df1.login_time.dt.month+df1.login_time.dt.year*100
+        # df1['login_time']=df1['login_time'].astype(int)
+        # print(df1)
+
+        # output=df1.groupby(['user','login_time']).count()
+        # output=output.unstack(2).stack(dropna=False).fillna(0)# missing one .
 
 
+        # output['Count']=output.max(1)
+        # output.reset_index().sort_values(['Product_ID','ID'])
+        print(output)
+        # means = df.groupby(pd.Grouper(freq='1D')).mean()
 
-
-        # print(df2,'llllllllll')
-        # res.groupby(level=0).user.nunique().max()
-        # d=pd.join(df1.join(df2.set_index('user'), on='id')
+        df_row_reindex = pd.concat([df1, df2], ignore_index=True)
+        
+        df=pd.merge(df1, df2, on=['user']).set_index(['logout_time','user']).sum(axis=1)
+        # df = (pd.to_datetime(df.logout_time) - pd.to_datetime(df.login_time)).dt.total_seconds()
+        df['AllLogin_flag'] = 'AllLogin'
+        df['AllLogout_flag'] = 'AllLogout'
+        # login1  = df.sort_values(by=['user_id', 'login_date','login_time'])
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
@@ -1598,13 +1582,12 @@ from rest_framework.permissions import IsAuthenticated
 ##theja
 # view/update/delete Team  by Admin
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAuthenticated,IsAdminPermission])
+# @permission_classes([IsAuthenticated,IsAdminPermission])
 def Team_detail(request, pk):
     '''
     This function is used for update team details of particular team and this
     function contain get, put, delete
     '''
-
     try:
         # get the model name with filtering team id
         tutorial = Teams.objects.get(pk=pk)
@@ -1618,8 +1601,8 @@ def Team_detail(request, pk):
 
     elif request.method == 'PUT':
         '''this function is used for update team detail '''
-        tutorial_data = JSONParser().parse(request)
-        tutorial_serializer = Teamserialsers(tutorial, data=tutorial_data)
+        # tutorial_data = JSONParser().parse(request)
+        tutorial_serializer = Teamserialsers(tutorial, data=request.data)
         if tutorial_serializer.is_valid():
             tutorial_serializer.save()
             return JsonResponse(tutorial_serializer.data,)
@@ -1628,6 +1611,9 @@ def Team_detail(request, pk):
     elif request.method == 'DELETE':
         tutorial.delete()
         return JsonResponse({'message': 'Team was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
+
+
+
 
 
 ##theja
@@ -1677,8 +1663,7 @@ def Person_detail(request, pk):
         this method is used for update single user data 
         \with particular field and update more fields
         '''
-        tutorial_data = JSONParser().parse(request)
-        tutorial_serializer = UserProfileSerializer(tutorial, data=tutorial_data)
+        tutorial_serializer = UserProfileSerializer(tutorial, data=request.data)
         if tutorial_serializer.is_valid():
             tutorial_serializer.save()
             return JsonResponse(tutorial_serializer.data)

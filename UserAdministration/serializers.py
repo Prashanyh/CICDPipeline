@@ -359,6 +359,30 @@ class AdminAgentwiseNewAssignTicketListAPIViewSerializer(serializers.ModelSerial
         fields = ['upload_date','count']
         # fields = '__all__'
 
+class AdminAgentwiseClosedTicketListCountAPIViewSerializer(serializers.ModelSerializer):
+    '''
+    sci all tickets serializer use this serializer all users
+    
+    '''
+    count = serializers.IntegerField()
+    class Meta:
+        # model name
+        model = Sci1stKey
+        # required fields
+        fields = ['completed_date','count']
+        # fields = '__all__'
+
+class AdminAgentwiseClosedTicketListCountSerializer(serializers.ModelSerializer):
+    '''
+    sci all tickets serializer use this serializer all users
+    
+    '''
+    count = serializers.IntegerField()
+    class Meta:
+        # model name
+        model = Sci1stKey
+        # required fields
+        fields = ['completed_date','count']
 #
 # class AdminAgentwiseClosedTicketListAPIViewSerializer(serializers.ModelSerializer):
 #     '''
