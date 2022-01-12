@@ -5,6 +5,7 @@ from django.contrib import auth
 from django.contrib.auth import login
 from django.contrib.auth.password_validation import validate_password
 from django.http import HttpResponse, JsonResponse, request
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -210,8 +211,15 @@ class AgentOwnTicketsSerializer(serializers.ModelSerializer):
 
 
 ##prasanth
+class DateTimeFieldWihTZ(serializers.DateTimeField):
+    '''Class to make output of a DateTime Field timezone aware
+    '''
+    def to_representation(self, value):
+        value = timezone.localtime(value)
+        return super(DateTimeFieldWihTZ, self).to_representation(value)
+
 class AgentRetriveSerializer(serializers.ModelSerializer):
-    stop_time_ticket = serializers.DateTimeField(input_formats=datetime.datetime.now())
+    # stop_time_ticket = serializers.DateTimeField(input_formats=datetime.datetime.now())
     '''
     agent update status of scikey serializer
     '''
@@ -220,6 +228,7 @@ class AgentRetriveSerializer(serializers.ModelSerializer):
         model = Sci1stKey
         # required fields
         fields = ['id','process_status','status','stop_time_ticket']
+    stop_time_ticket = DateTimeFieldWihTZ(format='%Y-%m-%d %H:%M')
         # fields = '__all__'
     # def update(self, instance, validated_data):
     #     qs = Sci1stKey.objects.filter(id=id)
