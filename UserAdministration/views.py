@@ -517,17 +517,25 @@ class AdminTeamwiseNewTicketListAPIView(APIView):
             for y in userslist:
                 agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="newtickets")
                 res.append(agentdata)
+            print(res,'sssssssssssssss')
             # tlteam_closed_tickets = (sum(res))
             agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="newtickets").values('upload_date', 'team_name','status').annotate(count=Count('status'))
-            print(agentdata,'ppppppppppppppppppppppp')
+            
             countArray = []
-
             for profile in agentdata:
                 data = {'upload_date':str(profile['upload_date']), 'team_name':str(profile['team_name']),'count': profile['count']}
                 countArray.append(data)
+            print(countArray,'sssssssssssssssss')
 
-            return Response(json.dumps(countArray))
-            return Response({'message':'assign tickets table data'}, status=status.HTTP_200_OK)
+            new_ticketsdata_serializer = AdminTeamwiseTicketListAPIViewSerializer(countArray, many=True)
+            # return JsonResponse(serializer.data, safe=False)
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': new_ticketsdata_serializer.data
+            }
+            return Response(response)
+            # return Response({'message':'assign tickets table data'}, status=status.HTTP_200_OK)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
@@ -562,9 +570,17 @@ class AdminTeamwiseAssignTicketListAPIView(APIView):
             for profile in agentdata:
                 data = {'upload_date':str(profile['upload_date']), 'team_name':str(profile['team_name']),'count': profile['count']}
                 countArray.append(data)
-
-            return Response(json.dumps(countArray))
-            return Response({'message':'assign tickets table data'}, status=status.HTTP_200_OK)
+            
+            assign_ticketsdata_serializer = AdminTeamwiseTicketListAPIViewSerializer(countArray, many=True)
+            # return JsonResponse(serializer.data, safe=False)
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': assign_ticketsdata_serializer.data
+            }
+            return Response(response)
+            # return Response(json.dumps(countArray))
+            # return Response({'message':'assign tickets table data'}, status=status.HTTP_200_OK)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
@@ -591,15 +607,23 @@ class AdminTeamwisePendingTicketListAPIView(APIView):
                 res.append(agentdata)
             # tlteam_closed_tickets = (sum(res))
             agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="pending").values('upload_date', 'team_name','status').annotate(count=Count('status'))
-            print(agentdata,'ppppppppppppppppppppppp')
             countArray = []
 
             for profile in agentdata:
                 data = {'upload_date':str(profile['upload_date']), 'team_name':str(profile['team_name']),'count': profile['count']}
                 countArray.append(data)
+
+            pending_ticketsdata_serializer = AdminTeamwiseTicketListAPIViewSerializer(countArray, many=True)
+            # return JsonResponse(serializer.data, safe=False)
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': pending_ticketsdata_serializer.data
+            }
+            return Response(response)
             
 
-            return Response(json.dumps(countArray),{'message':'assign tickets table data'}, status=status.HTTP_200_OK)
+            # return Response(json.dumps(countArray),{'message':'assign tickets table data'}, status=status.HTTP_200_OK)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
@@ -632,9 +656,18 @@ class AdminTeamwiseClosedTicketListAPIView(APIView):
                 data = {'completed_date':str(profile['completed_date']), 'team_name':str(profile['team_name']),'count': profile['count']}
                 countArray.append(data)
             
+            closed_ticketsdata_serializer = AdminTeamwiseClosedTicketListAPIViewSerializer(countArray, many=True)
+            # return JsonResponse(serializer.data, safe=False)
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'data': closed_ticketsdata_serializer.data
+            }
+            return Response(response)
+            
 
             # return Response(json.dumps(countArray))
-            return Response(json.dumps(countArray),{'message':'assign tickets table data'}, status=status.HTTP_200_OK)
+            # return Response(json.dumps(countArray),{'message':'assign tickets table data'}, status=status.HTTP_200_OK)
         except Exception:
             "if data does not exist enter into exception"
             return Response({'message':'No Details Found'}, status=status.HTTP_404_NOT_FOUND)
