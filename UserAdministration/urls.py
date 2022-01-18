@@ -77,7 +77,8 @@ urlpatterns = [
     ##tl reports
     path('tl_ticketstatus_count/', views.Tl_Teamwise_ticket_StatuscountView.as_view(), name='tl_ticketstatus_count'),#showing all tickets status count under his team
     path('tl_processstatus_count/',views.Tl_Teamwise_process_StatuscountView.as_view(),name='tl_processstatus_count'),#showing all process status count under his team
-    path('tl_agentwise_ticketstatus_count/',views.Tl_Team_agentwise_countView.as_view(),name='tl_agentwise_ticketstatus_count'),#showing all date wise with agent count under his team
+    path('tl_agentwise_ticketstatus_count/',views.Tl_Team_agentwise_ticketstatus_countView.as_view(),name='tl_agentwise_ticketstatus_count'),#showing all date wise with agent ticket status count under his team
+    path('tl_agentwise_processstatus_count/', views.Tl_Team_agentwise_processstatus_countView.as_view(),name='tl_agentwise_processstatus_count'),  # showing all date wise with agent process status count under his team
     path('tl_datewise_ticketstatus_count/', views.Tl_Team_datewise_countView.as_view(),name='tl_datewise_ticketstatus_count'),  # showing all date wise count under his team
     path('tl_previousweek_tickets_list/', views.Tl_Teamwise_ticketstatus_privousweek_countView.as_view(),name='tl_previousweek_tickets_list'),#showing new/closed tickets previous week count for tl under his team
     path('tl_currentweek_tickets_list/',views.Tl_Teamwise_ticketstatus_currentweek_countView.as_view(),name='tl_currentweek_tickets_list'),#showing new/closed tickets current week count for tl under his team
