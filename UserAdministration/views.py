@@ -1144,9 +1144,9 @@ class AgentAssignDetailTicketListApiView(generics.GenericAPIView,mixins.ListMode
                 change the status of ticket
             '''
             for x in qs:
-                x.start_time_ticket = datetime.datetime.now()
+                x.start_time_ticket = timezone.now()
                 x.save()
-                qs.update(start_time_ticket=datetime.datetime.now())
+                qs.update(start_time_ticket=timezone.now())
                 data = Sci1stKey.objects.get(id=id,status="assign",process_status="emty")
                 return data
         except Sci1stKey.DoesNotExist:
@@ -1386,38 +1386,47 @@ from datetime import timedelta
 import pandas as pd
 from datetime import timedelta    
 
-import time
-import pytz
-jst = pytz.timezone('Asia/Kolkata')
-dt = jst.localize(datetime.datetime.now())
+# import time
+# import pytz
+# jst = pytz.timezone('Asia/Kolkata')
+# dt = jst.localize(datetime.datetime.now())
 class ListUsers(generics.GenericAPIView):
     def get(self,request):
-        # last_month = datetime.today() - timedelta(days=0)
-        m = datetime.date.today()
-        agentdata = AllLogin.objects.all()
-        queryset=AllLogin.objects.values('login_time')
-        querySet3 = AllLogout.objects.values('logout_time')
-        data=zip(queryset,querySet3)
 
-        df1 = pd.DataFrame(queryset, columns = ['login_time','user'])
-        df2 = pd.DataFrame(querySet3, columns = ['logout_time','user'])
+        queryset=AllLogin.objects.values('login_time','user')
+        querySet3 = AllLogout.objects.values('logout_time','user')
+
+        df1 = pd.DataFrame(queryset)
+        df2 = pd.DataFrame(querySet3)
         df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
-        arrival = pd.to_datetime(df['login_time'].loc[0].replace("'",""), format=' %H:%M:%S.%f')
-        dept = datetime.strptime(df['logout_time'].loc[0].replace("'",""), format=' %H:%M:%S.%f')
-        diff = arrival - dept
+        # dateparse = lambda dates: pd.datetime.strptime(dates, "%d-%m-%Y %H:%M")
+        arrival = pd.to_timedelta(df['logout_time'].astype(str))
+        dept = pd.to_timedelta(df['login_time'].astype(str))
+        d= arrival - dept
+        # gk = df.groupby(['login_time', 'logout_time']).count()
 
-        print(diff)
+        gk=df.sort_values(['login_time', 'logout_time'])
 
-        print(output)
-        # means = df.groupby(pd.Grouper(freq='1D')).mean()
+        print(gk,'time')
 
-        df_row_reindex = pd.concat([df1, df2], ignore_index=True)
+        data1 = AllLogin.objects.values('login_time','user')
+        data2 = AllLogout.objects.values('logout_time','user')
+        df1 = pd.DataFrame(data1)
+        df2 = pd.DataFrame(data2)
+        frames = [df1, df2]
+        result = pd.concat(frames)
+        print(result)
+
+
+
+        # grouped_df = df.groupby(['logout_time', 'login_time'], axis=0, as_index=False).max()
+        # # dfs = dict(tuple(df.groupby('Group')))
+
+        # # print(grouped_df)
+        # df2 = df.groupby('logout_time')['login_time'].sum().to_frame().reset_index().sort_values(by='login_time')
         
-        df=pd.merge(df1, df2, on=['user']).set_index(['logout_time','user']).sum(axis=1)
-        # df = (pd.to_datetime(df.logout_time) - pd.to_datetime(df.login_time)).dt.total_seconds()
-        df['AllLogin_flag'] = 'AllLogin'
-        df['AllLogout_flag'] = 'AllLogout'
-        # login1  = df.sort_values(by=['user_id', 'login_date','login_time'])
+        # print(df2,'jjjjjjjjjjjjjjjjj')
+
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
