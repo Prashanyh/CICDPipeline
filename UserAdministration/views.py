@@ -1394,38 +1394,49 @@ class ListUsers(generics.GenericAPIView):
     def get(self,request):
 
         queryset=AllLogin.objects.values('login_time','user_id','login_date')
-        querySet3 = AllLogout.objects.values('logout_time','logout_date')
+        querySet3 = AllLogout.objects.values('logout_time','user_id','logout_date')
 
         df1 = pd.DataFrame(queryset)
         df2 = pd.DataFrame(querySet3)
-        df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
+        
+        df2.rename(columns = {'user_id':'user'}, inplace = True)
+        df1 = df1.sort_values(['login_date','user_id'])
+        df2 = df2.sort_values([ 'logout_date','user'])
+        
+        print("df1----")
+        print(df1)
+        print("df2-----")
+        print(df2)
+        
+        
+        
+        
+        df = df1.append(df2)
+        print(df)
         # dateparse = lambda dates: pd.datetime.strptime(dates, "%d-%m-%Y %H:%M")
         df['logout_time'] = pd.to_timedelta(df['logout_time'].astype(str))
         df['login_time'] = pd.to_timedelta(df['login_time'].astype(str))
         # d= arrival - dept
         df['diiffrences']=df['logout_time']-df['login_time']
-        print(df,"df---------------")
-        df1 = df[['login_date','user_id','diiffrences']]
-        print(type(df1))
-        print("df1----------")
-        print(df1)
-        group = df1.groupby('login_date')
-        print(group.groups)
+        
+        diff = df[['login_date','user_id','user','diiffrences']]
+        
+        print("diff----------")
+        print(diff)
+        
+        
 
-        group1 = df1.groupby(['user_id'])
-        for name, group in group1:
-            print("name-----")
-            print(name)
-            print("group-----------")
-            print(group)
-            print()
+        group1 = diff.groupby(['user_id','user','login_date']).sum('diiffrences')
+        print("group1------",group1.head)
+        
+      
 
         
         
         
         # gk = df.groupby(['login_time', 'logout_time']).count()
 
-        gk=df.sort_values(['login_time', 'logout_time'])
+        # gk=df.sort_values(['login_time', 'logout_time'])
 
         # print(d,'time')
 
