@@ -1400,8 +1400,8 @@ class ListUsers(generics.GenericAPIView):
         df2 = pd.DataFrame(querySet3)
         
         df2.rename(columns = {'user_id':'user'}, inplace = True)
-        df1 = df1.sort_values(['login_date','user_id'])
-        df2 = df2.sort_values([ 'logout_date','user'])
+        df1 = df1.sort_values(['user_id','login_time'])
+        df2 = df2.sort_values([ 'user','logout_time'])
         
         print("df1----")
         print(df1)
@@ -1411,7 +1411,8 @@ class ListUsers(generics.GenericAPIView):
         
         
         
-        df = df1.append(df2)
+        
+        df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
         print(df)
         # dateparse = lambda dates: pd.datetime.strptime(dates, "%d-%m-%Y %H:%M")
         df['logout_time'] = pd.to_timedelta(df['logout_time'].astype(str))
