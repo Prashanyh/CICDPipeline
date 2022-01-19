@@ -1393,29 +1393,56 @@ from datetime import timedelta
 class ListUsers(generics.GenericAPIView):
     def get(self,request):
 
-        queryset=AllLogin.objects.values('login_time','user')
-        querySet3 = AllLogout.objects.values('logout_time','user')
+        queryset=AllLogin.objects.values('login_time','user_id','login_date')
+        querySet3 = AllLogout.objects.values('logout_time','logout_date')
 
         df1 = pd.DataFrame(queryset)
         df2 = pd.DataFrame(querySet3)
         df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
         # dateparse = lambda dates: pd.datetime.strptime(dates, "%d-%m-%Y %H:%M")
-        arrival = pd.to_timedelta(df['logout_time'].astype(str))
-        dept = pd.to_timedelta(df['login_time'].astype(str))
-        d= arrival - dept
+        df['logout_time'] = pd.to_timedelta(df['logout_time'].astype(str))
+        df['login_time'] = pd.to_timedelta(df['login_time'].astype(str))
+        # d= arrival - dept
+        df['diiffrences']=df['logout_time']-df['login_time']
+        print(df,"df---------------")
+        df1 = df[['login_date','user_id','diiffrences']]
+        print(type(df1))
+        print("df1----------")
+        print(df1)
+        group = df1.groupby('login_date')
+        print(group.groups)
+
+        group1 = df1.groupby(['user_id'])
+        for name, group in group1:
+            print("name-----")
+            print(name)
+            print("group-----------")
+            print(group)
+            print()
+
+        
+        
+        
         # gk = df.groupby(['login_time', 'logout_time']).count()
 
         gk=df.sort_values(['login_time', 'logout_time'])
 
-        print(gk,'time')
+        # print(d,'time')
 
-        data1 = AllLogin.objects.values('login_time','user')
-        data2 = AllLogout.objects.values('logout_time','user')
-        df1 = pd.DataFrame(data1)
-        df2 = pd.DataFrame(data2)
-        frames = [df1, df2]
-        result = pd.concat(frames)
-        print(result)
+        data1 = AllLogin.objects.values('user','login_time','login_date').order_by('user')
+        data2 = AllLogout.objects.values('user','logout_time','logout_date').order_by('user')
+        lg=[]
+        for login in data1:
+            l1=login
+            lg.append(l1)
+            for k,v in l1.items():
+                a=v
+        for logout in data2:
+            l2=logout
+            lg.append(l2)
+            for k,v in l2.items():
+                b=v
+        # print(data2,'result')
 
 
         # grouped_df = df.groupby(['logout_time', 'login_time'], axis=0, as_index=False).max()
