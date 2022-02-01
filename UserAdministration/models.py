@@ -56,15 +56,15 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     mobile = models.CharField(_('mobile'), unique=True, max_length=10, blank=True, null=True)
     email = models.EmailField(_('email address'), blank=True, null=True)
     password = models.CharField(_('password'),max_length=25,blank=True, null=True)
-    date_joined = models.DateTimeField(verbose_name="date joined", auto_now_add=True,)
-    is_verified = models.BooleanField(default=True,)
-    is_active = models.BooleanField(_('active'), default=True)
+    date_joined = models.DateTimeField(verbose_name="date joined", auto_now_add=True)
+    is_verified = models.BooleanField(default=True,null=True)
+    is_active = models.BooleanField(_('active'), default=True,null=True)
     is_admin = models.BooleanField(_('is_Admin'), default=False, blank=True, null=True)
     is_manager = models.BooleanField(_('is_Manger'), default=False, blank=True, null=True)
     is_tl = models.BooleanField(_('is_Tl'), default=False, blank=True, null=True)
     is_agent = models.BooleanField(_('is_Agent'), default=False, blank=True, null=True)
     orginization = models.CharField(max_length=200, null=True, default=False)
-    dob=models.DateField(default=False)
+    dob=models.DateField(default=False,null=True)
     GENDER_CHOICES = (
         ('Male', 'Male'),
         ('Female', 'Female'),

@@ -259,30 +259,34 @@ class UploadPersonView(APIView):
         serializer.is_valid(raise_exception=True)
         dataset = Dataset()
         file = serializer.validated_data['file']
-        imported_data = dataset.load(file.read(), format='xlsx')
-        '''uploading xl file with particular data what user mentioned in xl we are looping the xl data
-                and appending into the database with same fields'''
-        for data in imported_data:
-            person_data=UserProfile(username=data[0],
-                      fullname=data[1],
-                      mobile=data[2],
-                      email=data[3],
-                      password=data[4],
-                      date_joined=data[5],
-                      is_verified=data[6],
-                      is_active=data[7],
-                      is_admin=data[8],
-                      is_manager=data[9],
-                      is_tl=data[10],
-                      is_agent=data[11],
-                      orginization=data[12],
-                      dob=data[13],
-                      gender=data[14],
-                      team_name=data[15],
-                      role=data[16]
-                      )
-            person_data.save()
-        return Response(status=status.HTTP_200_OK)
+        try:
+            imported_data = dataset.load(file.read(), format='xlsx')
+            '''uploading xl file with particular data what user mentioned in xl we are looping the xl data
+                    and appending into the database with same fields'''
+            for data in imported_data:
+                person_data = UserProfile(username=data[0],
+                                        fullname=data[1],
+                                        mobile=data[2],
+                                        email=data[3],
+                                        password=make_password(data[4]),
+                                        date_joined=data[5],
+                                        is_verified=data[6],
+                                        is_active=data[7],
+                                        is_admin=data[8],
+                                        is_manager=data[9],
+                                        is_tl=data[10],
+                                        is_agent=data[11],
+                                        orginization=data[12],
+                                        dob=data[13],
+                                        gender=data[14],
+                                        team_name_id=data[15],
+                                        role=data[16]
+                                        )
+                person_data.save()
+            return Response({'sucessfully uploaded your file'}, status=status.HTTP_200_OK)
+        except:
+            # return response
+            return Response({'message':'Please Check the file Data'}, status=status.HTTP_404_NOT_FOUND)
 
 
 ##prasanth
@@ -1396,76 +1400,40 @@ class ListUsers(generics.GenericAPIView):
         queryset=AllLogin.objects.values('login_time','user_id','login_date')
         querySet3 = AllLogout.objects.values('logout_time','user_id','logout_date')
 
-        df1 = pd.DataFrame(queryset)
-        df2 = pd.DataFrame(querySet3)
-        
-        df2.rename(columns = {'user_id':'user'}, inplace = True)
-        df1 = df1.sort_values(['user_id','login_time'])
-        df2 = df2.sort_values([ 'user','logout_time'])
-        
-        print("df1----")
-        print(df1)
-        print("df2-----")
-        print(df2)
-        
-        
-        
-        
-        
-        df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
-        print(df)
-        # dateparse = lambda dates: pd.datetime.strptime(dates, "%d-%m-%Y %H:%M")
-        df['logout_time'] = pd.to_timedelta(df['logout_time'].astype(str))
-        df['login_time'] = pd.to_timedelta(df['login_time'].astype(str))
-        # d= arrival - dept
-        df['diiffrences']=df['logout_time']-df['login_time']
-        
-        diff = df[['login_date','user_id','user','diiffrences']]
-        
-        print("diff----------")
-        print(diff)
-        
-        
-
-        group1 = diff.groupby(['user_id','user','login_date']).sum('diiffrences')
-        print("group1------",group1.head)
-        
-      
-
-        
-        
-        
-        # gk = df.groupby(['login_time', 'logout_time']).count()
-
-        # gk=df.sort_values(['login_time', 'logout_time'])
-
-        # print(d,'time')
-
-        data1 = AllLogin.objects.values('user','login_time','login_date').order_by('user')
-        data2 = AllLogout.objects.values('user','logout_time','logout_date').order_by('user')
-        lg=[]
-        for login in data1:
-            l1=login
-            lg.append(l1)
-            for k,v in l1.items():
-                a=v
-        for logout in data2:
-            l2=logout
-            lg.append(l2)
-            for k,v in l2.items():
-                b=v
-        # print(data2,'result')
+        # df1 = pd.DataFrame(queryset)
+        # df2 = pd.DataFrame(querySet3)
+        #
+        # df2.rename(columns = {'user_id':'user'}, inplace = True)
+        # df1 = df1.sort_values(['user_id','login_time'])
+        # df2 = df2.sort_values([ 'user','logout_time'])
+        #
+        # df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
+        # df['logout_time'] = pd.to_timedelta(df['logout_time'].astype(str))
+        # df['login_time'] = pd.to_timedelta(df['login_time'].astype(str))
+        #
+        # df['diiffrences']=df['logout_time']-df['login_time']
+        # diff = df[['login_date','user_id','user','diiffrences']]
+        # group1 = diff.groupby(['user_id','user','login_date']).sum('diiffrences')
+        # print(group1,'-------------------------')
+        # # d = group1.set_index('user_id')['diiffrences'].to_dict()
+        # d=group1.reset_index()
+        # # d['diiffrences']=pd.to_timedelta(df['diiffrences'],unit="ms")
+        # # j=group1.update(group1.select_dtypes('datetime').apply(lambda x: x.group1.strftime('%Y-%m-%d')))
+        # json_data  = d.to_json(orient='records',lines=False,date_format='iso')
+        # # d=list(d)
+        # # for k,v in d.items():
+        #     # d=v
+        # # json_data =json.dumps(json_data)
+        #
+        #
+        #
+        #
+        # print(d,'sssssssssssssssssssssssss')
 
 
-        # grouped_df = df.groupby(['logout_time', 'login_time'], axis=0, as_index=False).max()
-        # # dfs = dict(tuple(df.groupby('Group')))
+        return Response(json_data)
 
-        # # print(grouped_df)
-        # df2 = df.groupby('logout_time')['login_time'].sum().to_frame().reset_index().sort_values(by='login_time')
-        
-        # print(df2,'jjjjjjjjjjjjjjjjj')
-
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        # return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 
@@ -2889,4 +2857,45 @@ class Logout(GenericAPIView):
         name.save()
         sz.save()###saving the token in outstanding table
         return Response({'message':'Succssfully Logout'},status=status.HTTP_204_NO_CONTENT)
+
+
+from django.shortcuts import render
+from django.db import connection
+from django.apps import apps
+from django.core.management import call_command
+from django.core import management
+
+class DynamicQueries(APIView):
+    def post(self,request, format=None):
+        curser = connection.cursor()
+        curser.execute(request.data['data'])
+        return Response('table is cretaed',status=status.HTTP_201_CREATED)
+
+
+class ShemaImports(APIView):
+    def post(self,request, format=None):
+        management.call_command('inspectdb')
+        with open('C:/Users/DELL/Downloads/arxt/Apis/XT01/UserAdministration/model.py', 'w') as f:
+            call_command('inspectdb', stdout=f)
+        return Response('schema imported into django models',status=status.HTTP_200_OK)
+
+
+
+# class AllModels(APIView):
+#     def get(self,request, format=None):
+#         models = {
+#         model.__name__: model for model in apps.get_models()
+#         }
+#         print(models,'sssssssssssssssssssssss')
+#         return Response(models,status=status.HTTP_200_OK)
+
+# class SelectedTables(APIView):
+#     def get(self,request, format=None):
+#         model=request.POST.get('table')
+#         model=apps.get_model('users', model)
+#         data=model.objects.all()
+#         return Response(models,status=status.HTTP_200_OK)
+
+
+
 
