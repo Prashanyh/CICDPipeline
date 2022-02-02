@@ -73,7 +73,8 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         ('Manager', 'Manager'),
         ('TL', 'TL'),
         ('Admin', 'Admin'),
-        ('Agent', 'Agent'),)
+        ('Agent', 'Agent'),
+        ('SuperAdmin', 'SuperAdmin'),)
 
     gender = models.CharField(max_length=8, choices=GENDER_CHOICES, default=False)
     team_name = models.ForeignKey(Teams, on_delete=models.CASCADE, default=False, null=True, related_name='person_team')

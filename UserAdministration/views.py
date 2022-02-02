@@ -2912,9 +2912,9 @@ class AllModels(APIView):
 
 
 class SelectedTables(APIView):
-    def get(self,request, format=None):
-        model=request.POST.get('table')
+    def post(self,request, format=None):
         try:
+            model=request.data['table']
             model=apps.get_model('dynamicapp', model)
             data=model.objects.all()
             # data = data.data
@@ -2926,7 +2926,7 @@ class SelectedTables(APIView):
             }
             return Response(response)
         except:
-            return Response('table data not found',status=status.HTTP_404_NOT_FOUND)
+            return Response('please select any table / table data not found',status=status.HTTP_404_NOT_FOUND)
         
 
 

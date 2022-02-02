@@ -39,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
         # get the model name
         model = UserProfile
         #required fields
-        fields = ("id","username","fullname", "email", "password", "mobile","dob","gender","role","team_name","orginization","is_admin","is_manager","is_tl","is_agent")
+        fields = ("id","username","fullname", "email", "password", "mobile","dob","gender","role","team_name","orginization","is_admin","is_manager","is_tl","is_agent","is_superuser")
         # fields="__all__"
 
 
@@ -61,7 +61,8 @@ class LoginSerializer(serializers.ModelSerializer):
         ('Manager', 'Manager'),
         ('TL', 'TL'),
         ('Admin', 'Admin'),
-        ('Agent', 'Agent'),)
+        ('Agent', 'Agent'),
+        ('SuperAdmin', 'SuperAdmin'),)
 
     username=serializers.CharField()
     password=serializers.CharField(max_length=10,min_length=6,write_only=True)

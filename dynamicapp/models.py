@@ -83,7 +83,7 @@ class UseradministrationUserprofile(models.Model):
     fullname = models.CharField(max_length=200, blank=True, null=True)
     mobile = models.CharField(unique=True, max_length=10, blank=True, null=True)
     email = models.CharField(max_length=254, blank=True, null=True)
-    password = models.CharField(max_length=200, blank=True, null=True)
+    password = models.CharField(max_length=500, blank=True, null=True)
     date_joined = models.DateTimeField()
     is_verified = models.BooleanField(blank=True, null=True)
     is_active = models.BooleanField(blank=True, null=True)
@@ -207,6 +207,16 @@ class DjangoSession(models.Model):
     class Meta:
         managed = False
         db_table = 'django_session'
+
+
+class Testing6(models.Model):
+    user_id = models.AutoField(primary_key=True)
+    username = models.CharField(unique=True, max_length=50)
+    password = models.CharField(max_length=50)
+
+    class Meta:
+        managed = False
+        db_table = 'testing6'
 
 
 class Testing7(models.Model):
