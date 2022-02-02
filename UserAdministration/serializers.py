@@ -31,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
     """
     # mobile = serializers.RegexField("[0-9]{10}",min_length=10,max_length=10)
     mobile = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True,max_length=500)
     email=serializers.EmailField(max_length=155,min_length=3,required=True)
     fullname=serializers.CharField(max_length=55,min_length=3,required=True)
 
@@ -601,3 +601,9 @@ class RefreshTokenSerializer(serializers.Serializer):
             '''getting the token and put in the blacklist'''
         except TokenError:
             self.fail('bad_token')
+
+
+
+class RetriveTablesSerializer(serializers.Serializer):
+    class Meta:
+        fields = '__all__'

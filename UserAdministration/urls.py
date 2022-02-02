@@ -119,8 +119,8 @@ urlpatterns = [
     #dynamic model
     path('create_queries/', views.DynamicQueries.as_view(),name='create_queries'),#creating front end queries
     path('schema_imports/', views.ShemaImports.as_view(),name='schema_imports'), # shema defining dumping to models
-    # path('fetch_models/', views.AllModels.as_view(),name='fetch_models'), # fetching all models
-    # path('selected_tables/', views.SelectedTables.as_view(),name='selected_tables'), # fetching all selected tables
+    path('fetch_models/', views.AllModels.as_view(),name='fetch_models'), # fetching all models
+    path('selected_tables/', views.SelectedTables.as_view(),name='selected_tables'), # fetching all selected tables
 
 
 

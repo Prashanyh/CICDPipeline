@@ -48,7 +48,14 @@ from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 import string
 import random
-  
+
+from django.shortcuts import render
+from django.db import connection
+from django.apps import apps
+from django.core.management import call_command
+from django.core import management
+from dynamicapp.models import *
+
 # initializing size of string 
 N = 7
   
@@ -240,7 +247,6 @@ class UploadFileView(APIView):
                           tl_name=data[18],
                           team_name=data[19],
                           )
-                print(sci_data,'aaaaaaaaaaaaaaaaa')
                 sci_data.save()
                 # return response
             return Response({'sucessfully uploaded your file'},status=status.HTTP_200_OK)
@@ -521,7 +527,6 @@ class AdminTeamwiseNewTicketListAPIView(APIView):
             for y in userslist:
                 agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="newtickets")
                 res.append(agentdata)
-            print(res,'sssssssssssssss')
             # tlteam_closed_tickets = (sum(res))
             agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="newtickets").values('upload_date', 'team_name','status').annotate(count=Count('status'))
             
@@ -529,7 +534,6 @@ class AdminTeamwiseNewTicketListAPIView(APIView):
             for profile in agentdata:
                 data = {'upload_date':str(profile['upload_date']), 'team_name':str(profile['team_name']),'count': profile['count']}
                 countArray.append(data)
-            print(countArray,'sssssssssssssssss')
 
             new_ticketsdata_serializer = AdminTeamwiseTicketListAPIViewSerializer(countArray, many=True)
             # return JsonResponse(serializer.data, safe=False)
@@ -568,7 +572,6 @@ class AdminTeamwiseAssignTicketListAPIView(APIView):
                 res.append(agentdata)
             # tlteam_closed_tickets = (sum(res))
             agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="assign").values('upload_date', 'team_name','status').annotate(count=Count('status'))
-            print(agentdata,'ppppppppppppppppppppppp')
             countArray = []
 
             for profile in agentdata:
@@ -653,7 +656,6 @@ class AdminTeamwiseClosedTicketListAPIView(APIView):
                 res.append(agentdata)
             # tlteam_closed_tickets = (sum(res))
             agentdata = Sci1stKey.objects.filter(team_name=k).filter(status="closed").values('completed_date', 'team_name','status').annotate(count=Count('status'))
-            print(agentdata,'ppppppppppppppppppppppp')
             countArray = []
 
             for profile in agentdata:
@@ -1369,7 +1371,6 @@ class Ticketreassign_to_agentsCompleteview(APIView):
             values = id.split(',')
             user = Sci1stKey.objects.filter(id__in=values)
             for x in user:
-                print(x,'ssssssssssssssss')
                 x.status = 'assign'
                 x.save()
                 user.update(agent=agent_name)
@@ -2708,7 +2709,6 @@ class AllTlReAssign_Tickets_ListApi_View(APIView):
             user_id = request.user.username
             """ getting userid """
             queryset = UserProfile.objects.get(username=user_id).team_name_id
-            print(queryset)
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentfilter = UserProfile.objects.filter(role='Agent')
             
@@ -2783,7 +2783,6 @@ class TLTicketreassign_to_agentsCompleteview(APIView):
             values = id.split(',')
             user = Sci1stKey.objects.filter(id__in=values)
             for x in user:
-                print(x,'ssssssssssssssss')
                 x.status = 'assign'
                 x.save()
                 user.update(agent=agent_name)
@@ -2806,7 +2805,6 @@ class ExampleCookie(APIView):
         permission_classes = (permissions.IsAuthenticated,)
         response = HttpResponse("Welcome Guest.")  
         data=response.set_cookie('programink', 'We love Django') 
-        print(data,'ssssssssssssssssssssssss')
         return response  
 
 def getcookie(request):  
@@ -2859,42 +2857,60 @@ class Logout(GenericAPIView):
         return Response({'message':'Succssfully Logout'},status=status.HTTP_204_NO_CONTENT)
 
 
-from django.shortcuts import render
-from django.db import connection
-from django.apps import apps
-from django.core.management import call_command
-from django.core import management
+
 
 class DynamicQueries(APIView):
     def post(self,request, format=None):
-        curser = connection.cursor()
-        curser.execute(request.data['data'])
-        return Response('table is cretaed',status=status.HTTP_201_CREATED)
+        try:
+            curser = connection.cursor()
+            curser.execute(request.data['data'])
+            return Response('table is cretaed',status=status.HTTP_201_CREATED)
+        except:
+            return Response('please check your raw data query&table is already created with this name',status=status.HTTP_404_NOT_FOUND)
+
 
 
 class ShemaImports(APIView):
     def post(self,request, format=None):
-        management.call_command('inspectdb')
-        with open('C:/Users/DELL/Downloads/arxt/Apis/XT01/UserAdministration/model.py', 'w') as f:
-            call_command('inspectdb', stdout=f)
-        return Response('schema imported into django models',status=status.HTTP_200_OK)
+        try:
+            management.call_command('inspectdb')
+            with open('C:/Users/DELL/Downloads/arxt/Apis/XT01/dynamicapp/models.py', 'w') as f:
+                call_command('inspectdb', stdout=f)
+            return Response('schema imported into django models',status=status.HTTP_201_CREATED)
+        except:
+            return Response('your path is not defined properly ,please check your path',status=status.HTTP_404_NOT_FOUND)
 
 
 
-# class AllModels(APIView):
-#     def get(self,request, format=None):
-#         models = {
-#         model.__name__: model for model in apps.get_models()
-#         }
-#         print(models,'sssssssssssssssssssssss')
-#         return Response(models,status=status.HTTP_200_OK)
+class AllModels(APIView):
+    def get(self,request, format=None):
+        try:
+            models = {
+            model.__name__: model for model in apps.get_models()
+            }
+            return JsonResponse({"models_to_return": list(models)})
+        except:
+            return Response('no models in your database please check your database',status=status.HTTP_404_NOT_FOUND)
 
-# class SelectedTables(APIView):
-#     def get(self,request, format=None):
-#         model=request.POST.get('table')
-#         model=apps.get_model('users', model)
-#         data=model.objects.all()
-#         return Response(models,status=status.HTTP_200_OK)
+
+
+class SelectedTables(APIView):
+    def get(self,request, format=None):
+        model=request.POST.get('table')
+        try:
+            model=apps.get_model('dynamicapp', model)
+            data=model.objects.all()
+            # data = data.data
+            fields = [f.name for f in model._meta.fields]
+            response = {
+            'status': 'success',
+            'code': status.HTTP_200_OK,
+            'data': fields
+            }
+            return Response(response)
+        except:
+            return Response('table data not found',status=status.HTTP_404_NOT_FOUND)
+        
 
 
 

@@ -55,7 +55,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     fullname = models.CharField(_('name'), max_length=200, blank=True, null=True)
     mobile = models.CharField(_('mobile'), unique=True, max_length=10, blank=True, null=True)
     email = models.EmailField(_('email address'), blank=True, null=True)
-    password = models.CharField(_('password'),max_length=25,blank=True, null=True)
+    password = models.CharField(_('password'),max_length=500,blank=True, null=True)
     date_joined = models.DateTimeField(verbose_name="date joined", auto_now_add=True)
     is_verified = models.BooleanField(default=True,null=True)
     is_active = models.BooleanField(_('active'), default=True,null=True)

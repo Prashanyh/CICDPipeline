@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'UserAdministration', # app name
+    'dynamicapp',
     'rest_framework', # 3rd party
     'rest_framework.authtoken', # 3rd party
     'corsheaders', # front-end
