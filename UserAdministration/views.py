@@ -2872,8 +2872,8 @@ class DynamicQueries(APIView):
 
 class ShemaImports(APIView):
     def post(self,request, format=None):
+        management.call_command('inspectdb')
         try:
-            management.call_command('inspectdb')
             with open('C:/Users/DELL/Downloads/arxt/Apis/XT01/dynamicapp/models.py', 'w') as f:
                 call_command('inspectdb', stdout=f)
             return Response('schema imported into django models',status=status.HTTP_201_CREATED)
@@ -2888,7 +2888,24 @@ class AllModels(APIView):
             models = {
             model.__name__: model for model in apps.get_models()
             }
-            return JsonResponse({"models_to_return": list(models)})
+            data=["LogEntry","Permission","Group","ContentType","Session","Teams","UserProfile","Sci1stKey",
+                "AllLogin","AllLogout","UseradministrationAlllogin","UseradministrationAlllogout","UseradministrationSci1Stkey",
+                "UseradministrationTeams","UseradministrationUserprofile","UseradministrationUserprofileGroups",
+                "UseradministrationUserprofileUserPermissions","AuthGroup","AuthGroupPermissions","AuthPermission",
+                "AuthtokenToken","DjangoAdminLog","DjangoContentType","DjangoMigrations","DjangoSession",
+                "TokenBlacklistBlacklistedtoken","TokenBlacklistOutstandingtoken","Token","TokenProxy",
+                "OutstandingToken","BlacklistedToken"]
+            model_data = models
+            dynamic_data=[]
+            for elem in model_data:
+                if elem not in data:
+                    dynamic_data.append(elem)
+            response = {
+            'status': 'success',
+            'code': status.HTTP_200_OK,
+            'data': dynamic_data
+            }
+            return Response(response)
         except:
             return Response('no models in your database please check your database',status=status.HTTP_404_NOT_FOUND)
 
