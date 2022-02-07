@@ -2887,7 +2887,7 @@ class ShemaImports(APIView):
 
 
 class AllModels(APIView):
-    permission_classes = [IsAuthenticated, IsSuperAdminPermission]
+    permission_classes = [IsAuthenticated, IsSuperAdminPermission|IsAdminPermission]
     def get(self,request, format=None):
         try:
             models = {
@@ -2917,7 +2917,7 @@ class AllModels(APIView):
 
 
 class SelectedTables(APIView):
-    permission_classes = [IsAuthenticated, IsSuperAdminPermission]
+    permission_classes = [IsAuthenticated, IsSuperAdminPermission|IsAdminPermission]
     def post(self,request, format=None):
         try:
             model=request.data['table']
@@ -2949,25 +2949,36 @@ class Readingxldata(APIView):
             contating serializer data fetching serializer data and
             validating data and loading into the data with the file format
         '''
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        dataset = Dataset()
-        # fetching file
-        file = serializer.validated_data['file']
+        # serializer = self.serializer_class(data=request.data)
+        # serializer.is_valid(raise_exception=True)
+        # dataset = Dataset()
+        # # fetching file
+        # file = serializer.validated_data['file']
+        file=request.data['file']
+        print(file,'sssssssssssss')
+        movies = pd.read_excel(file,engine='openpyxl',index_col=0)
+        print(movies,'cominggggggg')
+
+        data=movies.head()
+        
+        print(data,'ssssssssssssssss')
 
         try:
-            imported_data = dataset.load(file.read(), format='xlsx')
-            #  for fruit in fruit_serializer.data:
-            #      for data in fruit
-            #      ws.append([fruit[data] for h in headers])
-            print(imported_data,'jjjjjjjjjjjjjjjjjjjj')
-            '''
-            uploading xl file with particular data what user mentioned in xl we are looping the xl data
-                    and appending into the database with same fields
-                    '''
-            for data in imported_data:
-                print(data,'gggggggggggggggggggggggggg')
-                pass
+            movies = pd.read_excel(file)
+            data=movies.head()
+            print(data,'ssssssssssssssss')
+            # imported_data = dataset.load(file.read(), format='xlsx')
+            # #  for fruit in fruit_serializer.data:
+            # #      for data in fruit
+            # #      ws.append([fruit[data] for h in headers])
+            # print(imported_data,'jjjjjjjjjjjjjjjjjjjj')
+            # '''
+            # uploading xl file with particular data what user mentioned in xl we are looping the xl data
+            #         and appending into the database with same fields
+            #         '''
+            # for data in imported_data:
+            #     print(data,'gggggggggggggggggggggggggg')
+            #     pass
             return Response("response")
         except:
             return Response('please select any table / table data not found',status=status.HTTP_404_NOT_FOUND)
