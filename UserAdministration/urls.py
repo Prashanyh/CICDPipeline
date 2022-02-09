@@ -70,6 +70,15 @@ urlpatterns = [
     path('admin_agentwise_processstatus_count/', views.AdminAgentWiseCountTicketListAPIView.as_view(),name='admin_agentwise_processstatus_count'), 
     path('admin_processtatus_count/', views.AdminProcessCountTicketListAPIView.as_view(),name='admin_processtatus_count'),
 
+    #admin current week/month and previous week/month reports
+    path('admin_previousmonth_ticketsstatus_list/', views.Admin_ticketstatus_privousmonth_countView.as_view(),name='admin_previousmonth_ticketsstatus_list'),  # showing new/closed/assign/pending tickets previous week count for Admin
+    path('admin_currentmonth_ticketsstatus_list/', views.Admin_ticketstatus_currentmonth_countView.as_view(),name='admin_currentmonth_ticketsstatus_list'),
+    path('admin_previousweek_ticketsstatus_list/', views.Admin_ticketstatus_privousweek_countView.as_view(),
+         name='admin_previousweek_ticketsstatus_list'),
+    # showing new/closed/assign/pending tickets previous week count for Admin
+    path('admin_currentweek_ticketsstatus_list/', views.Admin_ticketstatus_currentweek_countView.as_view(),
+         name='admin_currentweek_ticketsstatus_list'),
+
 
     ####tl
     path('tl_alltickets_list/',views.Tl_Teamwise_AllticketsView.as_view(),name='tl_alltickets_list'),#showing all tickets his under his team
