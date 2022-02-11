@@ -120,10 +120,7 @@ urlpatterns = [
     path('agent_processstatus_count/', views.Agent_process_status_count.as_view(), name='agent_processstatus_count'),# agent his processstatus tickets counts
     path('agent_datewise_ticketstatus_count/',views.Agent_datewise_ticketstatus_count.as_view(),name='agent_datewise_ticketstatus_count'),#agent date wise ticket status count
 
-    path('logout/', views.Logout.as_view()),
-
-    path('set_cookie/',views.ExampleCookie.as_view()),
-    path('demoapi/', views.ListUsers.as_view()),
+    path('login_hours/', views.LoginHours.as_view(),name='login_hours'),
 
     #dynamic model
     path('create_queries/', views.DynamicQueries.as_view(),name='create_queries'),#creating front end queries
@@ -132,10 +129,11 @@ urlpatterns = [
     path('selected_tables/', views.SelectedTables.as_view(),name='selected_tables'), # fetching all selected tables
 
 
-
-
     ##all tickets list api asked by rohith (for front end)
     path('show_alltickets_without_user_login/',views.ALLTicketListViewView.as_view(),name='show_alltickets_without_user_login'),
+
+
+    path('logout/', views.Logout.as_view()),
 
 
 ]

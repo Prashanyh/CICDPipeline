@@ -209,3 +209,14 @@ class AllLogout(models.Model):
 
     def __str__(self):
         return str(self.user) + ': ' + str(self.logout_time)
+
+class ProductiveHours(models.Model):
+    user_id=models.CharField(max_length=50, null=True, blank=True)
+    user=models.CharField(max_length=50, null=True, blank=True)
+    login_date=models.CharField(max_length=50, null=True, blank=True)
+    diiffrences=models.CharField(max_length=90, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.user) + ': ' + str(self.diiffrences)
+
+

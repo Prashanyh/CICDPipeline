@@ -57,6 +57,25 @@ from django.core.management import call_command
 from django.core import management
 from dynamicapp.models import *
 
+from .agent_permissions import *
+
+import datetime
+# from django.db.models import Count
+# from datetime import datetime, timedelta
+from rest_framework import authentication, permissions
+from UserAdministration.agent_permissions import *
+from django.db.models import F, ExpressionWrapper, DecimalField
+from django.db.models import F, Sum, FloatField, Avg
+import datetime
+from datetime import timedelta
+import pandas as pd
+from datetime import timedelta
+
+from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+import openpyxl
+import pandas as pd
 # initializing size of string
 N = 7
 
@@ -260,7 +279,7 @@ class UploadFileView(APIView):
             return Response(
                 {'please select proper file'}, status=status.HTTP_404_NOT_FOUND)
 
-
+from UserAdministration.xl_validation import *
 class UploadPersonView(APIView):
     permission_classes = [IsAuthenticated, IsAdminPermission | IsSuperAdminPermission]
     serializer_class = PersonUploadSerializer
@@ -270,34 +289,52 @@ class UploadPersonView(APIView):
         serializer.is_valid(raise_exception=True)
         dataset = Dataset()
         file = serializer.validated_data['file']
-        try:
-            imported_data = dataset.load(file.read(), format='xlsx')
-            '''uploading xl file with particular data what user mentioned in xl we are looping the xl data
+        imported_data = dataset.load(file.read(), format='xlsx')
+        '''uploading xl file with particular data what user mentioned in xl we are looping the xl data
                     and appending into the database with same fields'''
-            for data in imported_data:
-                person_data = UserProfile(username=data[0],
-                                          fullname=data[1],
-                                          mobile=data[2],
-                                          email=data[3],
-                                          password=make_password(data[4]),
-                                          date_joined=data[5],
-                                          is_verified=data[6],
-                                          is_active=data[7],
-                                          is_admin=data[8],
-                                          is_manager=data[9],
-                                          is_tl=data[10],
-                                          is_agent=data[11],
-                                          orginization=data[12],
-                                          dob=data[13],
-                                          gender=data[14],
-                                          team_name_id=data[15],
-                                          role=data[16]
-                                          )
-                person_data.save()
+        
+        for data in imported_data:
+            c=[]
+            d=data[0]
+            c.append(d)
+            d2=data[2]
+            print(c,'data coming')
+            # print(type(d),'type')
+            # if d in int :
+                #     print(d,'ddddddddddddddd')
+                # else:
+                #     d==str
+                #     print('str')
+            if c[0] == str:
+                print('int')
+            if c[0] == str:
+                print('str')
+            else:
+                print('not')
+                # elif d2.isnumeric():
+                #     print('numeric')
+                # person_data = UserProfile(username=d,
+                #                             fullname=data[1],
+                #                             mobile=d2,
+                #                             email=data[3],
+                #                             password=make_password(data[4]),
+                #                             date_joined=data[5],
+                #                             is_verified=data[6],
+                #                             is_active=data[7],
+                #                             is_admin=data[8],
+                #                             is_manager=data[9],
+                #                             is_tl=data[10],
+                #                             is_agent=data[11],
+                #                             orginization=data[12],
+                #                             dob=data[13],
+                #                             gender=data[14],
+                #                             team_name_id=data[15],
+                #                             role=data[16]
+                #                             )
+                # person_data.save()
             return Response({'sucessfully uploaded your file'}, status=status.HTTP_200_OK)
-        except:
-            # return response
-            return Response({'message': 'Please Check the file Data'}, status=status.HTTP_404_NOT_FOUND)
+            # except:
+            #     return Response({'message': 'aaa'}, status=status.HTTP_404_NOT_FOUND)
 
 
 ##prasanth
@@ -1113,7 +1150,6 @@ class AdminProcessCountTicketListAPIView(APIView):
 
 
 # prashanth
-from .agent_permissions import *
 
 
 class AgentAssignTicketsListApiView(generics.ListAPIView):
@@ -1164,8 +1200,6 @@ class AgentAssignTicketsListApiView(generics.ListAPIView):
     # queryset = Sci1stKey.objects.all()
     # serializer_class = AgentOwnTicketsSerializer
 
-
-import datetime
 
 
 # prashanth
@@ -1417,58 +1451,79 @@ class Ticketreassign_to_agentsCompleteview(APIView):
             return Response({'message': 'please select agent name and tickets'}, status=status.HTTP_404_NOT_FOUND)
 
 
-# from django.db.models import Count
-# from datetime import datetime, timedelta
-from rest_framework import authentication, permissions
-from UserAdministration.agent_permissions import *
-from django.db.models import F, ExpressionWrapper, DecimalField
-from django.db.models import F, Sum, FloatField, Avg
-import datetime
-from datetime import timedelta
-import pandas as pd
-from datetime import timedelta
 
 
-# import time
-# import pytz
-# jst = pytz.timezone('Asia/Kolkata')
-# dt = jst.localize(datetime.datetime.now())
-class ListUsers(generics.GenericAPIView):
-    def get(self, request):
-        queryset = AllLogin.objects.values('login_time', 'user_id', 'login_date')
-        querySet3 = AllLogout.objects.values('logout_time', 'user_id', 'logout_date')
+import json
 
-        # df1 = pd.DataFrame(queryset)
-        # df2 = pd.DataFrame(querySet3)
-        #
-        # df2.rename(columns = {'user_id':'user'}, inplace = True)
-        # df1 = df1.sort_values(['user_id','login_time'])
-        # df2 = df2.sort_values([ 'user','logout_time'])
-        #
-        # df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
-        # df['logout_time'] = pd.to_timedelta(df['logout_time'].astype(str))
-        # df['login_time'] = pd.to_timedelta(df['login_time'].astype(str))
-        #
-        # df['diiffrences']=df['logout_time']-df['login_time']
-        # diff = df[['login_date','user_id','user','diiffrences']]
-        # group1 = diff.groupby(['user_id','user','login_date']).sum('diiffrences')
-        # print(group1,'-------------------------')
-        # # d = group1.set_index('user_id')['diiffrences'].to_dict()
-        # d=group1.reset_index()
-        # # d['diiffrences']=pd.to_timedelta(df['diiffrences'],unit="ms")
-        # # j=group1.update(group1.select_dtypes('datetime').apply(lambda x: x.group1.strftime('%Y-%m-%d')))
-        # json_data  = d.to_json(orient='records',lines=False,date_format='iso')
-        # # d=list(d)
-        # # for k,v in d.items():
-        #     # d=v
-        # # json_data =json.dumps(json_data)
-        #
-        #
-        #
-        #
-        # print(d,'sssssssssssssssssssssssss')
+class LoginHours(generics.GenericAPIView):
 
-        # return Response(json_data)
+    def get(self,request):
+        # try:
+            queryset=AllLogin.objects.values('login_time','user_id','login_date')
+            querySet3 = AllLogout.objects.values('logout_time','user_id','logout_date')
+
+            df1 = pd.DataFrame(queryset)
+            df2 = pd.DataFrame(querySet3)
+
+            df2.rename(columns = {'user_id':'user'}, inplace = True)
+
+            df1 = df1.sort_values(['user_id','login_time'])
+            df2 = df2.sort_values([ 'user','logout_time'])
+
+            df = pd.concat([df1.reset_index(drop=True),df2.reset_index(drop=True)], axis=1)
+            df['logout_time'] = pd.to_timedelta(df['logout_time'].astype(str))
+
+            df['login_time'] = pd.to_timedelta(df['login_time'].astype(str))
+
+
+            df['diiffrences']=df['logout_time']-df['login_time']
+
+            diff = df[['login_date','user_id','user','diiffrences']]
+
+            group1 = diff.groupby(['user_id','user','login_date']).sum('')
+            
+            d=group1.reset_index()
+            print(d,"ddddddddddddddddddddd")
+            c = d[['diiffrences']]
+
+            data_dict = d.to_dict('records')
+
+
+            json_data =json.dumps(data_dict,default=str)
+    
+            python_obj = json.loads(json_data)
+            for i in range(0,len(python_obj)):
+                ProductiveHours.objects.create(user_id=python_obj[i]['user_id'], user=python_obj[i]['user'], login_date=python_obj[i]['login_date'], diiffrences=python_obj[i]['diiffrences'])
+            
+
+            # k={}
+            # for x in python_obj:
+            #     k.update(x)
+            # print(k,'sssssssssssss')
+            # c=[]
+            # for a,b in k.items():
+            #     # print(a)
+            #     c.append(b)
+            # # print(c,'ssssssssssssssssssssssss')
+            # users=c[0]
+            # user=c[1]
+            # login_date=c[2]
+            # diffrenses=c[3]
+            # print(type(login_date),'ppppppppppppppp')
+
+            # # create instance of model
+            # # m = LoginHours(**python_obj)
+            # # don't forget to save to database!
+            # # m.save()
+
+            # data=LoginHours(user_id=users)
+            # data.save()
+
+            return Response(python_obj)
+        # except:
+        #     return Response('no time data in your database please check your database', status=status.HTTP_404_NOT_FOUND)
+
+
 
         # return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -1633,8 +1688,6 @@ class Team_ListView(APIView):
         return JsonResponse(tutorial_serializer.data, safe=False)
 
 
-from rest_framework.permissions import IsAuthenticated
-
 
 ##theja
 # view/update/delete Team  by Admin
@@ -1768,10 +1821,8 @@ class Tl_Teamwise_AllticketsView(APIView):
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
                 userprofile database and getting all tickets matches with fullnames"""
                 res.append(agentdata)
-            print(res)
             """ appending in new list"""
             data_list = [num for elem in res for num in elem]
-            print(data_list)
             """looping lists [[][][]] inside list"""
             user_serializer = TlwiseTeamAllTicketsSerializer(data_list, many=True)
             '''convserting the all tickets into json by serializer'''
@@ -2787,10 +2838,8 @@ class Admin_ticketstatus_privousmonth_countView(APIView):
         try:
             ##########New tickets
             last_day_of_prev_month = date.today().replace(day=1) - timedelta(days=1)
-            print(last_day_of_prev_month)
             '''getting last date of previous month'''
             start_day_of_prev_month = date.today().replace(day=1) - timedelta(days=last_day_of_prev_month.day)
-            print(start_day_of_prev_month)
             '''getting 1st date of month'''
             newtickets = []
             '''empty list'''
@@ -3082,14 +3131,14 @@ class AllTlReAssign_Tickets_ListApi_View(APIView):
             agentfilter = UserProfile.objects.filter(role='Agent')
 
             """ filter the agents with their roles from database"""
-            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values('fullname')
+            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values('username')
             """1)comparing teamnameid from database with your getting id
               2) filter the agents with their roles 
               3) satisfies both above two conditions and getting their fullnames"""
             res = []
-            for fullname in agent_names:
+            for username in agent_names:
                 #     # selecting id
-                nameslist = (fullname["fullname"])
+                nameslist = (username["username"])
                 #     userslist.append(k)
                 """ getting all agents names in list"""
                 # agentdata = Sci1stKey.objects.filter(agent=fullname['fullname']).all().filter(status="closed")
@@ -3165,22 +3214,6 @@ class TLTicketreassign_to_agentsCompleteview(APIView):
             return Response({'message': 'please select agent name and tickets'}, status=status.HTTP_404_NOT_FOUND)
 
 
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-
-
-class ExampleCookie(APIView):
-    @csrf_exempt
-    def get(self, request):
-        permission_classes = (permissions.IsAuthenticated,)
-        response = HttpResponse("Welcome Guest.")
-        data = response.set_cookie('programink', 'We love Django')
-        return response
-
-
-def getcookie(request):
-    info = request.COOKIES.get('programink')
-    return HttpResponse("Welcome Back." + info);
 
 
 ##prasanth & theja
@@ -3227,13 +3260,16 @@ class Logout(GenericAPIView):
         return Response({'message': 'Succssfully Logout'}, status=status.HTTP_204_NO_CONTENT)
 
 
+
 class DynamicQueries(APIView):
     permission_classes = [IsAuthenticated, IsSuperAdminPermission]
 
     def post(self, request, format=None):
         try:
             curser = connection.cursor()
+            # connect the db server
             curser.execute(request.data['data'])
+            # get the model name here(frontend)
             return Response('table is cretaed', status=status.HTTP_201_CREATED)
         except:
             return Response('please check your raw data query&table is already created with this name',
@@ -3244,8 +3280,13 @@ class ShemaImports(APIView):
     permission_classes = [IsAuthenticated, IsSuperAdminPermission]
 
     def post(self, request, format=None):
+        '''converting postgressql to django models
+            eg :postgredata: varchar , tables name(table) ,,,
+             converting django models
+            eg:models(Table) CharField ,,, '''
         management.call_command('inspectdb')
         try:
+            # after converting postgre data storing into django models
             with open('C:/Users/DELL/Downloads/arxt/Apis/XT01/dynamicapp/models.py', 'w') as f:
                 call_command('inspectdb', stdout=f)
             return Response('schema imported into django models', status=status.HTTP_201_CREATED)
@@ -3254,14 +3295,17 @@ class ShemaImports(APIView):
                             status=status.HTTP_404_NOT_FOUND)
 
 
+
 class AllModels(APIView):
     permission_classes = [IsAuthenticated, IsSuperAdminPermission]
 
     def get(self, request, format=None):
         try:
+            # fetching all tables
             models = {
                 model.__name__: model for model in apps.get_models()
             }
+            # avalible models not required models
             data = ["LogEntry", "Permission", "Group", "ContentType", "Session", "Teams", "UserProfile", "Sci1stKey",
                     "AllLogin", "AllLogout", "UseradministrationAlllogin", "UseradministrationAlllogout",
                     "UseradministrationSci1Stkey",
@@ -3271,7 +3315,11 @@ class AllModels(APIView):
                     "AuthtokenToken", "DjangoAdminLog", "DjangoContentType", "DjangoMigrations", "DjangoSession",
                     "TokenBlacklistBlacklistedtoken", "TokenBlacklistOutstandingtoken", "Token", "TokenProxy",
                     "OutstandingToken", "BlacklistedToken"]
+            
+            # get the table here        
             model_data = models
+            # store all tables in dynamic data
+            # data is not availble in dynamic models just storing and send the response
             dynamic_data = []
             for elem in model_data:
                 if elem not in data:
@@ -3286,13 +3334,17 @@ class AllModels(APIView):
             return Response('no models in your database please check your database', status=status.HTTP_404_NOT_FOUND)
 
 
+
 class SelectedTables(APIView):
     permission_classes = [IsAuthenticated, IsSuperAdminPermission]
 
     def post(self, request, format=None):
         try:
+            # select table name here (front-end name)
             model = request.data['table']
+            # converting table name to queryset
             model = apps.get_model('dynamicapp', model)
+            # get the table name and send the response
             data = model.objects.all()
             # data = data.data
             fields = [f.name for f in model._meta.fields]
@@ -3306,8 +3358,7 @@ class SelectedTables(APIView):
             return Response('please select any table / table data not found', status=status.HTTP_404_NOT_FOUND)
 
 
-import openpyxl
-import pandas as pd
+
 
 
 class Readingxldata(APIView):

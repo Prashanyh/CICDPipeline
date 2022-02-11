@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -88,7 +89,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'useradministartion',
         'USER': 'postgres',
-        'PASSWORD': 'arxt123789',
+        'PASSWORD': 'arxt@123',
         'HOST': 'localhost',
         'PORT': '5432',
         'options':{
@@ -173,7 +174,7 @@ EMAIL_PORT = 587
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONEim= 'UTC'
 
 USE_I18N = True
 
@@ -206,3 +207,31 @@ CORS_ORIGIN_ALLOW_ALL=True
 #         'token_create': 'apps.accounts.serializers.CustomTokenCreateSerializer',
 #     },
 # }
+
+LOGGING = {
+    'version': 1,
+    # Version of logging
+    'disable_existing_loggers': False,
+    #disable logging
+    # Handlers #############################################################
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'dataflair-debug.log',
+        },
+########################################################################
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    # Loggers ####################################################################
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+
+        },
+    },
+}

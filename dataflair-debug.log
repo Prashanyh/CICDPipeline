@@ -1,0 +1,13 @@
+Watching for file changes with StatReloader
+"GET /api/tl_bulk_reassign_agent/Agent1/ HTTP/1.1" 200 16589
+"GET /api/tl_bulk_reassign_agent/Agent1/ HTTP/1.1" 200 16589
+"GET /api/tl_bulk_reassign_agent/Agent1/ HTTP/1.1" 200 16589
+Not Found: /api/readingxldata/
+"POST /api/readingxldata/ HTTP/1.1" 404 17427
+Not Found: /api/upload_person/
+"GET /api/upload_person/ HTTP/1.1" 404 17426
+Method Not Allowed: /api/upload-person/
+"GET /api/upload-person/ HTTP/1.1" 405 40
+Bad Request: /api/upload-person/
+"POST /api/upload-person/ HTTP/1.1" 400 35
+"POST /api/upload-person/ HTTP/1.1" 200 34

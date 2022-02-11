@@ -649,3 +649,11 @@ class RefreshTokenSerializer(serializers.Serializer):
 class RetriveTablesSerializer(serializers.Serializer):
     class Meta:
         fields = '__all__'
+
+class LoginHoursSerializer(serializers.Serializer):
+    class Meta:
+        fields = '__all__'
+    def create(self, validated_data):
+        user = super(LoginHoursSerializer, self).create(validated_data)
+        user.save()
+        return user
