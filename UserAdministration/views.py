@@ -1810,7 +1810,7 @@ class Tl_Teamwise_AllticketsView(APIView):
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentfilter = UserProfile.objects.filter(role='Agent')
             """ filter the agents with their roles from database"""
-            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values(full_name=Lower('fullname'))
+            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values(full_name=Lower('username'))
             """1)comparing teamnameid from database with your getting id
               2) filter the agents with their roles 
               3) satisfies both above two conditions and getting their fullnames"""
@@ -1863,14 +1863,14 @@ class Tl_Teamwise_AssignticketsView(APIView):
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentfilter = UserProfile.objects.filter(role='Agent')
             """ filter the agents with their roles from database"""
-            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values(full_name=Lower('fullname'))
+            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values(full_name=Lower('username'))
             """1)comparing teamnameid from database with your getting id
               2) filter the agents with their roles 
               3) satisfies both above two conditions and getting their fullnames"""
             res = []
             for fullname in agent_names:
                 """ getting all agents names in list"""
-                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullname['full_name']).filter(status="assign")
+                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullname['full_name']).filter(assign_tickets_status="assign")
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
                 userprofile database and getting only assign tickets matches with fullnames"""
                 res.append(agentdata)
@@ -1908,7 +1908,7 @@ class Tl_Teamwise_ticket_StatuscountView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('fullname'))
+                team_name_id=queryset)).values(full_name=Lower('username'))
             """1)comparing teamnameid from database with your getting id
             2) filter the agents with their roles 
             3) satisfies both above two conditions and getting their fullnames"""
@@ -1982,7 +1982,7 @@ class Tl_Teamwise_process_StatuscountView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('fullname'))
+                team_name_id=queryset)).values(full_name=Lower('username'))
             """1)comparing teamnameid from database with your getting id
                         2) filter the agents with their roles 
                         3) satisfies both above two conditions and getting their fullnames"""
@@ -2044,7 +2044,7 @@ class Tl_Team_agentwise_ticketstatus_countView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values('fullname')
+                team_name_id=queryset)).values('username')
             """1)comparing teamnameid from database with your getting id
                 2) filter the agents with their roles 
                 3) satisfies both above two conditions and getting their fullnames"""
@@ -2123,7 +2123,7 @@ class Tl_Team_agentwise_processstatus_countView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values('fullname')
+                team_name_id=queryset)).values('username')
             """1)comparing teamnameid from database with your getting id
                 2) filter the agents with their roles 
                 3) satisfies both above two conditions and getting their fullnames"""
@@ -2195,7 +2195,7 @@ class Tl_Team_datewise_countView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('fullname'))
+                team_name_id=queryset)).values(full_name=Lower('username'))
             """1)comparing teamnameid from database with your getting id
                 2) filter the agents with their roles 
                 3) satisfies both above two conditions and getting their fullnames"""
@@ -2273,7 +2273,7 @@ class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('fullname'))
+                team_name_id=queryset)).values(full_name=Lower('username'))
             """1)comparing teamnameid from database with your getting id
                 2) filter the agents with their roles 
                 3) satisfies both above two conditions and getting their fullnames"""
@@ -2365,7 +2365,7 @@ class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('fullname'))
+                team_name_id=queryset)).values(full_name=Lower('username'))
             """1)comparing teamnameid from database with your getting id
                 2) filter the agents with their roles 
                 3) satisfies both above two conditions and getting their fullnames"""
@@ -2443,7 +2443,7 @@ class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ (TL1=TL1,team_nameid=1)comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('fullname'))
+                team_name_id=queryset)).values(full_name=Lower('username'))
             '''getting all agent names and filtering temaname id equal to queryset (all agents,1=1) '''
             # quary = Teams.objects.filter(id=queryset).values('teamname')
             # print(quary,'q66666666')
@@ -2536,7 +2536,7 @@ class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
 
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('fullname'))
+                team_name_id=queryset)).values(full_name=Lower('username'))
             """1)comparing teamnameid from database with your getting id
                 2) filter the agents with their roles 
                 3) satisfies both above two conditions and getting their fullnames"""
@@ -2619,7 +2619,7 @@ class Agent_ticket_status_count(APIView):
 
     def get(self, request):
         try:
-            user_fullname = request.user.fullname
+            user_fullname = request.user.username
             """ getting fullname of user """
             agent_new_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='newtickets').count()
             '''using the username equalizing the agent name which is mention in the sci1stkey database then getting the newtickets/assign/pending etc count values'''
@@ -2659,7 +2659,7 @@ class Agent_process_status_count(APIView):
 
     def get(self, request):
         try:
-            user_fullname = request.user.fullname
+            user_fullname = request.user.username
             """ getting fullname from user """
             agent_exception_tickets = Sci1stKey.objects.filter(agent=user_fullname).filter(status='closed',
                                                                                            process_status='exception').count()
@@ -2693,7 +2693,7 @@ class Agent_datewise_ticketstatus_count(APIView):
 
     def get(self, request):
         try:
-            user_fullname = request.user.fullname
+            user_fullname = request.user.username
             """ getting fullname """
             agent_new_tickets = (
                 Sci1stKey.objects.filter(agent=user_fullname).filter(new_tickets_status="newtickets")).values(
