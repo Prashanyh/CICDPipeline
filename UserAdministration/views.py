@@ -1810,14 +1810,14 @@ class Tl_Teamwise_AllticketsView(APIView):
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentfilter = UserProfile.objects.filter(role='Agent')
             """ filter the agents with their roles from database"""
-            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values(full_name=Lower('username'))
+            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values('username')
             """1)comparing teamnameid from database with your getting id
               2) filter the agents with their roles 
               3) satisfies both above two conditions and getting their fullnames"""
             res = []
             for fullname in agent_names:
                 """ getting all agents names in list"""
-                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullname['full_name'])
+                agentdata = Sci1stKey.objects.filter(agent=fullname['username'])
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
                 userprofile database and getting all tickets matches with fullnames"""
                 res.append(agentdata)
@@ -1863,14 +1863,14 @@ class Tl_Teamwise_AssignticketsView(APIView):
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentfilter = UserProfile.objects.filter(role='Agent')
             """ filter the agents with their roles from database"""
-            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values(full_name=Lower('username'))
+            agent_names = (UserProfile.objects.filter(team_name_id=queryset) & agentfilter).values('username')
             """1)comparing teamnameid from database with your getting id
               2) filter the agents with their roles 
               3) satisfies both above two conditions and getting their fullnames"""
             res = []
             for fullname in agent_names:
                 """ getting all agents names in list"""
-                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullname['full_name']).filter(assign_tickets_status="assign")
+                agentdata = Sci1stKey.objects.filter(agent=fullname['username']).filter(assign_tickets_status="assign")
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
                 userprofile database and getting only assign tickets matches with fullnames"""
                 res.append(agentdata)
@@ -1908,7 +1908,7 @@ class Tl_Teamwise_ticket_StatuscountView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('username'))
+                team_name_id=queryset)).values('username')
             """1)comparing teamnameid from database with your getting id
             2) filter the agents with their roles 
             3) satisfies both above two conditions and getting their fullnames"""
@@ -1916,7 +1916,7 @@ class Tl_Teamwise_ticket_StatuscountView(APIView):
             '''empty list'''
             for fullnames in agentname:
                 """ getting all agents names in list"""
-                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(status="newtickets").count()
+                agentdata = Sci1stKey.objects.filter(agent=fullnames['username']).filter(status="newtickets").count()
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
                                 userprofile database and getting only newtickets tickets matches with fullnames with count values"""
                 newtickets.append(agentdata)
@@ -1928,7 +1928,7 @@ class Tl_Teamwise_ticket_StatuscountView(APIView):
             assigntickets = []
             ''' same process like new tickets'''
             for fullnames in agentname:
-                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(status="assign").count()
+                agentdata = Sci1stKey.objects.filter(agent=fullnames['username']).filter(status="assign").count()
                 assigntickets.append(agentdata)
             tlteam_assign_tickets = (sum(assigntickets))
             ''' adding the assign tickets values in the list'''
@@ -1936,14 +1936,14 @@ class Tl_Teamwise_ticket_StatuscountView(APIView):
             pendingtickets = []
             ''' same process like new tickets'''
             for fullnames in agentname:
-                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(status="pending").count()
+                agentdata = Sci1stKey.objects.filter(agent=fullnames['username']).filter(status="pending").count()
                 pendingtickets.append(agentdata)
             tlteam_pending_tickets = (sum(pendingtickets))
 
             closedtickets = []
             ''' same process like new tickets'''
             for fullnames in agentname:
-                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(status="closed").count()
+                agentdata = Sci1stKey.objects.filter(agent=fullnames['username']).filter(status="closed").count()
                 closedtickets.append(agentdata)
             tlteam_closed_tickets = (sum(closedtickets))
             totalticketscount = tlteam_new_tickets + tlteam_assign_tickets + tlteam_closed_tickets + tlteam_pending_tickets
@@ -1982,7 +1982,7 @@ class Tl_Teamwise_process_StatuscountView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('username'))
+                team_name_id=queryset)).values('username')
             """1)comparing teamnameid from database with your getting id
                         2) filter the agents with their roles 
                         3) satisfies both above two conditions and getting their fullnames"""
@@ -1990,7 +1990,7 @@ class Tl_Teamwise_process_StatuscountView(APIView):
             '''empty list'''
             for fullnames in agentname:
                 """ getting all agents names in list"""
-                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     process_status="exception").count()
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
                 userprofile database and getting only exception tickets matches with fullnames with count values"""
@@ -2001,14 +2001,14 @@ class Tl_Teamwise_process_StatuscountView(APIView):
 
             notfoundtickets = []
             for fullnames in agentname:
-                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     process_status="notfound").count()
                 notfoundtickets.append(agentdata)
             tlteam_notfound_tickets = (sum(notfoundtickets))
 
             completedtickets = []
             for fullnames in agentname:
-                agentdata = Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     process_status="completed").count()
                 completedtickets.append(agentdata)
             tlteam_completd_tickets = (sum(completedtickets))
@@ -2053,7 +2053,7 @@ class Tl_Team_agentwise_ticketstatus_countView(APIView):
             '''empty list'''
             for fullnames in agentname:
                 """ getting all agents names in list"""
-                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     new_tickets_status="newtickets")).values(
                     'agent', 'upload_date').order_by().annotate(Count('status'))
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
@@ -2069,7 +2069,7 @@ class Tl_Team_agentwise_ticketstatus_countView(APIView):
             '''same as new rickets'''
             assigntickets = []
             for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     assign_tickets_status="assign")).values(
                     'agent', 'assign_tickets_date').order_by().annotate(Count('status'))
                 assigntickets.append(agentdata)
@@ -2079,7 +2079,7 @@ class Tl_Team_agentwise_ticketstatus_countView(APIView):
             ### pending tickets
             pendingtickets = []
             for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     pending_tickets_status="pending")).values(
                     'agent', 'pending_tickets_date').order_by().annotate(Count('status'))
                 pendingtickets.append(agentdata)
@@ -2089,7 +2089,7 @@ class Tl_Team_agentwise_ticketstatus_countView(APIView):
             ###########closed tickets
             closedtickets = []
             for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(status="closed")).values(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(status="closed")).values(
                     'agent', 'completed_date').order_by().annotate(Count('status'))
                 closedtickets.append(agentdata)
             closed_ticketsdata = [num for elem in closedtickets for num in elem]
@@ -2133,7 +2133,7 @@ class Tl_Team_agentwise_processstatus_countView(APIView):
             for fullnames in agentname:
                 """ getting all agents names in list"""
                 agentdata = (
-                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(process_status="notfound")).values(
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(process_status="notfound")).values(
                     'agent', 'completed_date').order_by().annotate(Count('status'))
                 """ 1)filtering the agent names and status
                 2)getting values of agentnames and completd date
@@ -2151,7 +2151,7 @@ class Tl_Team_agentwise_processstatus_countView(APIView):
             exceptiontickets = []
             for fullnames in agentname:
                 agentdata = (
-                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(process_status="exception")).values(
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(process_status="exception")).values(
                     'agent', 'completed_date').order_by().annotate(Count('status'))
                 exceptiontickets.append(agentdata)
             exception_ticketsdata = [num for elem in exceptiontickets for num in elem]
@@ -2161,7 +2161,7 @@ class Tl_Team_agentwise_processstatus_countView(APIView):
             completedtickets = []
             for fullnames in agentname:
                 agentdata = (
-                    Sci1stKey.objects.filter(agent=fullnames['fullname']).filter(process_status="completed")).values(
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(process_status="completed")).values(
                     'agent', 'completed_date').order_by().annotate(Count('status'))
                 completedtickets.append(agentdata)
             completed_ticketsdata = [num for elem in completedtickets for num in elem]
@@ -2190,69 +2190,32 @@ class Tl_Team_datewise_countView(APIView):
 
     def get(self, request):
         try:
-            user_id = request.user.username
-            """ getting userid """
-            queryset = UserProfile.objects.get(username=user_id).team_name_id
-            """ comparing the userid with userprofile(database) username and getting the teamnameid"""
-            agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('username'))
-            """1)comparing teamnameid from database with your getting id
-                2) filter the agents with their roles 
-                3) satisfies both above two conditions and getting their fullnames"""
-            ###########New tickets
-            newtickets = []
-            '''empty list'''
-            for fullnames in agentname:
-                """ getting all agents names in list"""
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
-                    new_tickets_status="newtickets")).values(
-                     'upload_date').order_by().annotate(Count('status'))
-                """ looping the list objects and comparing the sci1st key agent names with full names from 
-                                userprofile database and getting only new  tickets matches with fullnames with count values and agent names and date"""
-                newtickets.append(agentdata)
-                """ appending in new list"""
-            new_ticketsdata = [num for elem in newtickets for num in elem]
-            """looping lists [[][][]] inside list"""
-            new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_ticketsdata, many=True)
-            '''convserting the all tickets into json by serializer'''
-
-            ###########assign tickets
-            '''same as new rickets'''
-            assigntickets = []
-            for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
-                    assign_tickets_status="assign")).values(
-                     'assign_tickets_date').order_by().annotate(Count('status'))
-                assigntickets.append(agentdata)
-            assign_ticketsdata = [num for elem in assigntickets for num in elem]
-            assign_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(assign_ticketsdata, many=True)
-
-            ### pending tickets
-            pendingtickets = []
-            for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
-                    pending_tickets_status="pending")).values(
-                     'pending_tickets_date').order_by().annotate(Count('status'))
-                pendingtickets.append(agentdata)
-            pending_ticketsdata = [num for elem in pendingtickets for num in elem]
-            pending_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(pending_ticketsdata, many=True)
-
-            ###########closed tickets
-            closedtickets = []
-            for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(status="closed")).values(
-                    'completed_date').order_by().annotate(Count('status'))
-                closedtickets.append(agentdata)
-            closed_ticketsdata = [num for elem in closedtickets for num in elem]
-            closed_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(closed_ticketsdata, many=True)
+            user_id = request.user.team_name
+            'geting user team name'
+            new_tickets = Sci1stKey.objects.filter(team_name=user_id, new_tickets_status='newtickets').values(
+                'upload_date').order_by().annotate(Count('status'))
+            """1)filtering team names using  userfull team name and filtering new tickets
+                          2) Group By agents and uploade_date
+                          3)Select the count of the grouping"""
+            tl_new_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(new_tickets, many=True)
+            ''''serializering the data convering into json'''
+            assign_tickets = Sci1stKey.objects.filter(team_name=user_id, assign_tickets_status='assign').values(
+                'assign_tickets_date').order_by().annotate(Count('status'))
+            tl_assign_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(assign_tickets, many=True)
+            pending_tickets = Sci1stKey.objects.filter(team_name=user_id, pending_tickets_status='pending').values(
+                'pending_tickets_date').order_by().annotate(Count('status'))
+            tl_pending_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(pending_tickets, many=True)
+            closed_tickets = Sci1stKey.objects.filter(team_name=user_id, status='closed').values(
+                'completed_date').order_by().annotate(Count('status'))
+            tl_closed_ticketsdata_serializer = TlwiseTeamdateTicketsSerializer(closed_tickets, many=True)
 
             response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
-                'data': {'newtickets': new_ticketsdata_serializer.data,
-                         'assigntickets': assign_ticketsdata_serializer.data,
-                         'pendingtickets': pending_ticketsdata_serializer.data,
-                         'closed': closed_ticketsdata_serializer.data}
+                'data': {'newtickets': tl_new_ticketsdata_serializer.data,
+                         'assigntickets': tl_assign_ticketsdata_serializer.data,
+                         'pendingtickets': tl_pending_ticketsdata_serializer.data,
+                         'closed': tl_closed_ticketsdata_serializer.data}
             }
             return Response(response)
         except Exception:
@@ -2273,7 +2236,7 @@ class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('username'))
+                team_name_id=queryset)).values('username')
             """1)comparing teamnameid from database with your getting id
                 2) filter the agents with their roles 
                 3) satisfies both above two conditions and getting their fullnames"""
@@ -2295,7 +2258,7 @@ class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
             for fullnames in agentname:
                 """ getting all agents names in list"""
                 agentdata = (
-                    Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(upload_date__gte=monday_of_last_week,
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(upload_date__gte=monday_of_last_week,
                                                                                  upload_date__lt=monday_of_this_week,
                                                                                  new_tickets_status='newtickets')).count()
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
@@ -2309,7 +2272,7 @@ class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
             assigntickets = []
             '''empty list'''
             for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     assign_tickets_date__gte=monday_of_last_week, assign_tickets_date__lt=monday_of_this_week,
                     assign_tickets_status='assign')).count()
                 assigntickets.append(agentdata)
@@ -2320,7 +2283,7 @@ class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
             '''empty list'''
             for fullnames in agentname:
                 agentdata = (
-                    Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                         pending_tickets_date__gte=monday_of_last_week,
                         pending_tickets_date__lt=monday_of_this_week,
                         pending_tickets_status='pending')).count()
@@ -2332,7 +2295,7 @@ class Tl_Teamwise_ticketstatus_privousweek_countView(APIView):
             '''sames as new tickets'''
             closedtickets = []
             for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     completed_date__gte=monday_of_last_week, completed_date__lt=monday_of_this_week,
                     status="closed")).count()
                 closedtickets.append(agentdata)
@@ -2365,7 +2328,7 @@ class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('username'))
+                team_name_id=queryset)).values('username')
             """1)comparing teamnameid from database with your getting id
                 2) filter the agents with their roles 
                 3) satisfies both above two conditions and getting their fullnames"""
@@ -2382,7 +2345,7 @@ class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
             for fullnames in agentname:
                 """ getting all agents names in list"""
                 agentdata = (
-                    Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                         upload_date__range=[start_week, end_week], new_tickets_status='newtickets')).count()
                 newtickets.append(agentdata)
 
@@ -2393,7 +2356,7 @@ class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
             '''empty list'''
             for fullnames in agentname:
                 agentdata = (
-                    Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                         assign_tickets_date__range=[start_week, end_week], assign_tickets_status='assign')).count()
                 assigntickets.append(agentdata)
             assign_tickets_count = sum(assigntickets)
@@ -2403,7 +2366,7 @@ class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
             '''empty list'''
             for fullnames in agentname:
                 agentdata = (
-                    Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                         pending_tickets_date__range=[start_week, end_week], pending_tickets_status='pending')).count()
                 pendingtickets.append(agentdata)
             pending_tickets_count = sum(pendingtickets)
@@ -2411,7 +2374,7 @@ class Tl_Teamwise_ticketstatus_currentweek_countView(APIView):
             ###########closed tickets
             closedtickets = []
             for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     completed_date__range=[start_week, end_week], status="closed")).count()
                 closedtickets.append(agentdata)
             closed_tickets_count = sum(closedtickets)
@@ -2443,7 +2406,7 @@ class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
             queryset = UserProfile.objects.get(username=user_id).team_name_id
             """ (TL1=TL1,team_nameid=1)comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('username'))
+                team_name_id=queryset)).values('username')
             '''getting all agent names and filtering temaname id equal to queryset (all agents,1=1) '''
             # quary = Teams.objects.filter(id=queryset).values('teamname')
             # print(quary,'q66666666')
@@ -2462,7 +2425,7 @@ class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
             for fullnames in agentname:
                 """ getting all agents names in list"""
                 agentdata = (
-                    Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(upload_date__year=current_year,
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(upload_date__year=current_year,
                                                                                  upload_date__month=current_month,
                                                                                  new_tickets_status='newtickets')).count()
                 """ looping the list objects and comparing the sci1st key agent names with full names from 
@@ -2477,7 +2440,7 @@ class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
             '''empty list'''
             for fullnames in agentname:
                 agentdata = (
-                    Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(assign_tickets_date__year=current_year,
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(assign_tickets_date__year=current_year,
                                                                                  assign_tickets_date__month=current_month,
                                                                                  assign_tickets_status='assign')).count()
                 assigntickets.append(agentdata)
@@ -2489,7 +2452,7 @@ class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
             '''empty list'''
             for fullnames in agentname:
                 agentdata = (
-                    Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                    Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                         pending_tickets_date__year=current_year,
                         pending_tickets_date__month=current_month,
                         pending_tickets_status='pending')).count()
@@ -2501,7 +2464,7 @@ class Tl_Teamwise_ticketstatus_currentmonth_countView(APIView):
             '''sames as new tickets'''
             closedtickets = []
             for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     completed_date__year=current_year, completed_date__month=current_month,
                     status="closed")).count()
                 closedtickets.append(agentdata)
@@ -2536,7 +2499,7 @@ class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
 
             """ comparing the userid with userprofile(database) username and getting the teamnameid"""
             agentname = (UserProfile.objects.filter(role='Agent') & UserProfile.objects.filter(
-                team_name_id=queryset)).values(full_name=Lower('username'))
+                team_name_id=queryset)).values('username')
             """1)comparing teamnameid from database with your getting id
                 2) filter the agents with their roles 
                 3) satisfies both above two conditions and getting their fullnames"""
@@ -2549,7 +2512,7 @@ class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
             '''empty list'''
             for fullnames in agentname:
                 """ getting all agents names in list"""
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent=fullnames['username']).filter(
                     upload_date__lte=last_day_of_prev_month,
                     upload_date__gte=start_day_of_prev_month,
                     new_tickets_status='newtickets')).count()
@@ -2566,7 +2529,7 @@ class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
             assigntickets = []
             '''empty list'''
             for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     assign_tickets_date__lte=last_day_of_prev_month,
                     assign_tickets_date__gte=start_day_of_prev_month,
                     assign_tickets_status='assign')).count()
@@ -2578,7 +2541,7 @@ class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
             pendingtickets = []
             '''empty list'''
             for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     pending_tickets_date__lte=last_day_of_prev_month,
                     pending_tickets_date__gte=start_day_of_prev_month,
                     pending_tickets_status='pending')).count()
@@ -2589,7 +2552,7 @@ class Tl_Teamwise_ticketstatus_previousmonth_countView(APIView):
             '''sames as new tickets'''
             closedtickets = []
             for fullnames in agentname:
-                agentdata = (Sci1stKey.objects.annotate(agent_name=Lower('agent')).filter(agent_name=fullnames['full_name']).filter(
+                agentdata = (Sci1stKey.objects.filter(agent=fullnames['username']).filter(
                     completed_date__lte=last_day_of_prev_month, completed_date__gte=start_day_of_prev_month,
                     status="closed")).count()
 
