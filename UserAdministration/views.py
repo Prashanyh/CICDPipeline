@@ -280,6 +280,11 @@ class UploadFileView(APIView):
                 {'please select proper file'}, status=status.HTTP_404_NOT_FOUND)
 
 from UserAdministration.xl_validation import *
+import pandas as pd
+import numpy as np
+from lxml import etree as et
+
+
 class UploadPersonView(APIView):
     permission_classes = [IsAuthenticated, IsAdminPermission | IsSuperAdminPermission]
     serializer_class = PersonUploadSerializer
@@ -294,47 +299,63 @@ class UploadPersonView(APIView):
                     and appending into the database with same fields'''
         
         for data in imported_data:
-            c=[]
             d=data[0]
-            c.append(d)
+            d1=data[1]
             d2=data[2]
-            print(c,'data coming')
-            # print(type(d),'type')
-            # if d in int :
-                #     print(d,'ddddddddddddddd')
-                # else:
-                #     d==str
-                #     print('str')
-            if c[0] == str:
-                print('int')
-            if c[0] == str:
-                print('str')
+            d6=data[6]
+            d12=data[12]
+            d15=data[15]
+
+            pop_data=[]
+            if d==d:
+                c='data already availble please check'
+                pop_data.append(c)
             else:
-                print('not')
-                # elif d2.isnumeric():
-                #     print('numeric')
-                # person_data = UserProfile(username=d,
-                #                             fullname=data[1],
-                #                             mobile=d2,
-                #                             email=data[3],
-                #                             password=make_password(data[4]),
-                #                             date_joined=data[5],
-                #                             is_verified=data[6],
-                #                             is_active=data[7],
-                #                             is_admin=data[8],
-                #                             is_manager=data[9],
-                #                             is_tl=data[10],
-                #                             is_agent=data[11],
-                #                             orginization=data[12],
-                #                             dob=data[13],
-                #                             gender=data[14],
-                #                             team_name_id=data[15],
-                #                             role=data[16]
-                #                             )
-                # person_data.save()
-            return Response({'sucessfully uploaded your file'}, status=status.HTTP_200_OK)
+                print('comming')    
+            if isinstance(d, (str)):
+                pop_data.append(d)
+            
+                
+                if isinstance(d1, (str)):
+                    pop_data.append(1)
+                if isinstance(d2, (int)):
+                    pop_data.append(d2)
+                if eval(d6):
+                    pop_data.append(d6)
+                if isinstance(d12, (str)):
+                    pop_data.append(d12)
+                if isinstance(d15, (int)):
+                    pop_data.append(d15)
+            
+            
+                        
+
+            # elif d == str:
+            #     print(d,'str')
+                person_data = UserProfile(username=d,
+                                            fullname=d1,
+                                            mobile=d2,
+                                            email=data[3],
+                                            password=make_password(data[4]),
+                                            date_joined=data[5],
+                                            is_verified=d6,
+                                            is_active=data[7],
+                                            is_admin=data[8],
+                                            is_manager=data[9],
+                                            is_tl=data[10],
+                                            is_agent=data[11],
+                                            orginization=d12,
+                                            dob=data[13],
+                                            gender=data[14],
+                                            team_name_id=d15,
+                                            role=data[16]
+                                            )
+                person_data.save()
+            print(pop_data,'pop_data')
+            return Response(pop_data, status=status.HTTP_200_OK)
             # except:
             #     return Response({'message': 'aaa'}, status=status.HTTP_404_NOT_FOUND)
+
 
 
 ##prasanth
@@ -1454,11 +1475,14 @@ class Ticketreassign_to_agentsCompleteview(APIView):
 
 
 import json
+from django_pandas.io import read_frame
+
+
 
 class LoginHours(generics.GenericAPIView):
 
     def get(self,request):
-        # try:
+        try:
             queryset=AllLogin.objects.values('login_time','user_id','login_date')
             querySet3 = AllLogout.objects.values('logout_time','user_id','logout_date')
 
@@ -1483,7 +1507,6 @@ class LoginHours(generics.GenericAPIView):
             group1 = diff.groupby(['user_id','user','login_date']).sum('')
             
             d=group1.reset_index()
-            print(d,"ddddddddddddddddddddd")
             c = d[['diiffrences']]
 
             data_dict = d.to_dict('records')
@@ -1493,39 +1516,25 @@ class LoginHours(generics.GenericAPIView):
     
             python_obj = json.loads(json_data)
             for i in range(0,len(python_obj)):
-                ProductiveHours.objects.create(user_id=python_obj[i]['user_id'], user=python_obj[i]['user'], login_date=python_obj[i]['login_date'], diiffrences=python_obj[i]['diiffrences'])
+                credit, created = ProductiveHours.objects.get_or_create(user_id=python_obj[i]['user_id'], user=python_obj[i]['user'], login_date=python_obj[i]['login_date'], diiffrences=python_obj[i]['diiffrences'])
+                # ProductiveHours.objects.create(user_id=python_obj[i]['user_id'], user=python_obj[i]['user'], login_date=python_obj[i]['login_date'], diiffrences=python_obj[i]['diiffrences'])
             
+            obj = ProductiveHours.objects.all()
+            df = read_frame(obj)
+                
+            latest_prod = df.sort_values('diiffrences').groupby(['user_id','login_date']).tail(1)
 
-            # k={}
-            # for x in python_obj:
-            #     k.update(x)
-            # print(k,'sssssssssssss')
-            # c=[]
-            # for a,b in k.items():
-            #     # print(a)
-            #     c.append(b)
-            # # print(c,'ssssssssssssssssssssssss')
-            # users=c[0]
-            # user=c[1]
-            # login_date=c[2]
-            # diffrenses=c[3]
-            # print(type(login_date),'ppppppppppppppp')
+            timer_dict = latest_prod.to_dict('records')
 
-            # # create instance of model
-            # # m = LoginHours(**python_obj)
-            # # don't forget to save to database!
-            # # m.save()
-
-            # data=LoginHours(user_id=users)
-            # data.save()
-
-            return Response(python_obj)
-        # except:
-        #     return Response('no time data in your database please check your database', status=status.HTTP_404_NOT_FOUND)
+            timetr_json_data =json.dumps(timer_dict,default=str)
+            timertr_json_data = json.loads(timetr_json_data)
+                     
+            return Response({"productive_hours":timertr_json_data},status=status.HTTP_404_NOT_FOUND )
+        except:
+            return Response('no time data in your database please check your database', status=status.HTTP_404_NOT_FOUND)
 
 
 
-        # return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 "****************************************Theja*********************************************************************************"
