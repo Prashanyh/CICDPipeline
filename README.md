@@ -21,16 +21,19 @@ install any Third party library (1) or avialable req list use (2) below commands
 add third party librarys ,apps  and Database changes,,,,,,
 >DB settings
 
-DATABASES = {  
-    'default': {  
-        'ENGINE': 'django.db.backends.mysql',  
-        'NAME': 'djangoApp',  
-        'USER':'',  
-        'PASSWORD':'',  
-        'HOST':'',  
-        'PORT':''  
-    }  
-}  
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': '#',
+        'USER': '#',
+        'PASSWORD': '#',
+        'HOST': 'localhost',
+        'PORT': '5432',
+        'options':{
+            'init_command':"SET sql_mode='STRICT_TRANS_TABLES'"
+        }
+    }
+}
 
  ![Example screenshot](imgage/db.png)
 
