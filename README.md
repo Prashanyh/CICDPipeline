@@ -15,6 +15,7 @@ creatinng tables & cloums use below commands, (adding single or more fields into
 install any Third party library (1) or avialable req list use (2) below commands
 - pip install packagename
 - pip list
+- pip install -r requirements.txt
 
 
 # Settings.py
@@ -22,18 +23,18 @@ add third party librarys ,apps  and Database changes,,,,,,
 >DB settings
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': '#',
-        'USER': '#',
-        'PASSWORD': '#',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'options':{
-            'init_command':"SET sql_mode='STRICT_TRANS_TABLES'"
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': '#',
+            'USER': '#',
+            'PASSWORD': '#',
+            'HOST': 'localhost',
+            'PORT': '5432',
+            'options':{
+                'init_command':"SET sql_mode='STRICT_TRANS_TABLES'"
+            }
         }
     }
-}
 
  ![Example screenshot](imgage/db.png)
 
