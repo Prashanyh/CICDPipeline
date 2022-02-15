@@ -16,7 +16,8 @@ install any Third party library (1) or avialable req list use (2) below commands
 - pip install packagename
 - pip list
 - pip install -r requirements.txt
-#Installation
+
+-Installation
 Before you get started with using PostgreSQL, you'll have to install it. Follow these steps to get started:
 
 Website:
