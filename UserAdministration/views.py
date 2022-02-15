@@ -76,6 +76,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 import openpyxl
 import pandas as pd
+
+import json
+from django_pandas.io import read_frame
+
 # initializing size of string
 N = 7
 
@@ -1474,21 +1478,22 @@ class Ticketreassign_to_agentsCompleteview(APIView):
 
 
 
-import json
-from django_pandas.io import read_frame
 
 
-
+# all login login diffrences hours,manager
 class LoginHours(generics.GenericAPIView):
 
     def get(self,request):
         try:
+            # get login&logout details with particular values
             queryset=AllLogin.objects.values('login_time','user_id','login_date')
             querySet3 = AllLogout.objects.values('logout_time','user_id','logout_date')
 
+            # add queryset into dataframe
             df1 = pd.DataFrame(queryset)
             df2 = pd.DataFrame(querySet3)
 
+            # rename the colums here user id 
             df2.rename(columns = {'user_id':'user'}, inplace = True)
 
             df1 = df1.sort_values(['user_id','login_time'])
@@ -1509,29 +1514,37 @@ class LoginHours(generics.GenericAPIView):
             d=group1.reset_index()
             c = d[['diiffrences']]
 
+            # converting the data into dictionary format
             data_dict = d.to_dict('records')
 
-
+            # dump the dict data into json 
             json_data =json.dumps(data_dict,default=str)
-    
+
+            # loads the dump data again ,and send the responce
             python_obj = json.loads(json_data)
+            # store the data into database
             for i in range(0,len(python_obj)):
                 credit, created = ProductiveHours.objects.get_or_create(user_id=python_obj[i]['user_id'], user=python_obj[i]['user'], login_date=python_obj[i]['login_date'], diiffrences=python_obj[i]['diiffrences'])
                 # ProductiveHours.objects.create(user_id=python_obj[i]['user_id'], user=python_obj[i]['user'], login_date=python_obj[i]['login_date'], diiffrences=python_obj[i]['diiffrences'])
             
+            # get the queryset for all data
             obj = ProductiveHours.objects.all()
             df = read_frame(obj)
-                
+
+            # get the latest record from every user 
             latest_prod = df.sort_values('diiffrences').groupby(['user_id','login_date']).tail(1)
 
             timer_dict = latest_prod.to_dict('records')
 
+            # dump the data into json format
             timetr_json_data =json.dumps(timer_dict,default=str)
+            # loads the data into the format
             timertr_json_data = json.loads(timetr_json_data)
-                     
+            # send the response         
             return Response({"productive_hours":timertr_json_data},status=status.HTTP_404_NOT_FOUND )
         except:
             return Response('no time data in your database please check your database', status=status.HTTP_404_NOT_FOUND)
+
 
 
 
