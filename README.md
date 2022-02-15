@@ -15,22 +15,32 @@ creatinng tables & cloums use below commands, (adding single or more fields into
 install any Third party library (1) or avialable req list use (2) below commands
 - pip install packagename
 - pip list
+- pip install -r requirements.txt
+
+-Installation
+Before you get started with using PostgreSQL, you'll have to install it. Follow these steps to get started:
+
+Website:
+There are a couple of ways to install PostgreSQL. One of the easier ways to get started is with Postgres.app. Navigate to http://postgresapp.com/ and then click "Download":
 
 
 # Settings.py
 add third party librarys ,apps  and Database changes,,,,,,
 >DB settings
 
-DATABASES = {  
-    'default': {  
-        'ENGINE': 'django.db.backends.mysql',  
-        'NAME': 'djangoApp',  
-        'USER':'',  
-        'PASSWORD':'',  
-        'HOST':'',  
-        'PORT':''  
-    }  
-}  
+DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': '#',
+            'USER': '#',
+            'PASSWORD': '#',
+            'HOST': 'localhost',
+            'PORT': '5432',
+            'options':{
+                'init_command':"SET sql_mode='STRICT_TRANS_TABLES'"
+            }
+        }
+    }
 
  ![Example screenshot](imgage/db.png)
 
