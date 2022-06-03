@@ -11,11 +11,13 @@
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserAdministration/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/UserAdministration/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/XT01/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/XT01/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dataflair-debug.log" beforeDir="false" afterPath="$PROJECT_DIR$/dataflair-debug.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dynamicapp/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/dynamicapp/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
