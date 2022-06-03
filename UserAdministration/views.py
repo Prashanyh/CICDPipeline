@@ -25,8 +25,6 @@ from UserAdministration.super_admin_permission import IsSuperAdminPermission
 from UserAdministration.agent_permissions import IsAgentPermission
 from django.utils.six import python_2_unicode_compatible
 from .utils import Util
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from six import python_2_unicode_compatible
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
