@@ -657,3 +657,8 @@ class LoginHoursSerializer(serializers.Serializer):
         user = super(LoginHoursSerializer, self).create(validated_data)
         user.save()
         return user
+
+class ProductiveHoursSerializer(serializers.Serializer):
+    class Meta:
+        model = ProductiveHours
+        fields = '__all__'

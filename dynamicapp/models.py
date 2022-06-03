@@ -30,6 +30,18 @@ class UseradministrationAlllogout(models.Model):
         db_table = 'UserAdministration_alllogout'
 
 
+class UseradministrationProductivehours(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    user_id = models.CharField(max_length=50, blank=True, null=True)
+    user = models.CharField(max_length=50, blank=True, null=True)
+    login_date = models.CharField(max_length=50, blank=True, null=True)
+    diiffrences = models.CharField(max_length=90, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'UserAdministration_productivehours'
+
+
 class UseradministrationSci1Stkey(models.Model):
     id = models.BigAutoField(primary_key=True)
     projectid = models.CharField(db_column='projectId', max_length=200, blank=True, null=True)  # Field name made lowercase.
@@ -54,6 +66,11 @@ class UseradministrationSci1Stkey(models.Model):
     team_name = models.CharField(max_length=100, blank=True, null=True)
     upload_date = models.DateField()
     status = models.CharField(max_length=15, blank=True, null=True)
+    new_tickets_status = models.CharField(max_length=50, blank=True, null=True)
+    assign_tickets_status = models.CharField(max_length=50, blank=True, null=True)
+    assign_tickets_date = models.DateField(blank=True, null=True)
+    pending_tickets_status = models.CharField(max_length=50, blank=True, null=True)
+    pending_tickets_date = models.DateField(blank=True, null=True)
     process_status = models.CharField(max_length=15)
     completed_date = models.DateField(blank=True, null=True)
     date_created = models.DateTimeField(blank=True, null=True)
@@ -209,47 +226,15 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
-class Testing6(models.Model):
-    user_id = models.AutoField(primary_key=True)
-    username = models.CharField(unique=True, max_length=50)
-    password = models.CharField(max_length=50)
+class Testing4(models.Model):
+    u_id = models.IntegerField(primary_key=True)
+    u_name = models.CharField(max_length=25)
+    u_email = models.CharField(unique=True, max_length=25)
+    u_password = models.CharField(max_length=25)
 
     class Meta:
         managed = False
-        db_table = 'testing6'
-
-
-class Testing7(models.Model):
-    user_id = models.AutoField(primary_key=True)
-    username = models.CharField(unique=True, max_length=50)
-    password = models.CharField(max_length=50)
-
-    class Meta:
-        managed = False
-        db_table = 'testing7'
-
-
-class Testing8(models.Model):
-    user_id = models.AutoField(primary_key=True)
-    username = models.CharField(unique=True, max_length=50)
-    password = models.CharField(max_length=50)
-    email = models.CharField(unique=True, max_length=255)
-    created_on = models.DateTimeField()
-    last_login = models.DateTimeField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'testing8'
-
-
-class Testing9(models.Model):
-    user_id = models.AutoField(primary_key=True)
-    username = models.CharField(unique=True, max_length=50)
-    password = models.CharField(max_length=50)
-
-    class Meta:
-        managed = False
-        db_table = 'testing9'
+        db_table = 'testing4'
 
 
 class TokenBlacklistBlacklistedtoken(models.Model):

@@ -83,18 +83,24 @@ WSGI_APPLICATION = 'XT01.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'useradministartion',
+#         'USER': 'postgres',
+#         'PASSWORD': 'arxt@123',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#         'options':{
+#             'init_command':"SET sql_mode='STRICT_TRANS_TABLES'"
+#         }
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'useradministartion',
-        'USER': 'postgres',
-        'PASSWORD': 'arxt@123',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'options':{
-            'init_command':"SET sql_mode='STRICT_TRANS_TABLES'"
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
