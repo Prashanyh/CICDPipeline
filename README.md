@@ -42,7 +42,6 @@ DATABASES = {
         }
     }
 
- ![Example screenshot](imgage/db.png)
 
 ## Table of Contents
 * [General Info](#general-information)
@@ -75,9 +74,7 @@ List the ready features here:
 - Developing End-Points(Api's)
 
 
-## Screenshots
-![Example screenshot](./img/screenshot.png)
-<!-- If you have screenshots you'd like to share, include them here. -->
+
 
 
 ## Setup
